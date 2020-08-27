@@ -89,15 +89,15 @@ var n = 884
 //     }
 // }
 
-async function appendBinbey(input, output) {
-    // fs.unlinkSync('x.1.blobs')
-    return new Promise((res, rej) => {
-        fs.createReadStream(input).pipe(fs.createWriteStream(output, { flags: 'a' })).on('finish', () => res()).on('error', (err) => rej(err.message))
-    })
-}
+// async function appendBinbey(input, output) {
+//     // fs.unlinkSync('x.1.blobs')
+//     return new Promise((res, rej) => {
+//         fs.createReadStream(input).pipe(fs.createWriteStream(output, { flags: 'a' })).on('finish', () => res()).on('error', (err) => rej(err.message))
+//     })
+// }
 
-(async () => {
-    for (let i = 0; i < n; i++) {
-        await appendBinbey(`${i}.1.blobs`, 'x.1.blobs')
-    }
-})()
+// (async () => {
+//     for (let i = 0; i < n; i++) {
+//         await appendBinbey(`${i}.1.blobs`, 'x.1.blobs')
+//     }
+// })()

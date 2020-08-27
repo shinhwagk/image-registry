@@ -5,4 +5,4 @@ GET https://quay.io/v2/openshift/okd-content/manifests/4.5.0-0.okd-2020-08-12-02
 GET https://quay.io/v2/openshift/okd-content/manifests/sha256:8cf7e06dd4095f2cd54e13fdb6fd313abbeb6e03d568f17956d97433623093c2 HTTP/1.1
 
 ### 测试只获得blobs长度
-GET https://quay.io/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95 HTTP/1.1
+HEAD https://quay.io/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95 HTTP/1.1
