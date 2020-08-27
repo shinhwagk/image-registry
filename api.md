@@ -1,0 +1,5 @@
+- HEAD /v2/<name>/blobs/<digest>
+- POST /v2/<name>/blobs/uploads/
+- PUT /v2/<name>/manifests/<reference>
+- GET /v2/<name>/tags/list
+- DELETE /v2/<name>/manifests/<reference>
