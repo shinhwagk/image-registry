@@ -12,7 +12,8 @@ jobs:
       with:
         fetch-depth: 1
     - run: docker build -t shinhwagk/registry .
-    - run: docker push shinhwagk/registry
+    - run: docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+    - run: docker logs docker push shinhwagk/registry
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
