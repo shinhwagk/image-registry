@@ -163,9 +163,9 @@ async function appendFile(input: string, output: string) {
 }
 
 
-const dm = new DownManager('quay.io', 'openshift/okd-content', '89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c')
-// dm.requestHEAD()
-dm.start(1024 * 1024)
+// const dm = new DownManager('quay.io', 'openshift/okd-content', '89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c')
+// // dm.requestHEAD()
+// dm.start(1024 * 1024)
 
 // const pipeline = promisify(stream.pipeline);
 
