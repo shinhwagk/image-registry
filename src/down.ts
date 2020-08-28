@@ -50,7 +50,7 @@ export class DownManager {
         fs.mkdirpSync(this.layerCacheDir)
     }
 
-    checkShardDone(id: string) {
+    checkChunkDone(id: string) {
         return fs.existsSync(`${this.layerCacheDir}/${id}.done`)
     }
 
@@ -58,7 +58,7 @@ export class DownManager {
         const x: [string, [number, number]][] = Object.entries(this.chunks)
         let pell = 10
         for (const [i, [s, e]] of x) {
-            if (this.checkShardDone(i)) {
+            if (this.checkChunkDone(i)) {
                 continue
             }
             console.log(`start ${i}`)
@@ -161,13 +161,3 @@ async function appendFile(input: string, output: string) {
         fs.createReadStream(input).pipe(fs.createWriteStream(output, { flags: 'a' })).on('finish', () => res()).on('error', (err) => rej(err.message))
     })
 }
-
-
-// const dm = new DownManager('quay.io', 'openshift/okd-content', '89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c')
-// // dm.requestHEAD()
-// dm.start(1024 * 1024)
-
-// const pipeline = promisify(stream.pipeline);
-
-
-
