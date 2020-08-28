@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:lts-alpine
 
 COPY dist .
 COPY package.json .
