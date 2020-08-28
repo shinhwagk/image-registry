@@ -50,7 +50,7 @@ var options2 = {
 //     fs.writeFileSync(`${id}.1.blobs.done`)
 // }
 // for (let i = 0; i < ls; i++) {
-    
+
 //     let y1 = i * 1024 * 1024
 //     let y2 = y1 + 1 * 1024 * 1024 - 1
 //     if (i == ls-1) {
@@ -101,3 +101,30 @@ var n = 884
 //         await appendBinbey(`${i}.1.blobs`, 'x.1.blobs')
 //     }
 // })()
+
+
+var fs = require('fs');
+var crypto = require('crypto');
+// const { stream } = require("got");
+
+const hash = crypto.createHash('sha256');
+const stream = fs.createReadStream('README.md');
+// stream.on('error', err => err);
+// stream.on('data', chunk => hash.update(chunk));
+// stream.on('end', () => console.log(hash.digest('hex')));
+
+// fs.createReadStream('README.md').pipe(crypto.createHash('sha256').setEncoding('hex')).once()
+
+function checksumFile(algorithm, path) {
+    return new Promise((resolve, reject) =>
+      fs.createReadStream(path)
+        .on('error', reject)
+        .pipe(crypto.createHash(algorithm)
+          .setEncoding('hex'))
+        .once('finish', function () {
+          resolve(this.read())
+        })
+    )
+  }
+
+  checksumFile('sha256','README.md').then(console.log)
