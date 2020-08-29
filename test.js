@@ -2,24 +2,24 @@ var fs = require("fs");
 var https = require("https");
 
 var options = {
-    host: "quay.io",
-    method: "HEAD",
-    path: '/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95'
+  host: "quay.io",
+  method: "HEAD",
+  path: '/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95'
 };
 
 var options1 = {
-    host: "quay.io",
-    method: "GET",
-    path: '/v2/openshift/okd-content/blobs/sha256:89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c'
+  host: "quay.io",
+  method: "GET",
+  path: '/v2/openshift/okd-content/blobs/sha256:89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c'
 };
 
 var options2 = {
-    host: "cdn02.quay.io",
-    method: "GET",
-    path: '/sha256/70/70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95?Expires=1598514237&Signature=dHZD-khFyJRgx2jm43iK-sfproFXG9n6nRVuoNSdYgUcU5PmXncLfuxJV1GY88QO1eChENKLbI4Tj0XKPXBrDilH82ctfs9bgOTTuewDyXCfkRsWzQHWVJ2Uo~6D3q3ZKThIa37BTPNEdNXXkEcGpasiMvdjWmJVjqbB~94KeLhIVFgNGhblX4m-iKvKCG17COfb-pIV8bOV19zWJHUG67006wdRUP7M1r97H9sNTf0v1AQOLPn~S~jDF5WnyWxLTRRGcB4HSQnDLxQy7ee-haJYURoDF8H~HUFliSCfK15hPa4dHtlyjiUaxbJKESc2UEt1-dUAL65W4HRFwUx45A__&Key-Pair-Id=APKAJ67PQLWGCSP66DGA',
-    headers: {
-        Range: 'bytes=0-1000'
-    }
+  host: "cdn02.quay.io",
+  method: "GET",
+  path: '/sha256/70/70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95?Expires=1598514237&Signature=dHZD-khFyJRgx2jm43iK-sfproFXG9n6nRVuoNSdYgUcU5PmXncLfuxJV1GY88QO1eChENKLbI4Tj0XKPXBrDilH82ctfs9bgOTTuewDyXCfkRsWzQHWVJ2Uo~6D3q3ZKThIa37BTPNEdNXXkEcGpasiMvdjWmJVjqbB~94KeLhIVFgNGhblX4m-iKvKCG17COfb-pIV8bOV19zWJHUG67006wdRUP7M1r97H9sNTf0v1AQOLPn~S~jDF5WnyWxLTRRGcB4HSQnDLxQy7ee-haJYURoDF8H~HUFliSCfK15hPa4dHtlyjiUaxbJKESc2UEt1-dUAL65W4HRFwUx45A__&Key-Pair-Id=APKAJ67PQLWGCSP66DGA',
+  headers: {
+    Range: 'bytes=0-1000'
+  }
 };
 
 // var req = https.request(options, function (res) {
@@ -116,15 +116,25 @@ const stream = fs.createReadStream('README.md');
 // fs.createReadStream('README.md').pipe(crypto.createHash('sha256').setEncoding('hex')).once()
 
 function checksumFile(algorithm, path) {
-    return new Promise((resolve, reject) =>
-      fs.createReadStream(path)
-        .on('error', reject)
-        .pipe(crypto.createHash(algorithm)
-          .setEncoding('hex'))
-        .once('finish', function () {
-          resolve(this.read())
-        })
-    )
-  }
+  return new Promise((resolve, reject) =>
+    fs.createReadStream(path)
+      .on('error', reject)
+      .pipe(crypto.createHash(algorithm)
+        .setEncoding('hex'))
+      .once('finish', function () {
+        resolve(this.read())
+      })
+  )
+}
 
-  checksumFile('sha256','README.md').then(console.log)
+checksumFile('sha256', 'README.md').then(console.log)
+
+
+
+
+async function test() {
+  console.log(11111)
+}
+
+const x = () => { test() }
+x()

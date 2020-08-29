@@ -14,7 +14,7 @@ const router = new koarouter();
 
 router.get('/v2', (ctx) => { ctx.body = 'true' })
 router.get('/v2/:owner/:name/blobs/:sha256', async (ctx) => {
-    const blobsFile = layer.blobsPath(ctx.params.repo, ctx.params.image, ctx.params.sha256)
+    const blobsFile = layer.blobsPath('quay.io', ctx.params.owner + '/' + ctx.params.image, ctx.params.sha256)
     if (layer.checkExist(ctx.params.repo, ctx.params.image, ctx.params.sha256)) {
         if (await layer.checkSha256(blobsFile, ctx.params.sha256)) {
             ctx.body = fs.createReadStream(`${storageDir}/${ctx.params.repo}/${ctx.params.image}/${ctx.params.sha256}`)

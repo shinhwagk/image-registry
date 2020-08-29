@@ -35,6 +35,10 @@ export class DownManager {
         return Number(res.headers['content-length'])
     }
 
+    setStoragePaht() {
+
+    }
+
     computeChunks(blobsBytes: number, split: number) {
         const chunksNumber = (blobsBytes / split >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
@@ -65,11 +69,11 @@ export class DownManager {
                     .then(() => cb())
                     .catch((e) => cb(e))
             }).then(() => callback()).catch((e) => callback(e))
-        }, 10);
-
+        }, 5);
         for (const [i, [s, e]] of Object.entries(this.chunks)) {
             q.push({ i, s, e });
         }
+
         await q.drain();
     }
 
@@ -96,11 +100,11 @@ export class DownManager {
     // }
 
     private async checkBlobssha256(sha256: string) {
-        return await sha256sum(this.layerBlobs) === sha256
+        return (await sha256sum(this.layerBlobs)) === sha256
     }
 
     async start() {
-        if (fs.existsSync(this.layerBlobs) && !this.checkBlobssha256(this.sha256)) {
+        if (fs.existsSync(this.layerBlobs) && !(await this.checkBlobssha256(this.sha256))) {
             fs.removeSync(this.layerBlobs)
         }
         if (!fs.existsSync(this.layerBlobs)) {
@@ -132,9 +136,11 @@ class DownWorker {
     r_end: number
     chunkDoneFile: string
     chunkFile: string
+    chunkSize: number
     constructor(readonly dm: DownManager, readonly id: number, readonly inc: number) {
         this.r_start = id * chunkSize
         this.r_end = this.r_start + inc
+        this.chunkSize = this.r_end - this.r_start + 1
         this.chunkDoneFile = `${this.dm.layerCacheDir}/${id}.done`
         this.chunkFile = `${this.dm.layerCacheDir}/${id}`
     }
@@ -142,7 +148,7 @@ class DownWorker {
     // try = 5
 
     checkDownIsNeed() {
-        if (fs.existsSync(this.chunkFile) && this.checkChunkSize(this.inc + 1)) {
+        if (fs.existsSync(this.chunkFile) && this.checkChunkSize()) {
             return false
         }
         fs.removeSync(this.chunkFile)
@@ -151,37 +157,28 @@ class DownWorker {
     }
 
     async down() {
+        console.log('down check', this.r_start, this.r_end)
         if (!this.checkDownIsNeed()) {
             return
         }
         const pipeline = promisify(stream.pipeline);
-        try {
-            await pipeline(
-                got.stream(this.dm._down_url, { headers: { Range: `bytes=${this.r_start}-${this.r_end}` } }),
-                fs.createWriteStream(this.chunkFile)
-            )
-            console.log('logger: checkpint')
-            // this.checkpoint(this.id)
-            // this.dm.markSuccess(this.id)
-
-        } catch (e) {
-            throw new Error(e);
-            // console.log(`id ${this.id} err ${e.message}`)
-            // if (this.try > 0) {
-            //     this.down()
-            //     this.try -= 1
-            // }
-        }
+        await pipeline(
+            got.stream(this.dm._down_url, { headers: { Range: `bytes=${this.r_start}-${this.r_end}` } }),
+            fs.createWriteStream(this.chunkFile)
+        )
+        console.log('logger: checkpint')
+        // this.checkpoint(this.id)
+        // this.dm.markSuccess(this.id)
     }
 
     private checkpoint(id: number) {
         fs.writeFileSync(this.chunkDoneFile, '', { encoding: "utf-8" })
     }
 
-    private checkChunkSize(size: number): boolean {
+    private checkChunkSize(): boolean {
         if (fs.existsSync(this.chunkFile)) {
             const stat = fs.statSync(this.chunkFile)
-            return stat.size === size
+            return stat.size === this.chunkSize
         }
         fs.removeSync(this.chunkFile)
         fs.removeSync(this.chunkDoneFile)

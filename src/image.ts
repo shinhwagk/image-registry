@@ -12,6 +12,6 @@ export async function checkSha256(blobs: string, sum: string) {
     return await sha256sum(blobs) === sum
 }
 
-export function blobsPath(repo: string, image: string, sha256: string) {
+export function blobsPath(repo: string, image: string, sha256: string): string {
     return path.join('/', storageDir, repo, image, sha256, 'blobs')
 }
