@@ -6,18 +6,18 @@
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
-	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"dbaeumer.vscode-eslint",
-		"humao.rest-client"
+		"humao.rest-client",
+		"howardzuo.vscode-npm-dependency"
 	],
 	"mounts": [
 		"source=vscode-extensions,target=/root/.vscode-server/extensions,type=volume",
-	]
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "npm install",
+	],
+	"forwardPorts": [
+		3001
+	],
+	"postCreateCommand": "npm i",
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "node"
 }

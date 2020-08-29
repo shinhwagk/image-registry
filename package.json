@@ -1,15 +1,17 @@
 {
-  "name": "image-registry",
+  "name": "registry",
   "version": "1.0.0",
   "description": "1. GET /v2/ ``` HTTP/2 401 server: nginx/1.12.1 date: Thu, 27 Aug 2020 02:54:15 GMT content-type: text/html; charset=utf-8 content-length: 4 docker-distribution-api-version: registry/2.0 www-authenticate: Bearer realm=\"https://quay.io/v2/auth\",service=\"quay.io\" ``` 2. GET /v2/library/node/manifests/12 ``` no exist HTTP/2 404 server: nginx/1.12.1 date: Thu, 27 Aug 2020 02:53:29 GMT content-type: application/json content-length: 82",
   "main": "main.js",
   "dependencies": {
+    "async": "^3.2.0",
     "fs-extra": "^9.0.1",
     "got": "^11.5.2",
     "koa": "^2.13.0",
     "koa-router": "^9.4.0"
   },
   "devDependencies": {
+    "@types/async": "^3.2.3",
     "@types/fs-extra": "^9.0.1",
     "@types/got": "^9.6.11",
     "@types/koa": "^2.11.4",

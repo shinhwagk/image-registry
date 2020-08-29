@@ -1,0 +1,29 @@
+var async = require('async');
+
+var count = 0;
+// var functionData = { some: 'data' };
+// var myFunction = function (callback, results) {
+//     console.log(++count);
+//     process.nextTick(function () {
+//         if (count < 5) { // Fail 5 times
+//             return callback({ message: 'this failed' }, null);
+//         }
+//         callback(null, { message: 'this succeeded' });
+//     });
+// };
+
+// async.retry({ times: 25, interval: 1000 }, myFunction.bind(functionData), function (err, results) {
+//     console.log("===================================")
+//     console.log("Async function finished processing")
+//     console.log(results, err)
+//     return;
+// });
+
+async.retry({ times: 11, interval: 1000 }, function (callback) {
+    count += 1
+    if (count < 10) {
+        callback('xxxx', null);
+    } else {
+        callback();
+    }
+}).then(() => console.log('ok')).catch(e => console.log(e))
