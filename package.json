@@ -1,6 +1,6 @@
 {
   "name": "registry",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "1. GET /v2/ ``` HTTP/2 401 server: nginx/1.12.1 date: Thu, 27 Aug 2020 02:54:15 GMT content-type: text/html; charset=utf-8 content-length: 4 docker-distribution-api-version: registry/2.0 www-authenticate: Bearer realm=\"https://quay.io/v2/auth\",service=\"quay.io\" ``` 2. GET /v2/library/node/manifests/12 ``` no exist HTTP/2 404 server: nginx/1.12.1 date: Thu, 27 Aug 2020 02:53:29 GMT content-type: application/json content-length: 82",
   "main": "main.js",
   "dependencies": {
