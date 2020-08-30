@@ -9,16 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - run: cp README.md /opt/
   sss:
     needs: [ss1]
     runs-on: ubuntu-latest
     services:
       nginx:
        image: nginx
-       volumes: ${{ github.workspace }}/test:/usr/share/nginx/html
        ports:
         - 80:80
     steps:
+       - run: ls -l /opt 
        - run: docker-compose version
        - run: curl http://localhost:${{ job.services.nginx.ports[80] }}
        - run: exit 1
