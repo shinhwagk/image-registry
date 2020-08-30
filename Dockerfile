@@ -4,7 +4,7 @@ WORKDIR /app
 COPY dist .
 COPY package.json .
 
-RUN npm i
+RUN npm i --production
 
 EXPOSE 9999
 
