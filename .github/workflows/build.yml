@@ -5,14 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  ss1:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - run: echo aaa > aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    - run: ls -l ./
   sss:
-    needs: [ss1]
     runs-on: ubuntu-latest
     services:
       nginx:
@@ -20,9 +13,11 @@ jobs:
        ports:
         - 80:80
     steps:
+       - run: docker run -d --name nginx  -p 8081:80 nginx
+       - run: docker ps
        - run: ls -l ./ && pwd
        - run: docker-compose version
-       - run: curl http://localhost:${{ job.services.nginx.ports[80] }}
+       - run: curl http://localhost:80
        - run: exit 1
   test:
     needs: [sss]
