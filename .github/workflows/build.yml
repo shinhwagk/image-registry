@@ -12,7 +12,7 @@ jobs:
     - uses: actions/setup-node@v2-beta
     - run: npm i
     - run: npm run compile
-    - run: apt install -y jq
-    - run: docker build -t shinhwagk/registry:alpine-$(cat package.json | .version) .
+    - run: sudo apt install -y jq
+    - run: docker build -t shinhwagk/registry:alpine-$(cat package.json | jq .version) .
     - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
     - run: docker push shinhwagk/registry
