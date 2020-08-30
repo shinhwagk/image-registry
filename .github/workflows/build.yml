@@ -5,7 +5,17 @@ on:
     branches: [ master ]
 
 jobs:
+  sss:
+    runs-on: ubuntu-latest
+    services:
+      nginx:
+       image: nginx
+       ports:
+        - 80:80
+    steps:
+       - run: curl http://nginx:${{ job.services.mongodb.ports[27017] }}
   test:
+    needs: [sss]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
