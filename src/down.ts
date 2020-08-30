@@ -6,32 +6,29 @@ import * as fs from 'fs-extra';
 import got from 'got';
 import * as async from 'async';
 
-import { sleep, sha256sum } from './helper';
+import { sleep, sha256sum, mergeFiles as mergeChunks, mergeFile } from './helper';
 import { storageDir, chunkSize } from './constants'
+import * as logger from './logger'
+export interface DownManagerOption {
+    overlay: boolean;
+}
 
 export class DownManager {
-    public _down_url: string
     private chunks: { [key: number]: [number, number, number] } = {}
-    public readonly layerCacheDir: string;
-    public readonly layerDir: string;
-    public readonly layerBlobs: string;
-    constructor(readonly repo: string, readonly image: string, readonly sha256: string) {
-        this._down_url = this.genDownUrl()
-        this.layerDir = `${storageDir}/${repo}/${image}/${sha256}`
-        this.layerCacheDir = `${this.layerDir}/cache`
-        this.layerBlobs = `${this.layerDir}/blobs`
-        this.initDownDirectory()
+    public readonly cacheDest: string;
+    public readonly goalFile: string;
+    private readonly logger;
+    constructor(private readonly url: string, private readonly dest: string, private readonly name: string, private readonly sha256: string) {
+        this.cacheDest = `${this.dest}/cache`
+        this.goalFile = `${this.dest}/${name}`
+        this.initDirs()
+        this.logger = logger.create(this.name, this.sha256.substr(0, 12))
     }
-    static create(repo: string, image: string, sha256: string) {
-        return new DownManager(repo, image, sha256)
+    static create(url: string, dest: string, name: string, sha256: string): DownManager {
+        return new DownManager(url, dest, name, sha256)
     }
-
-    genDownUrl() {
-        return `https://${this.repo}/v2/${this.image}/blobs/sha256:${this.sha256}`
-    }
-
-    async requestBlobsSize(): Promise<number> {
-        const res = (await got.head(this._down_url))
+    async reqGoalSize(): Promise<number> {
+        const res = (await got.head(this.url))
         return Number(res.headers['content-length'])
     }
 
@@ -52,126 +49,121 @@ export class DownManager {
         }
     }
 
-    initDownDirectory() {
-        fs.mkdirpSync(this.layerCacheDir)
+    private initDirs() {
+        fs.mkdirpSync(this.cacheDest)
     }
 
-    // checkChunkDone(id: string) {
-    //     return fs.existsSync(`${this.layerCacheDir}/${id}.done`)
-    // }
-
-    async scheduleWorker() {
+    async scheduleWorkers() {
         const q = async.queue<{ i: string, e: number, s: number }>((t, callback) => {
             async.retry({ times: 10, interval: 1000 }, (cb) => {
                 DownWorker
-                    .create(this, Number(t.i), t.e - t.s)
+                    .create(this.url, this.cacheDest, Number(t.i), t.e - t.s)
                     .down()
                     .then(() => cb())
                     .catch((e) => cb(e))
             }).then(() => callback()).catch((e) => callback(e))
         }, 5);
+
         for (const [i, [s, e]] of Object.entries(this.chunks)) {
             q.push({ i, s, e });
         }
-
         await q.drain();
     }
 
     async combineChunks() {
-        if (fs.existsSync(this.layerBlobs)) {
-            console.log('blobs exist')
+        if (fs.existsSync(this.goalFile)) {
+            console.log('goal exist')
             return
         }
         console.log('combine chunks for aaaa')
-        for (const i of Object.keys(this.chunks)) {
-            await appendFile(`${this.layerCacheDir}/${i}`, this.layerBlobs)
+        const chunkFiles = Object.keys(this.chunks).map((id) => `${this.cacheDest}/${id}`)
+        await mergeChunks(chunkFiles, this.goalFile)
+        console.log('combine chunks for aaaa success')
+    }
+    async mergeChunks() {
+        fs.removeSync(this.goalFile)
+        await mergeFile(`${this.cacheDest}/0`, this.goalFile)
+
+        console.log('combine chunks for aaaa')
+        for (const id of Object.keys(this.chunks).slice(1)) {
+            await mergeFile(`${this.cacheDest}/${id}`, this.goalFile)
         }
         console.log('combine chunks for aaaa success')
     }
 
-    private cleanCacheIfNeed() {
-        if (fs.existsSync(this.layerCacheDir)) {
-            fs.rmdirSync(`${this.layerCacheDir}`, { recursive: true })
-        }
+    private cleanCache() {
+        fs.rmdirSync(`${this.cacheDest}`, { recursive: true })
     }
 
     // public markSuccess(id: number) {
     //     this.chunks[id][2] = 1
     // }
 
-    private async checkBlobssha256(sha256: string) {
-        return (await sha256sum(this.layerBlobs)) === sha256
+    private async checksha256() {
+        return (await sha256sum(this.goalFile)) === this.sha256
     }
 
     async start() {
-        if (fs.existsSync(this.layerBlobs) && !(await this.checkBlobssha256(this.sha256))) {
-            fs.removeSync(this.layerBlobs)
-        }
-        if (!fs.existsSync(this.layerBlobs)) {
-            const blobsBytes = await this.requestBlobsSize()
-            this.computeChunks(blobsBytes, chunkSize)
-            console.log(this.chunks)
-            console.debug('scheduleWorker')
-            await this.scheduleWorker()
-            console.debug('scheduleWorker success')
-            await this.combineChunks()
-        }
-        const sha256 = await sha256sum(this.layerBlobs)
-        console.log(this.layerBlobs)
-        console.log(sha256, this.sha256)
-        if (sha256 === this.sha256) {
-            this.cleanCacheIfNeed()
-            console.log(111)
+        const goalBytes = await this.reqGoalSize()
+        this.computeChunks(goalBytes, chunkSize)
+        await this.scheduleWorkers()
+        await this.combineChunks()
+        const sha256 = await sha256sum(this.goalFile)
+        if (await this.checksha256()) {
+            this.cleanCache()
         } else {
+            await sleep(1000)
             await this.start()
         }
     }
 }
 
 class DownWorker {
-    static create(dmgr: DownManager, id: number, inc: number) {
-        return new DownWorker(dmgr, id, inc)
+    static create(url: string, dest: string, id: number, inc: number) {
+        return new DownWorker(url, dest, id, inc)
     }
     r_start: number
     r_end: number
     chunkDoneFile: string
     chunkFile: string
     chunkSize: number
-    constructor(readonly dm: DownManager, readonly id: number, readonly inc: number) {
+    constructor(readonly url: string, readonly dest: string, readonly id: number, readonly inc: number) {
         this.r_start = id * chunkSize
         this.r_end = this.r_start + inc
         this.chunkSize = this.r_end - this.r_start + 1
-        this.chunkDoneFile = `${this.dm.layerCacheDir}/${id}.done`
-        this.chunkFile = `${this.dm.layerCacheDir}/${id}`
+        this.chunkDoneFile = `${this.dest}/${id}.done`
+        this.chunkFile = `${this.dest}/${id}`
     }
 
     // try = 5
 
-    checkDownIsNeed() {
-        if (fs.existsSync(this.chunkFile) && this.checkChunkSize()) {
+    checkDown() {
+        if (fs.existsSync(this.chunkDoneFile)) {
             return false
         }
         fs.removeSync(this.chunkFile)
-        fs.removeSync(this.chunkDoneFile)
         return true
     }
 
     async down() {
         console.log('down check', this.r_start, this.r_end)
-        if (!this.checkDownIsNeed()) {
+        if (!this.checkDown()) {
             return
         }
         const pipeline = promisify(stream.pipeline);
         await pipeline(
-            got.stream(this.dm._down_url, { headers: { Range: `bytes=${this.r_start}-${this.r_end}` } }),
+            got.stream(this.url, { headers: { Range: `bytes=${this.r_start}-${this.r_end}` } }),
             fs.createWriteStream(this.chunkFile)
         )
-        console.log('logger: checkpint')
-        // this.checkpoint(this.id)
-        // this.dm.markSuccess(this.id)
+        if (this.checkChunkSize()) {
+            console.log('logger: checkpint')
+            this.checkpoint()
+        } else {
+            throw new Error('chunk sha256 invaild ' + this.id);
+        }
     }
 
-    private checkpoint(id: number) {
+    private checkpoint() {
         fs.writeFileSync(this.chunkDoneFile, '', { encoding: "utf-8" })
     }
 
@@ -186,8 +178,3 @@ class DownWorker {
     }
 }
 
-async function appendFile(input: string, output: string) {
-    return new Promise((res, rej) => {
-        fs.createReadStream(input).pipe(fs.createWriteStream(output, { flags: 'a' })).on('finish', () => res()).on('error', (err) => rej(err.message))
-    })
-}

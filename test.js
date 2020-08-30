@@ -103,38 +103,111 @@ var n = 884
 // })()
 
 
-var fs = require('fs');
-var crypto = require('crypto');
-// const { stream } = require("got");
+// var fs = require('fs');
+// var crypto = require('crypto');
+// // const { stream } = require("got");
 
-const hash = crypto.createHash('sha256');
-const stream = fs.createReadStream('README.md');
-// stream.on('error', err => err);
-// stream.on('data', chunk => hash.update(chunk));
-// stream.on('end', () => console.log(hash.digest('hex')));
+// const hash = crypto.createHash('sha256');
+// const stream = fs.createReadStream('README.md');
+// // stream.on('error', err => err);
+// // stream.on('data', chunk => hash.update(chunk));
+// // stream.on('end', () => console.log(hash.digest('hex')));
 
-// fs.createReadStream('README.md').pipe(crypto.createHash('sha256').setEncoding('hex')).once()
+// // fs.createReadStream('README.md').pipe(crypto.createHash('sha256').setEncoding('hex')).once()
 
-function checksumFile(algorithm, path) {
-  return new Promise((resolve, reject) =>
-    fs.createReadStream(path)
-      .on('error', reject)
-      .pipe(crypto.createHash(algorithm)
-        .setEncoding('hex'))
-      .once('finish', function () {
-        resolve(this.read())
-      })
-  )
-}
+// function checksumFile(algorithm, path) {
+//   return new Promise((resolve, reject) =>
+//     fs.createReadStream(path)
+//       .on('error', reject)
+//       .pipe(crypto.createHash(algorithm)
+//         .setEncoding('hex'))
+//       .once('finish', function () {
+//         resolve(this.read())
+//       })
+//   )
+// }
 
-checksumFile('sha256', 'README.md').then(console.log)
-
-
+// checksumFile('sha256', 'README.md').then(console.log)
 
 
-async function test() {
-  console.log(11111)
-}
 
-const x = () => { test() }
-x()
+
+// async function test() {
+//   console.log(11111)
+// }
+
+// const x = () => { test() }
+// x()
+
+
+// const { format, createLogger, transports, printf } = require('winston');
+// // const { combine, timestamp, label, printf } = winston.format;
+
+// const myFormat = printf(({ level, message, label, timestamp }) => {
+//   return `${timestamp} [${label}] ${level}: ${message}`;
+// });
+// const logger = winston.createLogger({
+//   level: 'info',
+//   // format: winston.format.json(),
+//   // defaultMeta: "aaa",
+//   format: combine(
+//     label({ label: 'right meow!' }),
+//     timestamp(),
+//     winston.format.simple()
+//     // myFormat
+//   ),
+//   transports: [
+//     new winston.transports.Console(),
+//   ],
+// });
+
+//
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+// if (process.env.NODE_ENV !== 'production') {
+
+
+// const { createLogger, format, transports } = require('winston');
+// const { combine, timestamp, json, simple, printf } = format;
+const winston = require('winston');
+const { combine, timestamp, label, printf } = winston.format;
+const myFormat = printf(({ level, message, label, timestamp }) => {
+  return `${timestamp} [${label}] ${level}: ${message}`;
+});
+winston.level = 'debug';
+const logger = winston.createLogger({
+  format: combine(
+    label({ label: 'right meow!' }),
+    timestamp(),
+    myFormat
+  ),
+  transports: [new winston.transports.Console({ level: 'debug' })]
+})
+logger.log('silly', "127.0.0.1 - there's no place like home");
+logger.log('debug', "127.0.0.1 - there's no place like home");
+logger.log('verbose', "127.0.0.1 - there's no place like home");
+logger.log('info', "127.0.0.1 - there's no place like home");
+logger.log('warn', "127.0.0.1 - there's no place like home");
+logger.log('error', "127.0.0.1 - there's no place like home");
+logger.info("127.0.0.1 - there's no place like home");
+logger.warn("127.0.0.1 - there's no place like home");
+logger.error("127.0.0.1 - there's no place like home");
+
+
+
+
+// const myFormat = printf(({ level, message, label, timestamp }) => {
+//   return `${timestamp} [${label}] ${level}: ${message}`;
+// });
+
+// const logger = createLogger({
+//   format: combine(
+//     label({ label: 'right meow!' }),
+//     timestamp(),
+//     myFormat
+//   ),
+//   transports: [new transports.Console()]
+// });
+
+// logger.info("111")

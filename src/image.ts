@@ -3,6 +3,8 @@ import * as path from 'path'
 
 import { storageDir, chunkSize, proxyRepo } from './constants'
 import { sleep, sha256sum } from './helper';
+import { DownManager } from './down';
+
 
 export function checkExist(repo: string, image: string, sha256: string) {
     return fs.existsSync(blobsPath(repo, image, sha256))
@@ -17,16 +19,16 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
 }
 
 export class ProxyImageLayer {
-    public static create(image: string, sha256: string) {
-        return new ProxyImageLayer(image, sha256)
+    public static create(owner: string, image: string, sha256: string) {
+        return new ProxyImageLayer(owner + '/' + image, sha256)
     }
     private readonly layerFile: string
-    constructor(private readonly image: string, private readonly sha256: string) {
-        this.layerFile = path.join('/', storageDir, proxyRepo, image, sha256, 'blobs')
+    constructor(private readonly name: string, private readonly sha256: string) {
+        this.layerFile = path.join('/', storageDir, proxyRepo, name, sha256, 'blobs')
     }
 
     private checkExist() {
-        fs.existsSync(this.layerFile)
+        return fs.existsSync(this.layerFile)
     }
 
     private async checkSha256() {
@@ -35,5 +37,31 @@ export class ProxyImageLayer {
 
     public createReadStream() {
         return fs.createReadStream(this.layerFile)
+    }
+
+    private clear() {
+        fs.removeSync(this.layerFile)
+    }
+
+    private async down() {
+        const dmgr = DownManager.create(this.url(), this.dest(), 'blobs', this.sha256)
+        dmgr.start()
+    }
+
+    private url() {
+        return `https://${proxyRepo}/v2/${this.name}/blobs/sha256:${this.sha256}`
+    }
+
+    private dest() {
+        return path.join(storageDir, proxyRepo, this.name, this.sha256)
+    }
+
+    public async verify() {
+        if (this.checkExist() && await this.checkSha256()) {
+            return true
+        }
+        this.clear()
+        this.down()
+        return false
     }
 }
