@@ -8,4 +8,4 @@ RUN npm i
 
 EXPOSE 9999
 
-CMD node main.js
+CMD node app.js

@@ -1,16 +1,17 @@
 import * as fs from 'fs-extra';
 import * as path from 'path'
 
-import { storageDir, chunkSize, proxyRepo } from './constants'
-import { sleep, sha256sum } from './helper';
+import { storageDir, proxyRepo } from './constants'
+import { sha256sum } from './helper';
 import { DownManager } from './down';
+import { ReadStream } from 'fs-extra';
 
 
-export function checkExist(repo: string, image: string, sha256: string) {
+export function checkExist(repo: string, image: string, sha256: string): boolean {
     return fs.existsSync(blobsPath(repo, image, sha256))
 }
 
-export async function checkSha256(blobs: string, sum: string) {
+export async function checkSha256(blobs: string, sum: string): Promise<boolean> {
     return await sha256sum(blobs) === sum
 }
 
@@ -19,7 +20,7 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
 }
 
 export class ProxyImageLayer {
-    public static create(owner: string, image: string, sha256: string) {
+    public static create(owner: string, image: string, sha256: string): ProxyImageLayer {
         return new ProxyImageLayer(owner + '/' + image, sha256)
     }
     private readonly layerFile: string
@@ -35,7 +36,7 @@ export class ProxyImageLayer {
         return (await sha256sum(this.layerFile)) === this.sha256
     }
 
-    public createReadStream() {
+    public createReadStream(): ReadStream {
         return fs.createReadStream(this.layerFile)
     }
 
@@ -44,7 +45,7 @@ export class ProxyImageLayer {
     }
 
     private async down() {
-        const dmgr = DownManager.create(this.url(), this.dest(), 'blobs', this.sha256)
+        const dmgr = DownManager.create(this.url(), this.dest(), this.name, 'blobs', this.sha256)
         dmgr.start()
     }
 
@@ -56,7 +57,7 @@ export class ProxyImageLayer {
         return path.join(storageDir, proxyRepo, this.name, this.sha256)
     }
 
-    public async verify() {
+    public async verify(): Promise<boolean> {
         if (this.checkExist() && await this.checkSha256()) {
             return true
         }
