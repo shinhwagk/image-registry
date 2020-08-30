@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2-beta
     - run: npm i
-    - run: npm i -g ts-node
+    - run: sudo npm i -g ts-node
     - run: ts-node test/down.test.ts
     - run: |
         sha256sum=$(storage/blobs)
