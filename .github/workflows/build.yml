@@ -10,6 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
   sss:
+    needs: [ss1]
     runs-on: ubuntu-latest
     services:
       nginx:
