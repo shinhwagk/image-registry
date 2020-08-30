@@ -13,7 +13,8 @@ jobs:
        ports:
         - 80:80
     steps:
-       - run: curl http://nginx:${{ job.services.mongodb.ports[80] }}
+       - run: curl http://nginx:${{ job.services.nginx.ports[80] }}
+       - run: exit 1
   test:
     needs: [sss]
     runs-on: ubuntu-latest
