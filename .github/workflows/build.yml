@@ -10,9 +10,11 @@ jobs:
     services:
       nginx:
        image: nginx
+       volumes: ${{ github.workspace }}/test:/usr/share/nginx/html
        ports:
         - 80:80
     steps:
+       - run: docker-compose version
        - run: curl http://localhost:${{ job.services.nginx.ports[80] }}
        - run: exit 1
   test:
