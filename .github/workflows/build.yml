@@ -14,9 +14,9 @@ jobs:
     - run: sudo npm i -g ts-node
     - run: ts-node test/down.test.ts
     - run: |
-        sha256sum=$(storage/blobs)
+        sha256sum=$(sha256sum storage/blobs)
         sha236=89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c
-        [ "89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c" == "$sha256sum" ] || exit 1
+        [ "${sha236}" == "${sha256sum}" ] || exit 1
   push:
     runs-on: ubuntu-latest
     steps:
