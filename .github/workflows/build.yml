@@ -19,6 +19,7 @@ jobs:
         sha236=89eaaaf386250faa931481c7a091b8540c35739569482aaebe214e0c69999e7c
         [ "${sha236}" == "${sha256sum}" ] || exit 1
   push:
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
