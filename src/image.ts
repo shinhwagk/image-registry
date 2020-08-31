@@ -20,11 +20,11 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
 }
 
 export class ProxyImageLayer {
-    public static create(owner: string, image: string, sha256: string): ProxyImageLayer {
-        return new ProxyImageLayer(owner + '/' + image, sha256)
+    public static create(owner: string, image: string, sha256: string, headers: any): ProxyImageLayer {
+        return new ProxyImageLayer(owner + '/' + image, sha256, headers)
     }
     private readonly layerFile: string
-    constructor(private readonly name: string, private readonly sha256: string) {
+    constructor(private readonly name: string, private readonly sha256: string, private readonly headers: any) {
         this.layerFile = path.join('/', storageDir, proxyRepo, name, sha256, 'blobs')
     }
 
@@ -36,7 +36,7 @@ export class ProxyImageLayer {
         return (await sha256sum(this.layerFile)) === this.sha256
     }
 
-    public createReadStream(): ReadStream {
+    public blobsStream(): ReadStream {
         return fs.createReadStream(this.layerFile)
     }
 
@@ -45,8 +45,9 @@ export class ProxyImageLayer {
     }
 
     private async down() {
-        const dmgr = DownManager.create(this.url(), this.dest(), this.name, 'blobs', this.sha256)
-        dmgr.start()
+        console.log('download start')
+        const dmgr = DownManager.create(this.url(), this.headers, this.dest(), this.name, 'blobs', this.sha256)
+        await dmgr.start()
     }
 
     private url() {
@@ -62,7 +63,7 @@ export class ProxyImageLayer {
             return true
         }
         this.clear()
-        this.down()
+        await this.down()
         return false
     }
 }

@@ -18,16 +18,23 @@ export class DownManager {
     private chunks: { [key: number]: [number, number, number] } = {}
     public readonly cacheDest: string;
     public readonly goalFile: string;
-    constructor(private readonly url: string, private readonly dest: string, name: string, private readonly sha256: string, private readonly logger: Logger) {
+    constructor(private readonly url: string, private readonly headers: any, private readonly dest: string, name: string, private readonly sha256: string, private readonly logger: Logger) {
         this.cacheDest = `${this.dest}/cache`
         this.goalFile = `${this.dest}/${name}`
     }
-    static create(url: string, dest: string, name: string, goalName: string, sha256: string): DownManager {
+    static create(url: string, headers: { [key: string]: string }, dest: string, name: string, goalName: string, sha256: string): DownManager {
         const l = logger.create('DownManager' + ' ' + name + ' ' + sha256.substr(0, 12))
-        return new DownManager(url, dest, goalName, sha256, l)
+        return new DownManager(url, headers, dest, goalName, sha256, l)
     }
     async reqGoalSize(): Promise<number> {
-        const res = (await got.head(this.url))
+        const headers: { [key: string]: string } = {}
+        if (this.headers['authorization']) {
+            headers['authorization'] = this.headers['authorization']
+        }
+        if (this.headers['user-agent']) {
+            headers['user-agent'] = this.headers['user-agent']
+        }
+        const res = (await got.head(this.url, { headers }))
         return Number(res.headers['content-length'])
     }
 
@@ -54,10 +61,11 @@ export class DownManager {
 
     async scheduleWorkers(): Promise<void> {
         let successes = 0
+        console.log('chunk url ', this.url)
         const q = async.queue<{ i: string, e: number, s: number }>((t, callback) => {
             async.retry({ times: 10, interval: 1000 }, (cb) => {
                 DownWorker
-                    .create(this.url, this.cacheDest, Number(t.i), t.e - t.s)
+                    .create(this.url, this.headers, this.cacheDest, Number(t.i), t.e - t.s)
                     .down()
                     .then(() => cb())
                     .catch((e) => cb(e))
@@ -121,15 +129,15 @@ export class DownManager {
 }
 
 class DownWorker {
-    static create(url: string, dest: string, id: number, size: number = chunkSize) {
-        return new DownWorker(url, dest, id, size)
+    static create(url: string, headers: any, dest: string, id: number, size: number = chunkSize) {
+        return new DownWorker(url, headers, dest, id, size)
     }
     r_start: number
     r_end: number
     chunkDoneFile: string
     chunkFile: string
     chunkSize: number
-    constructor(readonly url: string, readonly dest: string, readonly id: number, readonly size: number) {
+    constructor(readonly url: string, readonly headers: any, readonly dest: string, readonly id: number, readonly size: number) {
         this.r_start = id * chunkSize
         this.r_end = this.r_start + size
         this.chunkSize = this.r_end - this.r_start + 1
@@ -145,13 +153,26 @@ class DownWorker {
         return true
     }
 
+    setHeaders() {
+        const headers: { [key: string]: string } = {}
+        headers['Range'] = `bytes=${this.r_start}-${this.r_end}`
+        if (this.headers['authorization']) {
+            headers['authorization'] = this.headers['authorization']
+        }
+        if (this.headers['user-agent']) {
+            headers['user-agent'] = this.headers['user-agent']
+        }
+        return headers
+    }
+
     async down() {
         if (!this.checkDown()) {
             return
         }
         const pipeline = promisify(stream.pipeline);
+        const headers = this.setHeaders()
         await pipeline(
-            got.stream(this.url, { headers: { Range: `bytes=${this.r_start}-${this.r_end}` } }),
+            got.stream(this.url, { headers }),
             fs.createWriteStream(this.chunkFile)
         )
         if (this.checkChunkSize()) {

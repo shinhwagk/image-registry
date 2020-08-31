@@ -1,8 +1,8 @@
 {
 	"name": "image-registry",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
@@ -11,13 +11,6 @@
 		"humao.rest-client",
 		"howardzuo.vscode-npm-dependency"
 	],
-	"mounts": [
-		"source=vscode-extensions,target=/root/.vscode-server/extensions,type=volume",
-	],
-	"forwardPorts": [
-		3001
-	],
 	"postCreateCommand": "npm i",
-	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
-	// "remoteUser": "node"
+	"shutdownAction": "stopCompose"
 }
