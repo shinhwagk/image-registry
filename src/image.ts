@@ -19,6 +19,7 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
     return path.join('/', storageDir, repo, image, sha256, 'blobs')
 }
 
+
 export class ProxyImageLayer {
     public static create(owner: string, image: string, sha256: string, headers: any): ProxyImageLayer {
         return new ProxyImageLayer(owner + '/' + image, sha256, headers)
@@ -37,6 +38,7 @@ export class ProxyImageLayer {
     }
 
     public blobsStream(): ReadStream {
+        console.log('stream ' + this.layerFile)
         return fs.createReadStream(this.layerFile)
     }
 

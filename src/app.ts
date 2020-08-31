@@ -1,4 +1,6 @@
 import * as http from 'http';
+import * as zlib from 'zlib';
+import * as fs from 'fs';
 
 import { ProxyImageLayer } from './image'
 
@@ -12,16 +14,29 @@ http.createServer((req, res) => {
             console.log("headers", req.headers)
             const pil = ProxyImageLayer.create(owner, image, sha256, req.headers)
             console.log("111111111")
-            pil.verify().then(() => pil.blobsStream().pipe(res)).catch(e => {
-                res.statusCode = 500;
-                res.end(e.message);
-            })
+            pil.verify()
+                .then(() => {
+                    if (req.headers['accept-encoding']) {
+                        res.writeHead(200, { 'content-encoding': 'gzip' });
+                        pil.blobsStream().pipe(zlib.createGzip()).pipe(res).on('finish', () => console.log('finsih'))
+                    } else {
+                        pil.blobsStream().pipe(res).on('finish', () => console.log('finsih'))
+                    }
+                })
+                .catch(e => {
+                    res.statusCode = 500;
+                    res.end(e.message);
+                })
+        }
+        if (req.url === '/check') {
+            res.statusCode = 200;
+            res.end();
         }
     } else {
         res.statusCode = 500;
         res.end();
     }
-}).listen(3001, () => console.log('start.'))
+}).listen(3001, () => console.log('proxy registry blobs server start.'))
 // router.get('/v2', (ctx) => { ctx.body = 'true' })
 // router.get('/:owner/:name/:sha256', async (ctx) => {
 //     const blobsFile = layer.blobsPath(proxyRepo, ctx.params.owner + '/' + ctx.params.image, ctx.params.sha256)

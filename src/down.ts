@@ -14,6 +14,14 @@ export interface DownManagerOption {
     overlay: boolean;
 }
 
+interface DownTask {
+    url: string,
+    auth?: string,
+    dest: string,
+    name: string,
+    sha256: string
+}
+
 export class DownManager {
     private chunks: { [key: number]: [number, number, number] } = {}
     public readonly cacheDest: string;
@@ -68,7 +76,7 @@ export class DownManager {
                     .create(this.url, this.headers, this.cacheDest, Number(t.i), t.e - t.s)
                     .down()
                     .then(() => cb())
-                    .catch((e) => cb(e))
+                    .catch((e) => { console.log(`worker error ${e}`); cb(e) })
             }).then(() => callback()).catch((e) => callback(e))
         }, 10);
 
@@ -94,6 +102,7 @@ export class DownManager {
     private cleanGoal() {
         fs.removeSync(`${this.goalFile}`)
     }
+
     private cleanCache() {
         fs.rmdirSync(`${this.cacheDest}`, { recursive: true })
     }
@@ -101,6 +110,10 @@ export class DownManager {
     // public markSuccess(id: number) {
     //     this.chunks[id][2] = 1
     // }
+
+    private addLock() {
+        fs.writeFileSync(`${this.cacheDest}/lock`, '', { encoding: 'utf8' })
+    }
 
     private async checksha256() {
         const goalSha256 = await sha256sum(this.goalFile)
@@ -112,6 +125,7 @@ export class DownManager {
         this.logger.info('start')
         this.initDirs()
         const goalBytes = await this.reqGoalSize()
+        console.log(`size: ${goalBytes}`)
         this.logger.info(`size: ${goalBytes}`)
         this.computeChunks(goalBytes)
         this.logger.info(`chunks: ${Object.keys(this.chunks).length}`)
@@ -194,3 +208,4 @@ class DownWorker {
     }
 }
 
+// export downManager = new DownManager()

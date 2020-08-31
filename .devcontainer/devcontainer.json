@@ -1,5 +1,5 @@
 {
-	"name": "image-registry",
+	"name": "registry",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspace",
