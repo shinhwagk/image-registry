@@ -1,0 +1,1 @@
+export type ReqHeader = NodeJS.Dict<string | string[]>;

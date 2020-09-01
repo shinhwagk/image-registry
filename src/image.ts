@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import { storageDir, proxyRepo } from './constants'
 import { sha256sum } from './helper';
-import { DownManager } from './down';
+import { DownManager } from './down/manager';
 import { ReadStream } from 'fs-extra';
 
 
@@ -21,11 +21,12 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
 
 
 export class ProxyImageLayer {
-    public static create(owner: string, image: string, sha256: string, headers: any): ProxyImageLayer {
-        return new ProxyImageLayer(owner + '/' + image, sha256, headers)
+    private readonly dmgr = new DownManager();
+    public static create(owner: string, image: string, sha256: string, auth?: string): ProxyImageLayer {
+        return new ProxyImageLayer(owner + '/' + image, sha256, auth)
     }
     private readonly layerFile: string
-    constructor(private readonly name: string, private readonly sha256: string, private readonly headers: any) {
+    constructor(private readonly name: string, private readonly sha256: string, private readonly auth: any) {
         this.layerFile = path.join('/', storageDir, proxyRepo, name, sha256, 'blobs')
     }
 
@@ -47,9 +48,9 @@ export class ProxyImageLayer {
     }
 
     private async down() {
-        console.log('download start')
-        const dmgr = DownManager.create(this.url(), this.headers, this.dest(), this.name, 'blobs', this.sha256)
-        await dmgr.start()
+        // console.log('download start')
+        // const dmgr = DownManager.create(this.url(), this.auth, this.dest(), this.name, 'blobs', this.sha256)
+        // await dmgr.start()
     }
 
     private url() {
