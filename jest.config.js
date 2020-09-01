@@ -1,6 +1,9 @@
 module.exports = {
+    preset: 'ts-jest',
     testEnvironment: 'node',
     // collectCoverage: true,
-    verbose: true,
-    rootDir: "./test"
+    // rootDir: "./",
+    // testRegex: "(/__tests__/test/.*|(\\.|/)test)\\.ts$",
+    // moduleFileExtensions: ["ts", "js"],
+
 };

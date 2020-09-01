@@ -19,19 +19,7 @@ export interface DownManagerOption {
 }
 
 
-function makeChunkWorkers() {
-    return async.queue<{ id: string, url: string, auth: string | undefined, dest: string, r_start: number, r_end: number }>((t, callback) => {
-        async.retry({ times: 10, interval: 1000 }, (cb) => {
-            DownWorker
-                .create(t.id, t.url, t.auth, t.dest, t.r_start, t.r_end)
-                .down()
-                .then(() => cb())
-                .catch((e) => { console.log(`worker error ${e}`); cb(e) })
-        }).then(() => callback()).catch((e) => callback(e))
-    }, 10);
-}
-
-function makeTaskWorkers() {
+function makeTasksQueue() {
     return async.queue<{ task: DownTask }>(({ task }, callback) => {
         async.retry({ times: 10, interval: 1000 }, (cb) => {
             task.start().then(() => cb()).catch(err => (cb(err)))
@@ -45,7 +33,7 @@ export class DownManager {
     // public readonly cacheDest: string;
     // public readonly goalFile: string;
 
-    private readonly taskWorkers = makeTaskWorkers();
+    private readonly tasksQueue = makeTasksQueue();
 
     // constructor() {
     //     this.cacheDest = `${this.dest}/cache`
@@ -75,10 +63,10 @@ export class DownManager {
 
     public async perform(): Promise<void> {
         for (const task of this.taskQueue) {
-            if (task.getId() in this.taskWorkers.workersList().map(w => w.data.task.getId())) {
+            if (task.getId() in this.tasksQueue.workersList().map(w => w.data.task.getId())) {
                 continue;
             }
-            this.taskWorkers.push({ task }, (err) => {
+            this.tasksQueue.push({ task }, (err) => {
                 if (err) {
                     console.log(err)
                 }

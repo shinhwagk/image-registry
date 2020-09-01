@@ -9,15 +9,32 @@ import { Logger } from 'winston';
 import * as log from '../logger'
 import { ReqHeader } from './types';
 
-export class DownWorker {
-    chunkDoneFile: string
-    chunkFile: string
-    chunkSize: number
-    logger: Logger
-    headers: ReqHeader = {}
-    constructor(private readonly id: string, private readonly url: string, private readonly auth: string | undefined, private dest: string, private readonly r_start: number, private readonly r_end: number) {
-        this.chunkSize = r_start - r_end + 1
-        this.chunkFile = path.join(dest, this.id)
+export class DownTaskChunk {
+    public static create(id: string,
+        url: string,
+        auth: string | undefined = undefined,
+        dest: string,
+        r_start: number,
+        r_end: number): DownTaskChunk {
+        return new DownTaskChunk(id, url, auth, dest, r_start, r_end)
+    }
+
+    private readonly chunkDoneFile: string
+    private readonly chunkFile: string
+    private readonly chunkSize: number
+    private readonly logger: Logger
+    private readonly headers: ReqHeader = {}
+
+    constructor(
+        private readonly id: string,
+        private readonly url: string,
+        private readonly auth: string | undefined = undefined,
+        private readonly dest: string,
+        private readonly r_start: number,
+        private readonly r_end: number
+    ) {
+        this.chunkSize = r_end - r_start + 1;
+        this.chunkFile = path.join(this.dest, this.id)
         this.chunkDoneFile = path.join(this.chunkFile + '.done')
         this.logger = log.create('a')
     }
@@ -41,16 +58,15 @@ export class DownWorker {
         if (!this.checkDown()) {
             return
         }
-        const pipeline = promisify(stream.pipeline);
         this.setHeaders()
-        console.log(this.headers)
-        await pipeline(
+        await promisify(stream.pipeline)(
             got.stream(this.url, { headers: this.headers }),
             fs.createWriteStream(this.chunkFile)
         )
         if (this.checkChunkSize()) {
             this.checkpoint()
         } else {
+            fs.removeSync(this.chunkFile)
             throw new Error('chunk size invaild ' + this.id);
         }
     }
@@ -61,8 +77,6 @@ export class DownWorker {
 
     private checkChunkSize(): boolean {
         const stat = fs.statSync(this.chunkFile)
-        if (stat.size === this.chunkSize) { return true; }
-        fs.removeSync(this.chunkFile)
-        return false
+        return stat.size === this.chunkSize
     }
 }

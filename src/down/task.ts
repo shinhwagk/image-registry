@@ -5,39 +5,43 @@ import got from 'got';
 import * as async from 'async';
 // import { Logger } from 'winston'
 
-import { mergeFile } from '../helper';
+import { mergeFile, sha256sum } from '../helper';
 import { chunkSize } from '../constants'
+import { DownTaskChunk } from './worker';
 
 type ReqHeader = NodeJS.Dict<string | string[]>;
 
 export class DownTask {
     private blobsBytes = 0;
-    private chunks: { [key: number]: [number, number, number] } = {};
-    public readonly cacheDest: string;
+    private chunks: { [key: number]: [number, number] } = {};
     private readonly blobsFile: string;
-    constructor(public readonly url: string,
+    private readonly cacheDest: string;
+
+    constructor(
+        public readonly url: string,
         public readonly dest: string,
         private readonly name: string,
         private readonly sha256: string,
-        public readonly auth?: string) {
-        this.cacheDest = this.getCacheDest();
+        public readonly auth?: string
+    ) {
         this.blobsFile = path.join(dest, 'blobs');
+        this.cacheDest = path.join(dest, 'cache');
     }
 
     getId(): string {
         return this.name + '@' + this.sha256.substr(0, 12)
     }
 
-    private getCacheDest() {
-        return path.join(this.dest, 'cache')
+    private mkdirCacheDest() {
+        fs.mkdirpSync(this.cacheDest)
     }
 
-    async reqBlobsSize(t: DownTask): Promise<void> {
-        const headers: { [key: string]: string } = {}
-        if (t.auth) {
-            headers['authorization'] = t.auth
+    async reqBlobsSize(): Promise<void> {
+        const headers: ReqHeader = {}
+        if (this.auth) {
+            headers['authorization'] = this.auth
         }
-        const res = (await got.head(t.url, { headers }))
+        const res = (await got.head(this.url, { headers }))
         this.blobsBytes = Number(res.headers['content-length'])
     }
 
@@ -46,46 +50,61 @@ export class DownTask {
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * chunkSize
             if (chunksNumber - 1 === i) {
-                this.chunks[i] = [r_start, this.blobsBytes - 1, 0]
+                this.chunks[i] = [r_start, this.blobsBytes - 1]
                 continue
             }
             const r_end = r_start + chunkSize - 1
-            this.chunks[i] = [r_start, r_end, 0]
+            this.chunks[i] = [r_start, r_end]
         }
     }
 
-    cleanBlobs() {
+    cleanBlobs(): void {
         fs.removeSync(this.blobsFile)
     }
 
     async combineChunks(): Promise<void> {
         this.cleanBlobs()
-        for (const cf of Object.keys(this.chunks).map((id) => `${this.cacheDest}/${id}`)) {
+        for (const cf of Object.keys(this.chunks).map((id) => path.join(this.cacheDest, id))) {
             await mergeFile(cf, this.blobsFile)
         }
-        // this.logger.info('combine chunks success.')
+        console.info('combine chunks success.')
     }
 
     // setState() {
     //     this.start =''
     // }
-
-    async start() {
+    private cleanCache() {
+        fs.rmdirSync(this.cacheDest, { recursive: true })
+    }
+    private async checkBlobsShasum(): Promise<boolean> {
+        return await sha256sum(this.blobsFile) === this.sha256
+    }
+    async start(): Promise<void> {
+        await this.reqBlobsSize()
+        this.mkdirCacheDest()
         this.makeChunks()
-        const chunkWorkers = makeChunkWorkers()
+        const chunksQueue = makeChunksQueue()
         for (const [id, [start, end]] of Object.entries(this.chunks)) {
-            chunkWorkers.push({ id, url: this.url, auth: this.auth, dest: this.cacheDest, r_start: start, r_end: end })
+            const chunk = DownTaskChunk.create(id, this.url, this.auth, this.cacheDest, start, end)
+            chunksQueue.push({ chunk }, (err) => {
+                console.log(`${id} done`)
+            })
         }
-        await chunkWorkers.drain()
+        await chunksQueue.drain()
         await this.combineChunks()
+        if (this.checkBlobsShasum()) {
+            this.cleanCache()
+        } else {
+            this.cleanBlobs()
+        }
     }
 }
-function makeChunkWorkers() {
-    return async.queue<{ id: string, url: string, auth: string | undefined, dest: string, r_start: number, r_end: number }>((t, callback) => {
+function makeChunksQueue() {
+    return async.queue<{ chunk: DownTaskChunk }>(({ chunk }, callback) => {
         async.retry({ times: 10, interval: 1000 }, (cb) => {
-            DownWorker
-                .create(t.id, t.url, t.auth, t.dest, t.r_start, t.r_end)
-                .down()
+            // TaskChunkWorker
+            //     .create(t.id, t.url, t.auth, t.dest, t.r_start, t.r_end)
+            chunk.down()
                 .then(() => cb())
                 .catch((e) => { console.log(`worker error ${e}`); cb(e) })
         }).then(() => callback()).catch((e) => callback(e))
