@@ -1,7 +1,10 @@
 import * as http from 'http';
 import * as zlib from 'zlib';
 
-import { ProxyImageLayer } from './image'
+import * as logger from './logger'
+import { ProxyImageLayer } from './image';
+
+const log = logger.create('request')
 
 http.createServer((req, res) => {
     if (req.url) {
@@ -9,6 +12,7 @@ http.createServer((req, res) => {
             res.statusCode = 200;
             res.end();
         } else {
+            log.debug(JSON.stringify(req.rawHeaders))
             layerController(req, res)
         }
     } else {
@@ -16,11 +20,12 @@ http.createServer((req, res) => {
         res.end();
     }
 
-}).listen(3001, () => console.log('proxy registry blobs server start.\nlisten port 3001'))
+}).listen(3001, () => console.log('Proxy Laryer Blobs Server Start.\nlisten port 3001.'))
 
 const layerController: http.RequestListener = async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [owner, image, sha256] = req.url!.split('/').slice(1)
+
     const pil = ProxyImageLayer.create(owner, image, sha256, req.headers['authorization'])
     try {
         await pil.verify()

@@ -26,7 +26,7 @@
   },
   "scripts": {
     "compile": "tsc -d -p .",
-    "running": "ts-node src/app.ts",
+    "running": "level=debug ts-node src/app.ts",
     "test": "jest"
   },
   "keywords": [],

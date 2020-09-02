@@ -19,9 +19,9 @@ export class DownTaskChunk {
         return new DownTaskChunk(id, url, auth, dest, r_start, r_end)
     }
 
-    private readonly chunkDoneFile: string
-    private readonly chunkFile: string
-    private readonly chunkSize: number
+    // private readonly chunkDoneFile: string
+    private readonly chunk: string
+    private readonly size: number
     // private readonly logger: Logger
     private readonly headers: ReqHeader = {}
 
@@ -33,17 +33,17 @@ export class DownTaskChunk {
         private readonly r_start: number,
         private readonly r_end: number
     ) {
-        this.chunkSize = r_end - r_start + 1;
-        this.chunkFile = path.join(this.dest, this.id)
-        this.chunkDoneFile = path.join(this.chunkFile + '.done')
+        this.size = r_end - r_start + 1;
+        this.chunk = path.join(this.dest, this.id)
+        // this.chunkDoneFile = path.join(this.chunkFile + '.done')
         // this.logger = log.create('a')
     }
 
-    checkDown(): boolean {
-        if (fs.existsSync(this.chunkDoneFile)) {
+    checkIsDown(): boolean {
+        if (this.checkExist() && this.checkValid()) {
             return false
         }
-        fs.removeSync(this.chunkFile)
+        this.remove()
         return true
     }
 
@@ -55,28 +55,33 @@ export class DownTaskChunk {
     }
 
     async down(): Promise<void> {
-        if (!this.checkDown()) {
+        console.log('down：')
+        if (!this.checkIsDown()) {
             return
         }
         this.setHeaders()
         await promisify(stream.pipeline)(
             got.stream(this.url, { headers: this.headers }),
-            fs.createWriteStream(this.chunkFile)
+            fs.createWriteStream(this.chunk)
         )
-        if (this.checkChunkSize()) {
-            this.checkpoint()
-        } else {
-            fs.removeSync(this.chunkFile)
-            throw new Error('chunk size invaild ' + this.id);
+        if (this.checkExist()) {
+            if (!this.checkValid()) {
+                this.remove()
+                throw new Error('chunk size invaild ' + this.id + ' ' + `${this.r_end - this.r_start + 1}`);
+            }
         }
     }
 
-    private checkpoint() {
-        fs.writeFileSync(this.chunkDoneFile, '', { encoding: "utf-8" })
+    private remove() {
+        fs.removeSync(this.chunk)
     }
 
-    private checkChunkSize(): boolean {
-        const stat = fs.statSync(this.chunkFile)
-        return stat.size === this.chunkSize
+    private checkExist(): boolean {
+        return fs.existsSync(this.chunk)
     }
+
+    private checkValid(): boolean {
+        return fs.statSync(this.chunk).size === this.size
+    }
+
 }

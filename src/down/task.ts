@@ -112,11 +112,13 @@ export class DownTask {
         await this.reqBlobsSize()
         this.mkdirCacheDest()
         this.makeChunks()
-        const chunksQueue = makeChunksQueue()
+
         for (const [id, [start, end]] of Object.entries(this.chunks)) {
             const chunk = DownTaskChunk.create(id, this.url, this.auth, this.cacheDest, start, end)
             chunksQueue.push({ chunk }, (err) => {
-                console.log(`${id} done`)
+                if (err) {
+                    console.log(`${id} done ${err}`)
+                }
             })
         }
         await chunksQueue.drain()
@@ -128,15 +130,15 @@ export class DownTask {
         }
     }
 }
+
+const chunksQueue = makeChunksQueue()
+
 function makeChunksQueue() {
     return async.queue<{ chunk: DownTaskChunk }>(({ chunk }, callback) => {
         async.retry({ times: 10, interval: 1000 }, (cb) => {
-            // TaskChunkWorker
-            //     .create(t.id, t.url, t.auth, t.dest, t.r_start, t.r_end)
             chunk.down()
                 .then(() => cb())
-                .catch((e) => { console.log(`worker error ${e}`); cb(e) })
-        }).then(() => callback()).catch((e) => callback(e))
+                .catch((e) => { console.log(`worker error ${e.message} xxxxxxxxxxxx`); cb(e.message) })
+        }).then(() => callback()).catch((e) => callback(e.message))
     }, 10);
 }
-

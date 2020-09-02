@@ -6,29 +6,20 @@ import { sha256sum } from './helper';
 import { DownManager } from './down/manager';
 import { ReadStream } from 'fs-extra';
 import { DownTask } from './down/task';
+import * as logger from './logger'
 
 /**
  * 1. check layer of image exist
  * 2. check laryer of image sha256 validity
  */
 
-export function checkExist(repo: string, image: string, sha256: string): boolean {
-    return fs.existsSync(blobsPath(repo, image, sha256))
-}
-
-export async function checkSha256(blobs: string, sum: string): Promise<boolean> {
-    return await sha256sum(blobs) === sum
-}
-
-export function blobsPath(repo: string, image: string, sha256: string): string {
-    return path.join('/', storageDir, repo, image, sha256, 'blobs')
-}
-
 export class ProxyImageLayer {
+
     public static create(owner: string, image: string, sha256: string, auth?: string): ProxyImageLayer {
         return new ProxyImageLayer(owner + '/' + image, sha256, auth)
     }
 
+    private readonly log = logger.create(`imagerLayer ${this.name}@layer:${this.sha256.substr(0, 12)}`)
     private readonly dmgr = new DownManager();
     private readonly layerFile: string
 
@@ -40,6 +31,7 @@ export class ProxyImageLayer {
     private init() {
         fs.mkdirpSync(path.join(storageDir, proxyRepo))
     }
+
     private checkExist() {
         return fs.existsSync(this.layerFile)
     }
@@ -49,16 +41,21 @@ export class ProxyImageLayer {
     }
 
     public blobsStream(): ReadStream {
-        console.log('stream ' + this.layerFile)
+        // console.log('stream ' + this.layerFile)
         return fs.createReadStream(this.layerFile)
     }
 
     private clear() {
-        fs.removeSync(this.layerFile)
+        this.log.debug(`clear blobs if exist.`)
+        if (this.checkExist()) {
+            fs.removeSync(this.layerFile)
+        }
     }
 
     private async down() {
+        this.log.debug('create down task: ' + `${this.url()}:${this.dest()}:${this.name}:${this.sha256}:${this.auth}`)
         const task = new DownTask(this.url(), this.dest(), this.name, this.sha256, this.auth)
+        this.log.debug('add task to taskQueue.')
         this.dmgr.addTask(task)
         await this.dmgr.wait(task)
     }
@@ -73,8 +70,10 @@ export class ProxyImageLayer {
 
     public async verify(): Promise<void> {
         if (this.checkExist() && await this.checkSha256()) {
+            this.log.debug(`blobs ready.`)
             return
         }
+        this.log.debug(`blobs unreliable.`)
         this.clear()
         await this.down()
     }

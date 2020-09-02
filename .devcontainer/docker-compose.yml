@@ -20,7 +20,7 @@ services:
     ports:
       - 9999:8888
     volumes:
-      - ../nginx/proxy.conf:/etc/nginx/conf.d/proxy.conf
+      - ./proxy.conf:/etc/nginx/conf.d/proxy.conf
     networks:
       registry:
         aliases:

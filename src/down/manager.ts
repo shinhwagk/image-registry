@@ -12,7 +12,7 @@ function makeTasksQueue() {
                 .then(() => rcb())
                 .catch(e => { console.log('task retry queue: ' + task.getId() + ' ' + e); rcb(e); })
         }).then(() => qcb()).catch((e) => { console.log('task queue: ' + task.getId() + ' ' + e); qcb(e) })
-    }, 1);
+    }, 5);
 }
 
 export class DownManager {
@@ -54,7 +54,7 @@ export class DownManager {
 
     async wait(t: DownTask): Promise<void> {
         while (t.checkState('running')) {
-            console.log('task running ' + t.getId())
+            // this.log.de('task running ' + t.getId())
             await sleep(2000)
         }
         if (t.checkState('failure')) {
