@@ -36,37 +36,28 @@ export class DownManager {
         }
     }
 
-    private checkTaskRunning(t: DownTask): boolean {
-        return t.getId() in this.tasksQueue.workersList().map(w => w.data.task.getId())
-    }
-
     private perform(): void {
-        (async () => {
-            for (const task of this.tasks) {
-                if (this.checkTaskRunning(task)) {
-                    console.log('task is running')
-                    continue;
+        for (const task of this.tasks.filter(t => t.checkState('none'))) {
+            this.tasksQueue.push({ task }, (err) => {
+                if (err) {
+                    console.log('task error' + err)
+                    task.setState('failure')
+                } else {
+                    task.setState('success')
+                    console.log('task success')
                 }
-                this.tasksQueue.push({ task }, (err) => {
-                    if (err) {
-                        task.setState('failure')
-                    } else {
-                        task.setState('success')
-                        console.log('task success')
-                    }
-                    this.removeTask(task)
-                })
-                await sleep(1000)
-            }
-        })()
+                this.removeTask(task)
+            })
+            task.setState('running')
+        }
     }
 
     async wait(t: DownTask): Promise<void> {
-        while (this.checkTaskRunning(t)) {
+        while (t.checkState('running')) {
             console.log('task running ' + t.getId())
             await sleep(2000)
         }
-        if (t.getState() === 'failure') {
+        if (t.checkState('failure')) {
             throw new Error(`${t.getId()} error.`)
         }
     }

@@ -4,9 +4,9 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 import got from 'got';
-import { Logger } from 'winston';
+// import { Logger } from 'winston';
 
-import * as log from '../logger'
+// import * as log from '../logger'
 import { ReqHeader } from './types';
 
 export class DownTaskChunk {
@@ -22,7 +22,7 @@ export class DownTaskChunk {
     private readonly chunkDoneFile: string
     private readonly chunkFile: string
     private readonly chunkSize: number
-    private readonly logger: Logger
+    // private readonly logger: Logger
     private readonly headers: ReqHeader = {}
 
     constructor(
@@ -36,7 +36,7 @@ export class DownTaskChunk {
         this.chunkSize = r_end - r_start + 1;
         this.chunkFile = path.join(this.dest, this.id)
         this.chunkDoneFile = path.join(this.chunkFile + '.done')
-        this.logger = log.create('a')
+        // this.logger = log.create('a')
     }
 
     checkDown(): boolean {

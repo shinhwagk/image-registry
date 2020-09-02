@@ -33,8 +33,8 @@ export class DownTask {
         this.cacheDest = path.join(dest, 'cache');
     }
 
-    getState(): TaskState {
-        return this.state;
+    checkState(state: TaskState): boolean {
+        return this.state === state;
     }
 
     setState(state: TaskState): void {
@@ -49,7 +49,7 @@ export class DownTask {
         fs.mkdirpSync(this.cacheDest)
     }
 
-    async reqBlobsSize(): Promise<void> {
+    private async reqBlobsSize(): Promise<void> {
         const headers: ReqHeader = { 'accept-encoding': 'gzip' }
         if (this.auth) {
             headers['authorization'] = this.auth
@@ -58,7 +58,7 @@ export class DownTask {
         this.blobsBytes = Number(res.headers['content-length'])
     }
 
-    async makeChunks(): Promise<void> {
+    private async makeChunks(): Promise<void> {
         const chunksNumber = (this.blobsBytes / chunkSize >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * chunkSize
@@ -71,11 +71,11 @@ export class DownTask {
         }
     }
 
-    cleanBlobs(): void {
+    private cleanBlobs(): void {
         fs.removeSync(this.blobsFile)
     }
 
-    async combineChunks(): Promise<void> {
+    private async combineChunks(): Promise<void> {
         this.cleanBlobs()
         for (const cf of Object.keys(this.chunks).map((id) => path.join(this.cacheDest, id))) {
             await mergeFile(cf, this.blobsFile)
@@ -104,6 +104,7 @@ export class DownTask {
     }
 
     async start(): Promise<void> {
+        console.log('task start')
         if (!this.checkIsDown()) {
             console.log(`blobs exist`)
             return

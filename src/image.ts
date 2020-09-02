@@ -7,6 +7,10 @@ import { DownManager } from './down/manager';
 import { ReadStream } from 'fs-extra';
 import { DownTask } from './down/task';
 
+/**
+ * 1. check layer of image exist
+ * 2. check laryer of image sha256 validity
+ */
 
 export function checkExist(repo: string, image: string, sha256: string): boolean {
     return fs.existsSync(blobsPath(repo, image, sha256))
@@ -60,7 +64,6 @@ export class ProxyImageLayer {
     }
 
     private url() {
-        console.log(`https://${proxyRepo}/v2/${this.name}/blobs/sha256:${this.sha256}`)
         return `https://${proxyRepo}/v2/${this.name}/blobs/sha256:${this.sha256}`
     }
 

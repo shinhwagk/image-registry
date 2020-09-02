@@ -26,6 +26,7 @@
   },
   "scripts": {
     "compile": "tsc -d -p .",
+    "running": "ts-node src/app.ts",
     "test": "jest"
   },
   "keywords": [],
