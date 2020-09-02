@@ -7,15 +7,20 @@ import * as async from 'async';
 
 import { mergeFile, sha256sum } from '../helper';
 import { chunkSize } from '../constants'
-import { DownTaskChunk } from './worker';
+import { DownTaskChunk } from './chunk';
+import { existsSync } from 'fs-extra';
+import { ReqHeader, TaskState } from './types';
 
-type ReqHeader = NodeJS.Dict<string | string[]>;
+// type ReqHeader = NodeJS.Dict<string | string[]>;
+
 
 export class DownTask {
     private blobsBytes = 0;
     private chunks: { [key: number]: [number, number] } = {};
     private readonly blobsFile: string;
     private readonly cacheDest: string;
+
+    private state: TaskState = 'none';
 
     constructor(
         public readonly url: string,
@@ -28,6 +33,14 @@ export class DownTask {
         this.cacheDest = path.join(dest, 'cache');
     }
 
+    getState(): TaskState {
+        return this.state;
+    }
+
+    setState(state: TaskState): void {
+        this.state = state
+    }
+
     getId(): string {
         return this.name + '@' + this.sha256.substr(0, 12)
     }
@@ -37,7 +50,7 @@ export class DownTask {
     }
 
     async reqBlobsSize(): Promise<void> {
-        const headers: ReqHeader = {}
+        const headers: ReqHeader = { 'accept-encoding': 'gzip' }
         if (this.auth) {
             headers['authorization'] = this.auth
         }
@@ -76,10 +89,25 @@ export class DownTask {
     private cleanCache() {
         fs.rmdirSync(this.cacheDest, { recursive: true })
     }
+
     private async checkBlobsShasum(): Promise<boolean> {
         return await sha256sum(this.blobsFile) === this.sha256
     }
+
+    private checkIsDown(): boolean {
+        if (existsSync(this.blobsFile)) {
+            if (this.checkBlobsShasum()) {
+                return false
+            }
+        }
+        return true
+    }
+
     async start(): Promise<void> {
+        if (!this.checkIsDown()) {
+            console.log(`blobs exist`)
+            return
+        }
         await this.reqBlobsSize()
         this.mkdirCacheDest()
         this.makeChunks()

@@ -5,6 +5,7 @@ import { storageDir, proxyRepo } from './constants'
 import { sha256sum } from './helper';
 import { DownManager } from './down/manager';
 import { ReadStream } from 'fs-extra';
+import { DownTask } from './down/task';
 
 
 export function checkExist(repo: string, image: string, sha256: string): boolean {
@@ -19,17 +20,22 @@ export function blobsPath(repo: string, image: string, sha256: string): string {
     return path.join('/', storageDir, repo, image, sha256, 'blobs')
 }
 
-
 export class ProxyImageLayer {
-    private readonly dmgr = new DownManager();
     public static create(owner: string, image: string, sha256: string, auth?: string): ProxyImageLayer {
         return new ProxyImageLayer(owner + '/' + image, sha256, auth)
     }
+
+    private readonly dmgr = new DownManager();
     private readonly layerFile: string
-    constructor(private readonly name: string, private readonly sha256: string, private readonly auth: any) {
-        this.layerFile = path.join('/', storageDir, proxyRepo, name, sha256, 'blobs')
+
+    constructor(private readonly name: string, private readonly sha256: string, private readonly auth?: string) {
+        this.layerFile = path.join(storageDir, proxyRepo, name, sha256, 'blobs')
+        this.init()
     }
 
+    private init() {
+        fs.mkdirpSync(path.join(storageDir, proxyRepo))
+    }
     private checkExist() {
         return fs.existsSync(this.layerFile)
     }
@@ -48,12 +54,13 @@ export class ProxyImageLayer {
     }
 
     private async down() {
-        // console.log('download start')
-        // const dmgr = DownManager.create(this.url(), this.auth, this.dest(), this.name, 'blobs', this.sha256)
-        // await dmgr.start()
+        const task = new DownTask(this.url(), this.dest(), this.name, this.sha256, this.auth)
+        this.dmgr.addTask(task)
+        await this.dmgr.wait(task)
     }
 
     private url() {
+        console.log(`https://${proxyRepo}/v2/${this.name}/blobs/sha256:${this.sha256}`)
         return `https://${proxyRepo}/v2/${this.name}/blobs/sha256:${this.sha256}`
     }
 
@@ -61,12 +68,11 @@ export class ProxyImageLayer {
         return path.join(storageDir, proxyRepo, this.name, this.sha256)
     }
 
-    public async verify(): Promise<boolean> {
+    public async verify(): Promise<void> {
         if (this.checkExist() && await this.checkSha256()) {
-            return true
+            return
         }
         this.clear()
         await this.down()
-        return false
     }
 }

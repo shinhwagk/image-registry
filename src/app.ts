@@ -1,6 +1,5 @@
 import * as http from 'http';
 import * as zlib from 'zlib';
-import * as fs from 'fs';
 
 import { ProxyImageLayer } from './image'
 
@@ -12,8 +11,7 @@ http.createServer((req, res) => {
             const [owner, image, sha256] = req.url.split('/').slice(1)
             console.log(owner, image, sha256)
             console.log("headers", req.headers)
-            const pil = ProxyImageLayer.create(owner, image, sha256, req.headers)
-            console.log("111111111")
+            const pil = ProxyImageLayer.create(owner, image, sha256, req.headers['authorization'])
             pil.verify()
                 .then(() => {
                     if (req.headers['accept-encoding']) {

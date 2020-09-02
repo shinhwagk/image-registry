@@ -1,5 +1,5 @@
 export const storageDir = process.env['storage'] || '/var/lib/registry';
-export const chunkSize = 1 * 1024 * 1024;
+export const chunkSize = 1 * 1024 * 1024; // default 1m.
 
-export const proxyRepo = process.env['proxy_repo'] || 'docker.io';
+export const proxyRepo = process.env['proxy_repo'] || 'quay.io';
 export const logLevel = process.env['level'] || 'info';
