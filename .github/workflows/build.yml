@@ -45,4 +45,4 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker tag shinhwagk/registry:alpine-$(cat package.json | jq -r .version) shinhwagk/registry:latest
           docker push shinhwagk/registry:alpine-$(cat package.json | jq -r .version)
-          docker push shinhwagk/registry:latet
+          docker push shinhwagk/registry:latest
