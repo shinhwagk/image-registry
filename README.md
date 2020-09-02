@@ -5,7 +5,7 @@
 ## Getting Started
 ```sh
 git clone --depth=1 https://github.com/registry
-cd release
+cd exmaple
 docker-compose up
 
 # pull images
