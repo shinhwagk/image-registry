@@ -6,29 +6,25 @@ services:
     volumes:
       - ./nginx/proxy.conf:/etc/nginx/conf.d/proxy.conf
     ports:
-      - 6660:6660
-      - 6661:6661
+      - 6660:6660 # quayio
+      - 6661:6661 # dockerio
+    links:
+      - "proxy-quayio:quayio"
+      - "proxy-dockerio:dockerio"
   proxy-quayio:
     container_name: registry_proxy-quayio
     image: shinhwagk/registry:latest
+    environment:
+      proxy_repo: quay.io
     volumes:
       - registry-cache:/var/lib/registry
-    networks:
-      registry:
-        aliases:
-          - quayio
   proxy-dockerio:
     container_name: registry_proxy-dockerio
     image: shinhwagk/registry:latest
+    environment:
+      proxy_repo: registry-1.docker.io
     volumes:
       - registry-cache:/var/lib/registry
-    networks:
-      registry:
-        aliases:
-          - dockerio
-
-networks:
-  registry:
 
 volumes:
   registry-cache:
