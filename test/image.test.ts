@@ -1,6 +1,7 @@
 import { ProxyImageLayer } from '../src/image'
 import { sha256sum } from '../src/helper'
 import { mkdirpSync, removeSync } from 'fs-extra'
+import { storageDir } from '../src/constants'
 
 const sha256 = '70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95'
 const owner = 'openshift'
@@ -13,7 +14,7 @@ beforeAll(() => {
 })
 
 afterAll(() => {
-    removeSync(`/var/lib/registry/quay.io/openshift/okd-content/${sha256}/blobs`)
+    removeSync(`${storageDir}/quay.io/openshift/okd-content/${sha256}/blobs`)
 })
 
 describe('test image', () => {
@@ -21,7 +22,7 @@ describe('test image', () => {
     const pil = ProxyImageLayer.create(owner, image, sha256)
     test('Check image', async () => {
         await pil.verify()
-        const blobsShasum = await sha256sum(`/var/lib/registry/quay.io/openshift/okd-content/${sha256}/blobs`)
+        const blobsShasum = await sha256sum(`${storageDir}/quay.io/openshift/okd-content/${sha256}/blobs`)
         expect(blobsShasum).toBe(sha256)
     }, 60 * 2 * 1000);
 })
