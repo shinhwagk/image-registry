@@ -36,9 +36,9 @@ test('Check DownTask', async () => {
 }, 60 * 1000 * 2);
 
 describe('test DownManager', () => {
-    mkdirpSync(`${dest}/openshift/okd-content/${sha256}`)
-    const task1 = new DownTask(url, `${dest}/openshift/okd-content/${sha256}`, name, sha256)
-    // const task2 = new DownTask(url, `storage/openshift/okd-content/${sha256}`, name, sha256)
+    mkdirpSync(`${dest}/${name}/${sha256}`)
+    const task1 = new DownTask(url, `${dest}/${name}/${sha256}`, name, sha256)
+    // const task2 = new DownTask(url, `storage/${name}/${sha256}`, name, sha256)
     const dmgr = new DownManager()
     test('Check some task down', async () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -46,15 +46,14 @@ describe('test DownManager', () => {
             dmgr.addTask(task1)
         }
         await dmgr.wait(task1)
-        const blobsShasum = await sha256sum(`${dest}/openshift/okd-content/${sha256}/blobs`)
+        const blobsShasum = await sha256sum(`${dest}/${name}/${sha256}/blobs`)
         expect(blobsShasum).toBe(sha256)
     }, 60 * 1000 * 2);
 
     test('Check DownTask down', async () => {
         dmgr.addTask(task1)
         await dmgr.wait(task1)
-        const blobsShasum = await sha256sum(`${dest}/openshift/okd-content/${sha256}/blobs`)
+        const blobsShasum = await sha256sum(`${dest}/${name}/${sha256}/blobs`)
         expect(blobsShasum).toBe(sha256)
     }, 60 * 1000 * 2);
 })
-
