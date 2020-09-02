@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v2-beta
       - run: npm i
       - run: npm run test
+        env:
+          storage: ./storage
   push:
     needs: [test]
     runs-on: ubuntu-latest
