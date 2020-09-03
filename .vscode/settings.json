@@ -2,5 +2,6 @@
     "editor.insertSpaces": true,
     "editor.formatOnSave": true,
     "files.eol": "\n",
-    "eslint.enable": true
+    "eslint.enable": true,
+    "editor.wordWrap": "on"
 }

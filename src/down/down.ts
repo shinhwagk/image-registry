@@ -1,26 +1,24 @@
 import * as path from 'path';
 
-import * as fs from 'fs-extra';
 import got from 'got';
-import * as async from 'async';
-// import { Logger } from 'winston'
+import { existsSync, mkdirpSync, rmdirSync, removeSync } from 'fs-extra';
 
-import { mergeFile, sha256sum } from '../helper';
+import { chunksQueue } from './queue'
+import { mergeFile, sha256sum, sleep } from '../helper';
 import { chunkSize } from '../constants'
 import { DownTaskChunk } from './chunk';
-import { existsSync } from 'fs-extra';
-import { ReqHeader, TaskState } from './types';
+import { ReqHeader, AbsState, TaskState } from './types';
+import * as logger from '../logger'
+import { Logger } from 'winston';
 
-// type ReqHeader = NodeJS.Dict<string | string[]>;
+export class DownTask extends AbsState {
 
-
-export class DownTask {
+    private readonly id: string;
+    private readonly log: Logger;
     private blobsBytes = 0;
-    private chunks: { [key: number]: [number, number] } = {};
     private readonly blobsFile: string;
     private readonly cacheDest: string;
-
-    private state: TaskState = 'none';
+    private chunks: DownTaskChunk[] = []
 
     constructor(
         public readonly url: string,
@@ -29,16 +27,11 @@ export class DownTask {
         private readonly sha256: string,
         public readonly auth?: string
     ) {
+        super()
         this.blobsFile = path.join(dest, 'blobs');
         this.cacheDest = path.join(dest, 'cache');
-    }
-
-    checkState(state: TaskState): boolean {
-        return this.state === state;
-    }
-
-    setState(state: TaskState): void {
-        this.state = state
+        this.id = this.getId()
+        this.log = logger.create(`DownTask ${this.id}`)
     }
 
     getId(): string {
@@ -46,33 +39,30 @@ export class DownTask {
     }
 
     private mkdirCacheDest() {
-        fs.mkdirpSync(this.cacheDest)
+        mkdirpSync(this.cacheDest)
     }
 
     private async reqBlobsSize(): Promise<void> {
-        const headers: ReqHeader = { 'accept-encoding': 'gzip' }
-        if (this.auth) {
-            headers['authorization'] = this.auth
-        }
+        const headers: ReqHeader = this.auth ? { 'authorization': this.auth } : {}
         const res = (await got.head(this.url, { headers }))
         this.blobsBytes = Number(res.headers['content-length'])
     }
 
-    private async makeChunks(): Promise<void> {
+    private makeChunks(): void {
         const chunksNumber = (this.blobsBytes / chunkSize >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * chunkSize
             if (chunksNumber - 1 === i) {
-                this.chunks[i] = [r_start, this.blobsBytes - 1]
+                this.chunks.push(DownTaskChunk.create(this.getId() + '@' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, this.blobsBytes - 1))
                 continue
             }
             const r_end = r_start + chunkSize - 1
-            this.chunks[i] = [r_start, r_end]
+            this.chunks.push(DownTaskChunk.create(this.getId() + '@' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, r_end))
         }
     }
 
     private cleanBlobs(): void {
-        fs.removeSync(this.blobsFile)
+        removeSync(this.blobsFile)
     }
 
     private async combineChunks(): Promise<void> {
@@ -80,14 +70,11 @@ export class DownTask {
         for (const cf of Object.keys(this.chunks).map((id) => path.join(this.cacheDest, id))) {
             await mergeFile(cf, this.blobsFile)
         }
-        console.info('combine chunks success.')
+        this.log.info(this.id + ' combine chunks success.')
     }
 
-    // setState() {
-    //     this.start =''
-    // }
     private cleanCache() {
-        fs.rmdirSync(this.cacheDest, { recursive: true })
+        rmdirSync(this.cacheDest, { recursive: true })
     }
 
     private async checkBlobsShasum(): Promise<boolean> {
@@ -103,42 +90,38 @@ export class DownTask {
         return true
     }
 
+    private checkTasksState(state: TaskState): AbsState[] {
+        return this.chunks.filter(c => c.checkState(state))
+    }
+
     async start(): Promise<void> {
-        console.log('task start')
+        this.setState('running')
+        this.log.info('start')
         if (!this.checkIsDown()) {
-            console.log(`blobs exist`)
+            this.log.info('blobs exist')
             return
         }
         await this.reqBlobsSize()
         this.mkdirCacheDest()
         this.makeChunks()
-
-        for (const [id, [start, end]] of Object.entries(this.chunks)) {
-            const chunk = DownTaskChunk.create(id, this.url, this.auth, this.cacheDest, start, end)
-            chunksQueue.push({ chunk }, (err) => {
-                if (err) {
-                    console.log(`${id} done ${err}`)
-                }
-            })
+        chunksQueue.push(this.chunks.map(task => { return { task } }))
+        while (this.checkTasksState('none').length >= 1 || this.checkTasksState('running').length >= 1) {
+            console.log('queue length' + chunksQueue.length() + ' ' + chunksQueue.running())
+            await sleep(5000)
         }
-        await chunksQueue.drain()
+        if (this.chunks.filter(c => c.checkState('failure')).length >= 1) {
+            this.setState('failure')
+            return;
+        }
         await this.combineChunks()
         if (this.checkBlobsShasum()) {
+            this.log.info('blobs sha256sum ok')
             this.cleanCache()
+            this.setState('success')
         } else {
+            this.log.info('blobs sha256sum faile')
             this.cleanBlobs()
+            this.setState('failure')
         }
     }
-}
-
-const chunksQueue = makeChunksQueue()
-
-function makeChunksQueue() {
-    return async.queue<{ chunk: DownTaskChunk }>(({ chunk }, callback) => {
-        async.retry({ times: 10, interval: 1000 }, (cb) => {
-            chunk.down()
-                .then(() => cb())
-                .catch((e) => { console.log(`worker error ${e.message} xxxxxxxxxxxx`); cb(e.message) })
-        }).then(() => callback()).catch((e) => callback(e.message))
-    }, 10);
 }

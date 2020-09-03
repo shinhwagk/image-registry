@@ -1,5 +1,5 @@
-import { ProxyImageLayer } from '../src/image'
-import { sha256sum } from '../src/helper'
+import { ProxyLayer } from '../src/image/layer'
+import { sha256sum, sleep } from '../src/helper'
 import { mkdirpSync, removeSync } from 'fs-extra'
 import { storageDir } from '../src/constants'
 
@@ -8,21 +8,20 @@ const owner = 'openshift'
 const image = 'okd-content'
 
 beforeAll(() => {
-    // process.env = Object.assign(process.env, { storage: dest });
-    // process.env.storage = dest
-    // mkdirpSync(dest)
+    mkdirpSync(storageDir)
 })
 
-afterAll(() => {
-    removeSync(`${storageDir}/quay.io/openshift/okd-content/${sha256}/blobs`)
+afterAll(async () => {
+    await sleep(5000)
+    removeSync(storageDir)
 })
 
 describe('test image', () => {
-    process.env.proxy_repo = 'quay.io'
-    const pil = ProxyImageLayer.create(owner, image, sha256)
+    const pil = ProxyLayer.create(owner, image, sha256)
     test('Check image', async () => {
         await pil.verify()
+        console.log('verify')
         const blobsShasum = await sha256sum(`${storageDir}/quay.io/openshift/okd-content/${sha256}/blobs`)
         expect(blobsShasum).toBe(sha256)
-    }, 60 * 2 * 1000);
+    }, 60 * 1000);
 })

@@ -9,7 +9,8 @@
 	"extensions": [
 		"dbaeumer.vscode-eslint",
 		"humao.rest-client",
-		"howardzuo.vscode-npm-dependency"
+		"howardzuo.vscode-npm-dependency",
+		"shinhwagk.vscode-googletran-zh"
 	],
 	"postCreateCommand": "npm i",
 	"shutdownAction": "stopCompose"
