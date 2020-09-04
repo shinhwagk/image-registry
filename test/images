@@ -1,0 +1,8 @@
+calico/node
+jetstack/cert-manager-controller
+jetstack/cert-manager-webhook
+prometheus/node-exporter
+jetstack/cert-manager-cainjector
+outline/shadowbox
+mettle/fluentd
+prometheus/prometheus

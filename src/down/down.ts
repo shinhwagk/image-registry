@@ -35,7 +35,7 @@ export class DownTask extends AbsState {
     }
 
     getId(): string {
-        return this.name + '@' + this.sha256.substr(0, 12)
+        return this.name + '@sha256:' + this.sha256.substr(0, 12)
     }
 
     private mkdirCacheDest() {
@@ -53,11 +53,11 @@ export class DownTask extends AbsState {
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * chunkSize
             if (chunksNumber - 1 === i) {
-                this.chunks.push(DownTaskChunk.create(this.getId() + '@' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, this.blobsBytes - 1))
+                this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, this.blobsBytes - 1))
                 continue
             }
             const r_end = r_start + chunkSize - 1
-            this.chunks.push(DownTaskChunk.create(this.getId() + '@' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, r_end))
+            this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, r_end))
         }
     }
 

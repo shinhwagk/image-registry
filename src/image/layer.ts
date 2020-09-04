@@ -10,7 +10,8 @@ import * as logger from '../logger'
 
 /**
  * 1. check layer of image exist
- * 2. check laryer of image sha256 validity
+ * 2. check layer of image sha256 validity
+ * 3. down layer of image by DownManager
  */
 
 export class ProxyLayer {
@@ -19,7 +20,7 @@ export class ProxyLayer {
         return new ProxyLayer(owner + '/' + image, sha256, auth)
     }
 
-    private readonly log = logger.create(`imagerLayer ${this.name}@layer:${this.sha256.substr(0, 12)}`)
+    private readonly log = logger.create(`layer ${this.name}@sha256:${this.sha256.substr(0, 12)}`)
     private readonly layerFile: string
 
     constructor(private readonly name: string, private readonly sha256: string, private readonly auth?: string) {
@@ -43,21 +44,12 @@ export class ProxyLayer {
         return fs.createReadStream(this.layerFile)
     }
 
-    private clear() {
-        this.log.debug(`clear blobs if exist.`)
-        if (this.checkExist()) {
-            fs.removeSync(this.layerFile)
-        }
-    }
-
     private async down() {
-        console.log('create down task: ' + `${this.url()}:${this.dest()}:${this.name}:${this.sha256}:${this.auth}`)
         this.log.debug('create down task: ' + `${this.url()}:${this.dest()}:${this.name}:${this.sha256}:${this.auth}`)
         const task = new DownTask(this.url(), this.dest(), this.name, this.sha256, this.auth)
-        this.log.debug('add task to taskQueue.')
-        dmgr.addTask(task)
+        this.log.debug('add task to DownManager.')
         await dmgr.wait(task)
-        this.log.info('down success ')
+        this.log.info('down success')
     }
 
     private url() {
@@ -74,7 +66,6 @@ export class ProxyLayer {
             return
         }
         this.log.debug(`blobs unreliable.`)
-        this.clear()
         await this.down()
     }
 }

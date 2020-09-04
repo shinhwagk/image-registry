@@ -4,9 +4,9 @@ import * as path from 'path';
 
 import * as fs from 'fs-extra';
 import got from 'got';
-// import { Logger } from 'winston';
+import { Logger } from 'winston';
 
-// import * as log from '../logger'
+import * as logger from '../logger'
 import { ReqHeader, AbsState, ITask } from './types';
 
 export class DownTaskChunk extends AbsState implements ITask {
@@ -23,9 +23,8 @@ export class DownTaskChunk extends AbsState implements ITask {
 
     private readonly chunk: string
     private readonly size: number
-    // private readonly logger: Logger
+    private readonly log: Logger;
     private readonly headers: ReqHeader = {}
-
 
     constructor(
         public readonly id: string,
@@ -39,7 +38,7 @@ export class DownTaskChunk extends AbsState implements ITask {
         super()
         this.size = r_end - r_start + 1;
         this.chunk = path.join(this.dest, this.seq)
-        // this.logger = log.create('a')
+        this.log = logger.create(`DownTaskChunk ${this.id}`)
     }
 
     checkIsDown(): boolean {
@@ -60,7 +59,6 @@ export class DownTaskChunk extends AbsState implements ITask {
     async start(): Promise<void> {
         console.log('down：', this.id)
         if (!this.checkIsDown()) {
-            this.setState('success')
             return
         }
         this.setState('running')
@@ -69,16 +67,13 @@ export class DownTaskChunk extends AbsState implements ITask {
             got.stream(this.url, { headers: this.headers }),
             fs.createWriteStream(this.chunk)
         )
-        if (this.checkExist()) {
-            if (!this.checkValid()) {
-                this.remove()
-                this.setState('failure')
-                console.log(`${this.id} failure`)
-                // throw new Error(this.id + ' chunk size invaild ' + this.seq + ' ' + `${this.r_end - this.r_start + 1}`);
-            }
+        if (this.checkExist() && this.checkValid()) {
+            this.log.info('done')
+        } else {
+            this.remove()
+            this.log.info('done')
+            throw new Error('valid failure')
         }
-        console.log(`${this.id} done`)
-        this.setState('success')
     }
 
     private remove() {

@@ -1,16 +1,22 @@
 import * as async from 'async';
 
-import { ITask } from './types';
+import { ITask, IState } from './types';
 import { sleep } from '../helper';
 import { logLevel } from '../constants';
 
-function makeTasksQueue(qc: number, rc: number, ri: number): async.AsyncQueue<{ task: ITask }> {
-    return async.queue<{ task: ITask }>(({ task }, qcb) => {
-        async.retry({ times: rc, interval: ri }, (rcb) => {
+function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ task: ITask }> {
+    return async.queue<{ task: ITask & IState }>(({ task }, qcb) => {
+        async.retry({ times: rt, interval: ri }, (rcb) => {
             task.start()
                 .then(() => rcb())
                 .catch((e) => { console.log(`worker error ${e.message} xxxxxxxxxxxx`); rcb(e.message) })
-        }).then(() => qcb()).catch((e) => qcb(e.message))
+        }).then(() => {
+            task.setState('success');
+            qcb()
+        }).catch((e) => {
+            task.setState('failure')
+            qcb(e.message)
+        })
     }, qc);
 }
 
