@@ -2,16 +2,16 @@ import * as path from 'path';
 
 import got from 'got';
 import { existsSync, mkdirpSync, rmdirSync, removeSync } from 'fs-extra';
+import { Logger } from 'winston';
 
 import { chunksQueue } from './queue'
 import { mergeFile, sha256sum, sleep } from '../helper';
 import { chunkSize } from '../constants'
 import { DownTaskChunk } from './chunk';
-import { ReqHeader, AbsState, TaskState } from './types';
+import { ReqHeader } from './types';
 import * as logger from '../logger'
-import { Logger } from 'winston';
 
-export class DownTask extends AbsState {
+export class DownTask {
 
     private readonly id: string;
     private readonly log: Logger;
@@ -27,7 +27,6 @@ export class DownTask extends AbsState {
         private readonly sha256: string,
         public readonly auth?: string
     ) {
-        super()
         this.blobsFile = path.join(dest, 'blobs');
         this.cacheDest = path.join(dest, 'cache');
         this.id = this.getId()
@@ -90,12 +89,7 @@ export class DownTask extends AbsState {
         return true
     }
 
-    private checkTasksState(state: TaskState): AbsState[] {
-        return this.chunks.filter(c => c.checkState(state))
-    }
-
     async start(): Promise<void> {
-        this.setState('running')
         this.log.info('start')
         if (!this.checkIsDown()) {
             this.log.info('blobs exist')
@@ -104,24 +98,30 @@ export class DownTask extends AbsState {
         await this.reqBlobsSize()
         this.mkdirCacheDest()
         this.makeChunks()
-        chunksQueue.push(this.chunks.map(task => { return { task } }))
-        while (this.checkTasksState('none').length >= 1 || this.checkTasksState('running').length >= 1) {
-            console.log('queue length' + chunksQueue.length() + ' ' + chunksQueue.running())
+        const succes: number[] = []
+        for (const task of this.chunks) {
+            chunksQueue.push({ task }, (err) => {
+                if (err) {
+                    succes.push(0)
+                } else {
+                    succes.push(1)
+                }
+            })
+        }
+        while (succes.length !== this.chunks.length) {
             await sleep(5000)
         }
-        if (this.chunks.filter(c => c.checkState('failure')).length >= 1) {
-            this.setState('failure')
-            return;
+        if (succes.filter(s => s === 0).length >= 1) {
+            throw new Error('down error')
         }
+
         await this.combineChunks()
         if (this.checkBlobsShasum()) {
             this.log.info('blobs sha256sum ok')
             this.cleanCache()
-            this.setState('success')
         } else {
             this.log.info('blobs sha256sum faile')
             this.cleanBlobs()
-            this.setState('failure')
         }
     }
 }

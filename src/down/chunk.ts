@@ -7,9 +7,9 @@ import got from 'got';
 import { Logger } from 'winston';
 
 import * as logger from '../logger'
-import { ReqHeader, AbsState, ITask } from './types';
+import { ReqHeader, ITask } from './types';
 
-export class DownTaskChunk extends AbsState implements ITask {
+export class DownTaskChunk implements ITask {
     public static create(
         id: string,
         seq: string,
@@ -35,7 +35,6 @@ export class DownTaskChunk extends AbsState implements ITask {
         private readonly r_start: number,
         private readonly r_end: number
     ) {
-        super()
         this.size = r_end - r_start + 1;
         this.chunk = path.join(this.dest, this.seq)
         this.log = logger.create(`DownTaskChunk ${this.id}`)
@@ -57,11 +56,10 @@ export class DownTaskChunk extends AbsState implements ITask {
     }
 
     async start(): Promise<void> {
-        console.log('down：', this.id)
+        this.log.debug('start')
         if (!this.checkIsDown()) {
             return
         }
-        this.setState('running')
         this.setHeaders()
         await promisify(stream.pipeline)(
             got.stream(this.url, { headers: this.headers }),

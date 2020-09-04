@@ -1,22 +1,20 @@
 import * as async from 'async';
 
-import { ITask, IState } from './types';
+import { ITask } from './types';
 import { sleep } from '../helper';
 import { logLevel } from '../constants';
+import { create } from '../logger';
+
+
+const log = create('queue')
 
 function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ task: ITask }> {
-    return async.queue<{ task: ITask & IState }>(({ task }, qcb) => {
+    return async.queue<{ task: ITask }>(({ task }, qcb) => {
         async.retry({ times: rt, interval: ri }, (rcb) => {
             task.start()
                 .then(() => rcb())
-                .catch((e) => { console.log(`worker error ${e.message} xxxxxxxxxxxx`); rcb(e.message) })
-        }).then(() => {
-            task.setState('success');
-            qcb()
-        }).catch((e) => {
-            task.setState('failure')
-            qcb(e.message)
-        })
+                .catch((e) => { log.info(`worker error ${e.message} xxxxxxxxxxxx`); rcb(e.message) })
+        }).then(() => qcb()).catch((e) => qcb(e.message))
     }, qc);
 }
 
@@ -27,9 +25,7 @@ if (logLevel === 'debug') {
         // eslint-disable-next-line no-constant-condition
         while (true) {
             await sleep(1000)
-            console.log('###################queue length ' + chunksQueue.length())
-            console.log('###################queue running ' + chunksQueue.running())
-            console.log('###################queue workersList ' + chunksQueue.workersList().length)
+            log.debug('length ' + chunksQueue.length() + '|running ' + chunksQueue.running())
         }
     })()
 }

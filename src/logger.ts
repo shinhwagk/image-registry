@@ -9,7 +9,6 @@ export function create(module: string,): Logger {
     return createLogger({
         format: combine(
             timestamp(),
-            // label({ label: l }),
             customFormat
         ),
         transports: [new transports.Console({ level: logLevel })]

@@ -11,20 +11,22 @@ http.createServer((req, res) => {
         if (req.url === '/check') {
             res.statusCode = 200;
             res.end();
+            if (req.url.startsWith('/proxy/layer')) {
+                proxyLayerController(req, res)
+            }
         } else {
             log.debug(JSON.stringify(req.rawHeaders))
-            layerController(req, res)
+            proxyLayerController(req, res)
         }
     } else {
         res.statusCode = 500;
         res.end();
     }
+}).listen(3001, () => log.info('Proxy Laryer Blobs Server Start.\nlisten port 3001.'))
 
-}).listen(3001, () => console.log('Proxy Laryer Blobs Server Start.\nlisten port 3001.'))
-
-const layerController: http.RequestListener = async (req, res) => {
+const proxyLayerController: http.RequestListener = async (req, res) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const [owner, image, sha256] = req.url!.split('/').slice(1)
+    const [owner, image, sha256] = req.url!.split('/').slice(3)
     const pil = ProxyLayer.create(owner, image, sha256, req.headers['authorization'])
     try {
         await pil.verify()

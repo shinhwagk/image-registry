@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { statSync, removeSync, mkdirpSync, existsSync } from 'fs-extra';
+import { statSync, removeSync, mkdirpSync } from 'fs-extra';
 
 import { DownTask } from '../src/down/down'
 import { DownTaskChunk } from '../src/down/chunk'

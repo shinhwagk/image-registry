@@ -1,8 +1,6 @@
-calico/node
-jetstack/cert-manager-controller
-jetstack/cert-manager-webhook
-prometheus/node-exporter
-jetstack/cert-manager-cainjector
-outline/shadowbox
-mettle/fluentd
-prometheus/prometheus
+jetstack/cert-manager-controller:v0.16.0
+jetstack/cert-manager-cainjector:v0.16.1
+outline/shadowbox:server-v1.5.0
+mettle/fluentd:1.7.4-4
+prometheus/prometheus:v2.21.0-rc.0
+calico/cni:v3.16.0-5-g0e26d41
