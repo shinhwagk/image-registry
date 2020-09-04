@@ -5,7 +5,7 @@
 ## Getting Started
 ```sh
 git clone --depth=1 https://github.com/registry
-cd exmaple
+cd registry/exmaple
 
 docker volume create registry-cache
 docker-compose up
