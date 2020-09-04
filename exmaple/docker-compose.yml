@@ -18,6 +18,10 @@ services:
       proxy_repo: quay.io
     volumes:
       - registry-cache:/var/lib/registry
+    networks:
+      registry:
+        aliases:
+          - quayio
   proxy-dockerio:
     container_name: registry_proxy-dockerio
     image: shinhwagk/registry:latest
@@ -25,7 +29,14 @@ services:
       proxy_repo: registry-1.docker.io
     volumes:
       - registry-cache:/var/lib/registry
+    networks:
+      registry:
+        aliases:
+          - dockerio
 
 volumes:
   registry-cache:
     external: true
+
+network:
+  proxy:
