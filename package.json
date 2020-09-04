@@ -27,7 +27,7 @@
   "scripts": {
     "compile": "tsc -d -p .",
     "running": "level=debug ts-node src/app.ts",
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
