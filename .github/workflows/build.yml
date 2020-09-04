@@ -22,17 +22,17 @@ jobs:
   #     - run: docker-compose version
   #     - run: curl http://localhost:8081
   #     - run: exit 1
-  test:
-    # needs: [sss]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-      - run: npm i
-      - run: npm run test
-        env:
-          storage: ./storage
-          level: debug
+  # test:
+  #   # needs: [sss]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2-beta
+  #     - run: npm i
+  #     - run: npm run test
+  #       env:
+  #         storage: ./storage
+  #         level: debug
   push:
     needs: [test]
     runs-on: ubuntu-latest
