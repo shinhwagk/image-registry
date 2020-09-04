@@ -19,7 +19,7 @@ services:
     volumes:
       - registry-cache:/var/lib/registry
     networks:
-      registry:
+      proxy:
         aliases:
           - quayio
   proxy-dockerio:
@@ -30,7 +30,7 @@ services:
     volumes:
       - registry-cache:/var/lib/registry
     networks:
-      registry:
+      proxy:
         aliases:
           - dockerio
 
