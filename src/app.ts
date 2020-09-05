@@ -11,9 +11,8 @@ http.createServer((req, res) => {
         if (req.url === '/check') {
             res.statusCode = 200;
             res.end();
-            if (req.url.startsWith('/proxy/layer')) {
-                proxyLayerController(req, res)
-            }
+        } else if (req.url.startsWith('/proxy/layer')) {
+            proxyLayerController(req, res)
         } else {
             log.debug(JSON.stringify(req.rawHeaders))
             proxyLayerController(req, res)
