@@ -61,10 +61,11 @@ export class DownTaskChunk implements ITask {
             return
         }
         this.setHeaders()
-        await promisify(stream.pipeline)(
-            got.stream(this.url, { headers: this.headers }),
-            fs.createWriteStream(this.chunk)
-        )
+        const pipeline = promisify(stream.pipeline);
+        const source = got.stream(this.url, { headers: this.headers })
+            .on('request', request => setTimeout(() => request.destroy(), 30 * 1000));
+        const target = fs.createWriteStream(this.chunk)
+        await pipeline(source, target)
         if (this.checkExist() && this.checkValid()) {
             this.log.info('done')
         } else {
