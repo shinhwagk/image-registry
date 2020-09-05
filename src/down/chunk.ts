@@ -66,13 +66,15 @@ export class DownTaskChunk implements ITask {
             .on('request', request => setTimeout(() => request.destroy(), 30 * 1000));
         const target = fs.createWriteStream(this.chunk)
         await pipeline(source, target)
-        if (this.checkExist() && this.checkValid()) {
-            this.log.info('done')
-        } else {
-            this.remove()
-            this.log.info('done')
-            throw new Error('valid failure')
+        if (this.checkExist()) {
+            if (this.checkValid()) {
+                this.log.info('done')
+                return
+            } else {
+                this.remove()
+            }
         }
+        throw new Error('valid failure')
     }
 
     private remove() {
