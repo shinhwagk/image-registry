@@ -48,14 +48,15 @@ export class DownTask {
     }
 
     private makeChunks(): void {
-        const chunksNumber = (this.blobsBytes / chunkSize >> 0) + 1
+        const cs = Number(chunkSize)
+        const chunksNumber = (this.blobsBytes / cs >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
-            const r_start = i * chunkSize
+            const r_start = i * cs
             if (chunksNumber - 1 === i) {
                 this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, this.blobsBytes - 1))
                 continue
             }
-            const r_end = r_start + chunkSize - 1
+            const r_end = r_start + cs - 1
             this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, r_end))
         }
     }

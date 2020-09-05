@@ -1,6 +1,6 @@
 {
   "name": "registry",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "a simple image layer proxy",
   "main": "main.js",
   "dependencies": {

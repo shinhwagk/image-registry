@@ -13,7 +13,7 @@ function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ 
         async.retry({ times: rt, interval: ri }, (rcb) => {
             task.start()
                 .then(() => rcb())
-                .catch((e) => { log.info(`worker error ${e.message} xxxxxxxxxxxx`); rcb(e.message) })
+                .catch((e) => { log.info(`worker error ${e.message}`); rcb(e.message) })
         }).then(() => qcb()).catch((e) => qcb(e.message))
     }, qc);
 }
