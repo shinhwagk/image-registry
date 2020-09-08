@@ -2,7 +2,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path'
 
 import { storageDir, proxyRepo } from '../constants'
-import { sha256sum } from '../helper';
+import { checkFileShasum } from '../helper';
 import { dmgr } from '../down/manager';
 import { ReadStream } from 'fs-extra';
 import { DownTask } from '../down/down';
@@ -36,9 +36,9 @@ export class ProxyLayer {
         return fs.existsSync(this.layerFile)
     }
 
-    private async checkSha256() {
-        return (await sha256sum(this.layerFile)) === this.sha256
-    }
+    // private async checkShasum() {
+    //     return (await sha256sum(this.layerFile)) === this.sha256
+    // }
 
     public blobsStream(): ReadStream {
         return fs.createReadStream(this.layerFile)
@@ -61,7 +61,7 @@ export class ProxyLayer {
     }
 
     public async verify(): Promise<void> {
-        if (this.checkExist() && await this.checkSha256()) {
+        if (this.checkExist() && await checkFileShasum(this.layerFile, this.sha256)) {
             this.log.debug(`blobs ready.`)
             return
         }

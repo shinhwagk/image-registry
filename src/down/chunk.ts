@@ -8,7 +8,84 @@ import { Logger } from 'winston';
 
 import * as logger from '../logger'
 import { ReqHeader, ITask } from './types';
-import { agent } from '../constants';
+import { agent, storageDir, proxyRepo } from '../constants';
+
+export interface IChunk {
+    id: string;
+    seq: number;
+    url: string;
+    auth?: string;
+    dest: string;
+    r_start: number;
+    r_end: number;
+}
+
+function getLayerPath(image: string, layer: string): string {
+    return path.join(storageDir, image, layer)
+}
+
+function getChunkPath(image: string, layer: string): string {
+    return path.join(getLayerPath(image, layer), 'cache')
+}
+
+function getLayerUrl(image: string, layer: string): string {
+    return `https://${proxyRepo}/v2/${image}/blobs/sha256:${layer}`
+}
+
+async function downChunk(id: number, seq: number, image: string, layer: string, auth?: string): Promise<void> {
+    const chunkFile = getChunkPath(image, layer)
+    const chunkUrl = getLayerUrl(image, layer)
+    const chunkSize = 11
+    if (!checkIsDown(chunkFile, chunkSize)) {
+        return
+    }
+    removeChunkFile(chunkFile)
+    // this.setHeaders()
+    const pipeline = promisify(stream.pipeline);
+    const source = got.stream(chunkUrl, { headers: this.headers, timeout: 20 * 1000, agent: agent })
+        .on('request', request => setTimeout(() => request.destroy(), 30 * 1000));
+    const target = fs.createWriteStream(chunkFile)
+    await pipeline(source, target)
+    if (checkChunkExist(chunkFile)) {
+        if (checkChunkSize(chunkFile, chunkSize)) {
+            this.log.info('done')
+            return
+        } else {
+            this.remove()
+        }
+    }
+    throw new Error('valid failure')
+}
+
+async function requestLayerOfImageBlobsSize(image: string, layer: string, auth?: string): Promise<void> {
+    const headers: ReqHeader = auth ? { 'authorization': auth } : {}
+    const res = (await got.head(url, { headers }))
+    this.blobsBytes = Number(res.headers['content-length'])
+}
+
+function checkIsDown(chunkFile: string, size: number): boolean {
+    return checkChunkExist(chunkFile) && checkChunkSize(chunkFile, size)
+}
+
+function makeHeaders(r_start: number, r_end: number, auth?: string) {
+    const headers: ReqHeader = { Range: `bytes=${r_start}-${r_end}` }
+    if (auth) {
+        headers['authorization'] = auth
+    }
+    return headers
+}
+
+function checkChunkExist(chunkFile: string): boolean {
+    return fs.existsSync(chunkFile)
+}
+
+function checkChunkSize(chunkFile: string, size: number): boolean {
+    return fs.statSync(chunkFile).size === size
+}
+
+function removeChunkFile(chunkFile: string) {
+    fs.removeSync(chunkFile)
+}
 
 export class DownTaskChunk implements ITask {
     public static create(
@@ -42,11 +119,7 @@ export class DownTaskChunk implements ITask {
     }
 
     checkIsDown(): boolean {
-        if (this.checkExist() && this.checkValid()) {
-            return false
-        }
-        this.remove()
-        return true
+        return this.checkExist() && this.checkValid()
     }
 
     setHeaders(): void {
@@ -61,6 +134,7 @@ export class DownTaskChunk implements ITask {
         if (!this.checkIsDown()) {
             return
         }
+        this.remove()
         this.setHeaders()
         const pipeline = promisify(stream.pipeline);
         const source = got.stream(this.url, { headers: this.headers, timeout: 20 * 1000, agent: agent })
@@ -80,14 +154,6 @@ export class DownTaskChunk implements ITask {
 
     private remove() {
         fs.removeSync(this.chunk)
-    }
-
-    private checkExist(): boolean {
-        return fs.existsSync(this.chunk)
-    }
-
-    private checkValid(): boolean {
-        return fs.statSync(this.chunk).size === this.size
     }
 
 }
