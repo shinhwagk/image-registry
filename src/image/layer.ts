@@ -16,8 +16,8 @@ import * as logger from '../logger'
 
 export class ProxyLayer {
 
-    public static create(owner: string, image: string, sha256: string, auth?: string): ProxyLayer {
-        return new ProxyLayer(owner + '/' + image, sha256, auth)
+    public static create(repo: string, image: string, sha256: string, auth?: string): ProxyLayer {
+        return new ProxyLayer(repo + '/' + image, sha256, auth)
     }
 
     private readonly log = logger.create(`layer ${this.name}@sha256:${this.sha256.substr(0, 12)}`)
