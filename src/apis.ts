@@ -1,23 +1,24 @@
 import koa from 'koa'
 import koarouter from 'koa-router'
 
-import { api_a } from './apis/a'
+// import { api_a } from './apis/a'
+import { api_a, api_b, api_d } from './middlewares'
 
-const b = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
-const c = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
-const d = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
-const e = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
-const f = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
-const g = (ctx: any) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const b = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const c = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const d = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const e = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const f = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
+const g = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
 
-export const apis: [string, string, koa.Middleware<any, any>][] = [
+const apis: [string, string | RegExp, any][] = [
     ['GET', '/v2', api_a],
-    ['GET', '/v2/:repo/:image/manifests/:reference', c],
-    ['HEAD', '/v2/:repo/:image/manifests/:reference', d],
-    ['GET', '/v2/:repo/:image/blobs/:digest', b],
-    ['POST', '/v2/:repo/:image/blobs/uploads/', e],
-    ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', f],
-    ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', g],
+    ['HEAD', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
+    ['GET', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
+    // ['GET', '/v2/:repo/:image/blobs/:digest', b],
+    // ['POST', '/v2/:repo/:image/blobs/uploads/', e],
+    // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', f],
+    // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', g],
     // ['GET', '/v2/:repo/:image/blobs/upload/:uuid', "a"],
     // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', 'sss'],
     // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', 'ss'],
@@ -27,16 +28,19 @@ const app = new koa()
 const router = new koarouter();
 
 apis.forEach(api => {
-    const [m, p, h] = api;
+    const [m, p, h]: [string, string | RegExp, any] = api;
     if (m === 'GET') {
         router.get(p, h)
+    } else if (m === 'HEAD') {
+        router.head(p, h)
     }
 })
 
-app
-    .use(router.routes())
-    .use(router.allowedMethods())
-    .listen(3000);
+app.use(router.routes())
+app.use(router.allowedMethods())
+app.listen(8000, () => console.log('start'));
+
+export default apis;
 
 // class ApiServer {
 

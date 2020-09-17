@@ -1,6 +1,6 @@
 // mutable
 export const storageDir = process.env['storage'] || '/var/lib/registry';
-export const proxyRepo = process.env['proxy-repo'] || 'quay.io';
+export const proxyRepo = process.env['proxy-repo'] || 'https://registry-1.docker.io'
 export const logLevel = process.env['log-level'] || 'info';
 
 // fix immutable
@@ -11,7 +11,7 @@ const proxyPort = process.env['port']
 
 import * as tunnel from 'tunnel'
 
-function makeProxy(host: string, port: number) {
+function makeProxy(host, port) {
     return {
         https: tunnel.httpsOverHttp({
             proxy: { host, port }

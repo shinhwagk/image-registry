@@ -1,4 +1,4 @@
-FROM y8kuj5cc.mirror.aliyuncs.com/library/node:lts
+FROM y8kuj5cc.mirror.aliyuncs.com/library/node:14
 
 RUN npm config set registry https://registry.npm.taobao.org
 

@@ -1,1 +1,0 @@
-export const api_d = (ctx: any) => ctx.body = "Ok"
