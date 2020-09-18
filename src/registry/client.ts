@@ -14,7 +14,7 @@ export class RegistryClient {
     authUrl?: string = undefined
     serviceUrl?: string
     isAuth = false
-    manifest: any
+    manifest: string
     manifestType?: ManifestType
 
     constructor(private readonly registryUrl: string, private readonly name: string, private readonly ref: string = 'latest') { }
@@ -22,7 +22,6 @@ export class RegistryClient {
     async ping() {
         const res = await got(sfmt('%s/%s/', this.registryUrl, 'v2'), { throwHttpErrors: false })
         if (res.statusCode === 401 && res.headers["www-authenticate"]) {
-            console.log(res.headers["www-authenticate"])
             const [authUrl, serviceUrl] = parserHeaderWWWAuthenticate(res.headers["www-authenticate"])
             if (authUrl) {
                 this.isAuth = true;
@@ -49,16 +48,20 @@ export class RegistryClient {
         }
         // console.log(this.registryUrl, this.serviceUrl, headers)
         const url = sfmt('%s/v2/%s/manifests/%s', this.registryUrl, this.name, this.ref)
-        console.log(url, headers)
         const res = await got(url, { headers })
-        console.log(res.headers['content-type'])
+        console.log(res.headers)
         if (res.headers['content-type']) {
             this.manifestType = res.headers['content-type'] as ManifestType
         }
-        console.log(res.headers)
         this.manifest = res.body
     }
+
+    // async reqBlobs(sha) {
+
+    // }
 }
+
+
 
 // interface ManifestType {
 

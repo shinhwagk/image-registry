@@ -1,8 +1,8 @@
 import koa from 'koa'
-import koarouter from 'koa-router'
 
 // import { api_a } from './apis/a'
-import { api_a, api_b, api_d } from './middlewares'
+// import { api_a, api_b, api_d } from './middlewares'
+import { router } from './v2'
 
 const b = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
 const c = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
@@ -11,36 +11,39 @@ const e = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.para
 const f = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
 const g = (ctx) => ctx.body = `${ctx.params.repo} ${ctx.params.image} ${ctx.params.digest}`
 
-const apis: [string, string | RegExp, any][] = [
-    ['GET', '/v2', api_a],
-    ['HEAD', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
-    ['GET', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
-    // ['GET', '/v2/:repo/:image/blobs/:digest', b],
-    // ['POST', '/v2/:repo/:image/blobs/uploads/', e],
-    // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', f],
-    // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', g],
-    // ['GET', '/v2/:repo/:image/blobs/upload/:uuid', "a"],
-    // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', 'sss'],
-    // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', 'ss'],
-]
+// const apis: [string, string | RegExp, any][] = [
+//     ['GET', '/v2', api_a],
+//     ['HEAD', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
+//     ['GET', /^\/v2\/(.+)\/manifests\/(.*)/, api_d],
+//     // ['GET', '/v2/:repo/:image/blobs/:digest', b],
+//     // ['POST', '/v2/:repo/:image/blobs/uploads/', e],
+//     // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', f],
+//     // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', g],
+//     // ['GET', '/v2/:repo/:image/blobs/upload/:uuid', "a"],
+//     // ['PATCH', '/v2/:repo/:image/blobs/uploads/:uuid', 'sss'],
+//     // ['PUT', '/v2/:repo/:image/blobs/uploads/:uuid', 'ss'],
+// ]
 
 const app = new koa()
-const router = new koarouter();
 
-apis.forEach(api => {
-    const [m, p, h]: [string, string | RegExp, any] = api;
-    if (m === 'GET') {
-        router.get(p, h)
-    } else if (m === 'HEAD') {
-        router.head(p, h)
-    }
-})
+// apis.forEach(api => {
+//     const [m, p, h]: [string, string | RegExp, any] = api;
+//     if (m === 'GET') {
+//         router.get(p, h)
+//     } else if (m === 'HEAD') {
+//         router.head(p, h)
+//     }
+// })
 
+
+
+const bodyParser = require('koa-bodyparser');
+app.use(bodyParser())
 app.use(router.routes())
 app.use(router.allowedMethods())
 app.listen(8000, () => console.log('start'));
 
-export default apis;
+// export default apis;
 
 // class ApiServer {
 
