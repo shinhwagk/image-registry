@@ -17,7 +17,7 @@ services:
         aliases:
           - registry
   reverse:
-    image: nginx
+    image: y8kuj5cc.mirror.aliyuncs.com/library/nginx
     ports:
       - 9999:8888
     volumes:

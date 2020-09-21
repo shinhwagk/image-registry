@@ -36,7 +36,6 @@ export async function checkManifests(ctx: any, next) {
 }
 
 export async function getManifests(ctx, next) {
-    await next()
     console.log('aaaa', ctx.state.mf)
     ctx.body = ctx.state.mf
 }
@@ -44,23 +43,30 @@ export async function getManifests(ctx, next) {
 
 export async function checkBlobs(ctx, next) {
     console.log('checkblobs')
+    console.log('head', ctx.method, ctx.path)
     const name = ctx.params[0]
     const sha = ctx.params[1]
-    if (checkBlobsExist(name, sha)) {
-        ctx.status = 200
-    } else {
-        ctx.status = 404
-        // requestBlobs(name, sha)
-    }
-    await next()
+    // if (checkBlobsExist(name, sha)) {
+    //     ctx.status = 200
+    // } else {
+    ctx.status = 404
+
+    //     // requestBlobs(name, sha)
+    // }
+    // ctx.status = 200
+    // await next()
 }
 
 export async function postBlobs(ctx, next) {
-    console.log('postBlobs')
+    console.log('postBlobs', ctx.params[0])
     const name = ctx.params[0]
     const uid = uuid.v4()
+    console.log(uid)
+    // ctx.req.on('data', (c) => console.log(c))
+    // ctx.req.on('end', () => {
     ctx.set('Location', `/v2/${name}/blobs/uploads/${uid}`)
     ctx.set('Docker-Upload-UUID', uid)
+    ctx.set('range', '0-0')
     ctx.status = 202
 }
 
