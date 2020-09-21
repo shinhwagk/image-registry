@@ -2,13 +2,13 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "CommonJS",
-    "allowJs": true,
-    "checkJs": true,
     "strict": false,
-    "esModuleInterop": true,
-    "outDir": "dist"
+    "outDir": "out"
   },
-  "include": [
-    "src"
+  "files": [
+    "src/v21.ts"
   ]
+  // "include": [
+  //   "src"
+  // ]
 }
