@@ -3,7 +3,8 @@ const http = require('http');
 http.createServer(onRequest).listen(8000);
 
 function onRequest(client_req, client_res) {
-    console.log('serve: ' + client_req.url);
+    const print = ['serve: ' + client_req.url]
+    // console.log('serve: ' + client_req.url);
 
     var options = {
         hostname: '192.168.67.69',
@@ -14,14 +15,21 @@ function onRequest(client_req, client_res) {
     };
 
     var proxy = http.request(options, function (res) {
-        console.log("server", res.statusCode, res.headers)
+        print.push('responce: ' + res.statusCode + " " + JSON.stringify(res.headers))
         client_res.writeHead(res.statusCode, res.headers)
         res.pipe(client_res, {
             end: true
-        });
+        }).on('finish', () => {
+            console.log("============================")
+            for (const p of print) {
+                console.log(p)
+            }
+            console.log("============================")
+        })
     });
 
-    console.log("request", client_req.method, client_req.headers)
+    // console.log("request", client_req.method, client_req.headers)
+    print.push('request: ' + client_req.method + " " + JSON.stringify(client_req.headers))
     client_req.pipe(proxy, {
         end: true
     });

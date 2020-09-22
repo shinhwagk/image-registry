@@ -1,0 +1,310 @@
+============================
+serve: /v2/
+request: GET {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","accept-encoding":"gzip","connection":"close"}
+responce: 200 {"content-length":"2","content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"2b6969bf-86e5-40e9-9cc1-00cf500a672d","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/2b6969bf-86e5-40e9-9cc1-00cf500a672d?_state=9JUiRrJOyN2pLTJ_eIfI0EJqqXB3isgw44l6s7UvN117Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMmI2OTY5YmYtODZlNS00MGU5LTljYzEtMDBjZjUwMGE2NzJkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjU5NTE5NDVaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"d86feedd-0695-4972-9fb2-8efc85671415","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/d86feedd-0695-4972-9fb2-8efc85671415?_state=FEXOzG2_792HoqICcS58lW_HbyJDbIELL1-g9TQBFG17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZDg2ZmVlZGQtMDY5NS00OTcyLTlmYjItOGVmYzg1NjcxNDE1IiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYwODA0OFoifQ%3D%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"7c3dbec1-e3b2-41b2-9f41-43279cc9104f","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/7c3dbec1-e3b2-41b2-9f41-43279cc9104f?_state=IULjp8BSJlfhH4l0wIQWlxVvqDLSHgQLEnydRH-_3r57Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2MzZGJlYzEtZTNiMi00MWIyLTlmNDEtNDMyNzljYzkxMDRmIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYxNTkzNTFaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"a43a14c2-ffec-4361-bf12-337cab206eeb","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/a43a14c2-ffec-4361-bf12-337cab206eeb?_state=oYzDlfltLiZoRxKYazAkkVqb3UWcSCvtvw-TucPuKqF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiYTQzYTE0YzItZmZlYy00MzYxLWJmMTItMzM3Y2FiMjA2ZWViIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYzMTkwNDFaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"31ed1896-1c0b-49d3-b7d8-0f42ea3645c2","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/31ed1896-1c0b-49d3-b7d8-0f42ea3645c2?_state=hzXeRAEWgzkEB8jozNIpiEBERWpcdw4cDB2VVhBgSRJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMzFlZDE4OTYtMWMwYi00OWQzLWI3ZDgtMGY0MmVhMzY0NWMyIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjY1NzI1MDFaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/7c3dbec1-e3b2-41b2-9f41-43279cc9104f?_state=IULjp8BSJlfhH4l0wIQWlxVvqDLSHgQLEnydRH-_3r57Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2MzZGJlYzEtZTNiMi00MWIyLTlmNDEtNDMyNzljYzkxMDRmIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYxNTkzNTFaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"7c3dbec1-e3b2-41b2-9f41-43279cc9104f","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/7c3dbec1-e3b2-41b2-9f41-43279cc9104f?_state=tO2tR1u3ssyqpTSwqsvVWe7eB3lx-w0yJsRRKm8q4BV7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2MzZGJlYzEtZTNiMi00MWIyLTlmNDEtNDMyNzljYzkxMDRmIiwiT2Zmc2V0IjoyMzkzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyWiJ9","range":"0-2392","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/d86feedd-0695-4972-9fb2-8efc85671415?_state=FEXOzG2_792HoqICcS58lW_HbyJDbIELL1-g9TQBFG17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZDg2ZmVlZGQtMDY5NS00OTcyLTlmYjItOGVmYzg1NjcxNDE1IiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYwODA0OFoifQ%3D%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"d86feedd-0695-4972-9fb2-8efc85671415","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/d86feedd-0695-4972-9fb2-8efc85671415?_state=giGoAPTODFPZpVpL2FCbe0nxbCY5lS8v3tmEb0pz4O57Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZDg2ZmVlZGQtMDY5NS00OTcyLTlmYjItOGVmYzg1NjcxNDE1IiwiT2Zmc2V0IjoxMjEsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D","range":"0-120","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/31ed1896-1c0b-49d3-b7d8-0f42ea3645c2?_state=hzXeRAEWgzkEB8jozNIpiEBERWpcdw4cDB2VVhBgSRJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMzFlZDE4OTYtMWMwYi00OWQzLWI3ZDgtMGY0MmVhMzY0NWMyIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjY1NzI1MDFaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"31ed1896-1c0b-49d3-b7d8-0f42ea3645c2","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/31ed1896-1c0b-49d3-b7d8-0f42ea3645c2?_state=0CQMw_YKeQGfPHK8bMuu8cAI4DGXS3R41RA_tr3CGYF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMzFlZDE4OTYtMWMwYi00OWQzLWI3ZDgtMGY0MmVhMzY0NWMyIiwiT2Zmc2V0Ijo1MTQ0LCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyWiJ9","range":"0-5143","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/a43a14c2-ffec-4361-bf12-337cab206eeb?_state=oYzDlfltLiZoRxKYazAkkVqb3UWcSCvtvw-TucPuKqF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiYTQzYTE0YzItZmZlYy00MzYxLWJmMTItMzM3Y2FiMjA2ZWViIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjYzMTkwNDFaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"a43a14c2-ffec-4361-bf12-337cab206eeb","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/a43a14c2-ffec-4361-bf12-337cab206eeb?_state=Csa4_9_BXzRDkYCUmFEAADmtthruRhc2eR-F-ML6fJR7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiYTQzYTE0YzItZmZlYy00MzYxLWJmMTItMzM3Y2FiMjA2ZWViIiwiT2Zmc2V0IjoyMjIsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D","range":"0-221","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/7c3dbec1-e3b2-41b2-9f41-43279cc9104f?_state=tO2tR1u3ssyqpTSwqsvVWe7eB3lx-w0yJsRRKm8q4BV7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2MzZGJlYzEtZTNiMi00MWIyLTlmNDEtNDMyNzljYzkxMDRmIiwiT2Zmc2V0IjoyMzkzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyWiJ9&digest=sha256%3A4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/d86feedd-0695-4972-9fb2-8efc85671415?_state=giGoAPTODFPZpVpL2FCbe0nxbCY5lS8v3tmEb0pz4O57Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZDg2ZmVlZGQtMDY5NS00OTcyLTlmYjItOGVmYzg1NjcxNDE1IiwiT2Zmc2V0IjoxMjEsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D&digest=sha256%3A3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"2393","content-type":"application/octet-stream","docker-content-digest":"sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:4b50d1c6b05cfc51651f145028c85c8eb3a5c8c02b0c4537aad065ad3083150d\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"121","content-type":"application/octet-stream","docker-content-digest":"sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:3dcd2a278b4adab247dd447b0d8fd2b284dbcaffbf9914a2b1da2c9f3f98e887\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/31ed1896-1c0b-49d3-b7d8-0f42ea3645c2?_state=0CQMw_YKeQGfPHK8bMuu8cAI4DGXS3R41RA_tr3CGYF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMzFlZDE4OTYtMWMwYi00OWQzLWI3ZDgtMGY0MmVhMzY0NWMyIiwiT2Zmc2V0Ijo1MTQ0LCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyWiJ9&digest=sha256%3Af7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/a43a14c2-ffec-4361-bf12-337cab206eeb?_state=Csa4_9_BXzRDkYCUmFEAADmtthruRhc2eR-F-ML6fJR7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiYTQzYTE0YzItZmZlYy00MzYxLWJmMTItMzM3Y2FiMjA2ZWViIiwiT2Zmc2V0IjoyMjIsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D&digest=sha256%3Ad85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"222","content-type":"application/octet-stream","docker-content-digest":"sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:d85174a871441e82995f5577b3bbd247e53ed25d5a75a709b3b63a638c07457f\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"5144","content-type":"application/octet-stream","docker-content-digest":"sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:f7a5433ce20d474c9cb1b3ae428f1b804c7ae866ca4c34e01af1bfc9201ae51a\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:02 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa?_state=QG5CgTYaan-h-PMEaXxsvPP8YuZepgBDkmmu0hqRp8x7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiOTdhN2Q3NGEtZjRjOC00YzFjLWI3NmQtOTFjY2YxMDJiYmFhIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjA3MDE0OTlaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"e53b4f9e-12c1-45df-b25c-8e233c3136ad","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/e53b4f9e-12c1-45df-b25c-8e233c3136ad?_state=FBaNnSvQ2rUbmXnSke-Iea0Yxw4zlL3rzR89yYJ3A2t7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZTUzYjRmOWUtMTJjMS00NWRmLWIyNWMtOGUyMzNjMzEzNmFkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjE3ODU3MzZaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"dcd223ac-2567-4e28-83e8-90f8e7ae8732","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/dcd223ac-2567-4e28-83e8-90f8e7ae8732?_state=oq7GZH5wm4ofowknrcERWC8VXyFsBB26zN_kUHbnJLd7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZGNkMjIzYWMtMjU2Ny00ZTI4LTgzZTgtOTBmOGU3YWU4NzMyIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjIyODk2NDlaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f80276b2-ecd6-4bc9-b67e-4219bfc31b4f","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f80276b2-ecd6-4bc9-b67e-4219bfc31b4f?_state=v2suwCbpfHdkTlLAmsyjEdxaNfpvn1kpjj0iA-9gPL17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjgwMjc2YjItZWNkNi00YmM5LWI2N2UtNDIxOWJmYzMxYjRmIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjIzNTA0NjJaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/e53b4f9e-12c1-45df-b25c-8e233c3136ad?_state=FBaNnSvQ2rUbmXnSke-Iea0Yxw4zlL3rzR89yYJ3A2t7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZTUzYjRmOWUtMTJjMS00NWRmLWIyNWMtOGUyMzNjMzEzNmFkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjE3ODU3MzZaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"e53b4f9e-12c1-45df-b25c-8e233c3136ad","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/e53b4f9e-12c1-45df-b25c-8e233c3136ad?_state=ilIuVcW32UXkZ834moZF2wQ51N7nfUTGCV_D51xWrFF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZTUzYjRmOWUtMTJjMS00NWRmLWIyNWMtOGUyMzNjMzEzNmFkIiwiT2Zmc2V0IjoxMTUsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDNaIn0%3D","range":"0-114","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/e53b4f9e-12c1-45df-b25c-8e233c3136ad?_state=ilIuVcW32UXkZ834moZF2wQ51N7nfUTGCV_D51xWrFF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZTUzYjRmOWUtMTJjMS00NWRmLWIyNWMtOGUyMzNjMzEzNmFkIiwiT2Zmc2V0IjoxMTUsIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDNaIn0%3D&digest=sha256%3A16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"115","content-type":"application/octet-stream","docker-content-digest":"sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:16da0c38dc5bad1047f9912514e8232bf9d4d40c3790e94e9c25d5f48ac39ffd\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:03 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"7d08acb0-3691-49e1-9703-3d3b1aaa9fed","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/7d08acb0-3691-49e1-9703-3d3b1aaa9fed?_state=VNI2sBuhOJkWvVO7CcqtOMci27tJGsFRfRi-W6UfRzZ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2QwOGFjYjAtMzY5MS00OWUxLTk3MDMtM2QzYjFhYWE5ZmVkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0LjExOTQzOTZaIn0%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/7d08acb0-3691-49e1-9703-3d3b1aaa9fed?_state=VNI2sBuhOJkWvVO7CcqtOMci27tJGsFRfRi-W6UfRzZ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2QwOGFjYjAtMzY5MS00OWUxLTk3MDMtM2QzYjFhYWE5ZmVkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0LjExOTQzOTZaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"7d08acb0-3691-49e1-9703-3d3b1aaa9fed","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/7d08acb0-3691-49e1-9703-3d3b1aaa9fed?_state=q_eznuO2ayhkhK10CtFFZ5rZzMpt6o0Biy98Rf3O9eZ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2QwOGFjYjAtMzY5MS00OWUxLTk3MDMtM2QzYjFhYWE5ZmVkIiwiT2Zmc2V0IjoxNzI5LCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0WiJ9","range":"0-1728","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f80276b2-ecd6-4bc9-b67e-4219bfc31b4f?_state=v2suwCbpfHdkTlLAmsyjEdxaNfpvn1kpjj0iA-9gPL17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjgwMjc2YjItZWNkNi00YmM5LWI2N2UtNDIxOWJmYzMxYjRmIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjIzNTA0NjJaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f80276b2-ecd6-4bc9-b67e-4219bfc31b4f","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f80276b2-ecd6-4bc9-b67e-4219bfc31b4f?_state=lhUB_QJUe7BElmJTMfnop3CshKJXLG_poBqZq32fmwJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjgwMjc2YjItZWNkNi00YmM5LWI2N2UtNDIxOWJmYzMxYjRmIiwiT2Zmc2V0IjoxNDE5MjAzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzWiJ9","range":"0-1419202","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/7d08acb0-3691-49e1-9703-3d3b1aaa9fed?_state=q_eznuO2ayhkhK10CtFFZ5rZzMpt6o0Biy98Rf3O9eZ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiN2QwOGFjYjAtMzY5MS00OWUxLTk3MDMtM2QzYjFhYWE5ZmVkIiwiT2Zmc2V0IjoxNzI5LCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0WiJ9&digest=sha256%3Ad51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"1729","content-type":"application/octet-stream","docker-content-digest":"sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:d51ce1c2e5758ad66758028c37b3224bff94ee2cdb716215a91dde7b754443f3\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f80276b2-ecd6-4bc9-b67e-4219bfc31b4f?_state=lhUB_QJUe7BElmJTMfnop3CshKJXLG_poBqZq32fmwJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjgwMjc2YjItZWNkNi00YmM5LWI2N2UtNDIxOWJmYzMxYjRmIiwiT2Zmc2V0IjoxNDE5MjAzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzWiJ9&digest=sha256%3Afcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"1419203","content-type":"application/octet-stream","docker-content-digest":"sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:fcf3ceff18fca19f16c7108d4c0dfcacc194f1762f80712e854c16ec164733aa\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f66f083d-779a-49f6-bd07-9a7468eea40d","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f66f083d-779a-49f6-bd07-9a7468eea40d?_state=5Cduf-OgAHAcPjiwxTdD-H6isbJaBoaV6Mup0kXE8c17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjY2ZjA4M2QtNzc5YS00OWY2LWJkMDctOWE3NDY4ZWVhNDBkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0LjU4NjE0NloifQ%3D%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:04 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/dcd223ac-2567-4e28-83e8-90f8e7ae8732?_state=oq7GZH5wm4ofowknrcERWC8VXyFsBB26zN_kUHbnJLd7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZGNkMjIzYWMtMjU2Ny00ZTI4LTgzZTgtOTBmOGU3YWU4NzMyIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjIyODk2NDlaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"dcd223ac-2567-4e28-83e8-90f8e7ae8732","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/dcd223ac-2567-4e28-83e8-90f8e7ae8732?_state=h3HN0rNN2Kt5GcSm1-WgAALY-nndklbU32QpEMePLiV7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZGNkMjIzYWMtMjU2Ny00ZTI4LTgzZTgtOTBmOGU3YWU4NzMyIiwiT2Zmc2V0Ijo0MTc4MDMyLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzWiJ9","range":"0-4178031","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:05 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/dcd223ac-2567-4e28-83e8-90f8e7ae8732?_state=h3HN0rNN2Kt5GcSm1-WgAALY-nndklbU32QpEMePLiV7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZGNkMjIzYWMtMjU2Ny00ZTI4LTgzZTgtOTBmOGU3YWU4NzMyIiwiT2Zmc2V0Ijo0MTc4MDMyLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzWiJ9&digest=sha256%3Ac2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:05 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"4178032","content-type":"application/octet-stream","docker-content-digest":"sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:c2344adc4858d61b5c9424d49320703bec8d5e1044378a83cae39dbdc49acba7\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:05 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa?_state=QG5CgTYaan-h-PMEaXxsvPP8YuZepgBDkmmu0hqRp8x7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiOTdhN2Q3NGEtZjRjOC00YzFjLWI3NmQtOTFjY2YxMDJiYmFhIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAzLjA3MDE0OTlaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa?_state=wynxXRL-4Sy5gUMterOUJvRSo2DF1VZogKs0eYBApCF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiOTdhN2Q3NGEtZjRjOC00YzFjLWI3NmQtOTFjY2YxMDJiYmFhIiwiT2Zmc2V0IjoxMzQ0MjY5MSwiU3RhcnRlZEF0IjoiMjAyMC0wOS0yMlQwNTo1NzowM1oifQ%3D%3D","range":"0-13442690","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:12 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/97a7d74a-f4c8-4c1c-b76d-91ccf102bbaa?_state=wynxXRL-4Sy5gUMterOUJvRSo2DF1VZogKs0eYBApCF7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiOTdhN2Q3NGEtZjRjOC00YzFjLWI3NmQtOTFjY2YxMDJiYmFhIiwiT2Zmc2V0IjoxMzQ0MjY5MSwiU3RhcnRlZEF0IjoiMjAyMC0wOS0yMlQwNTo1NzowM1oifQ%3D%3D&digest=sha256%3Ab905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:12 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"13442691","content-type":"application/octet-stream","docker-content-digest":"sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:b905d1797e97cbecb5a12655cab5c3df92736805574af0f96477c98d7a27411c\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:12 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f66f083d-779a-49f6-bd07-9a7468eea40d?_state=5Cduf-OgAHAcPjiwxTdD-H6isbJaBoaV6Mup0kXE8c17Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjY2ZjA4M2QtNzc5YS00OWY2LWJkMDctOWE3NDY4ZWVhNDBkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjA0LjU4NjE0NloifQ%3D%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f66f083d-779a-49f6-bd07-9a7468eea40d","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f66f083d-779a-49f6-bd07-9a7468eea40d?_state=voNXxvA8encx057lToo9U-21F6YrJ2YIZ2uk0XB9slJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjY2ZjA4M2QtNzc5YS00OWY2LWJkMDctOWE3NDY4ZWVhNDBkIiwiT2Zmc2V0IjoyNzA5ODI2NSwiU3RhcnRlZEF0IjoiMjAyMC0wOS0yMlQwNTo1NzowNFoifQ%3D%3D","range":"0-27098264","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:13 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f66f083d-779a-49f6-bd07-9a7468eea40d?_state=voNXxvA8encx057lToo9U-21F6YrJ2YIZ2uk0XB9slJ7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjY2ZjA4M2QtNzc5YS00OWY2LWJkMDctOWE3NDY4ZWVhNDBkIiwiT2Zmc2V0IjoyNzA5ODI2NSwiU3RhcnRlZEF0IjoiMjAyMC0wOS0yMlQwNTo1NzowNFoifQ%3D%3D&digest=sha256%3A8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:14 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"27098265","content-type":"application/octet-stream","docker-content-digest":"sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:8559a31e96f442f2c7b6da49d6c84705f98a39d8be10b3f5f14821d0ee8417df\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:14 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/2b6969bf-86e5-40e9-9cc1-00cf500a672d?_state=9JUiRrJOyN2pLTJ_eIfI0EJqqXB3isgw44l6s7UvN117Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMmI2OTY5YmYtODZlNS00MGU5LTljYzEtMDBjZjUwMGE2NzJkIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjAyLjU5NTE5NDVaIn0%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"2b6969bf-86e5-40e9-9cc1-00cf500a672d","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/2b6969bf-86e5-40e9-9cc1-00cf500a672d?_state=xl7fEdnnGNN0jZc9OXqZqPbk5FH2NS7DDs7FtkgJqip7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMmI2OTY5YmYtODZlNS00MGU5LTljYzEtMDBjZjUwMGE2NzJkIiwiT2Zmc2V0IjoxMDgyNTY5NzksIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D","range":"0-108256978","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/2b6969bf-86e5-40e9-9cc1-00cf500a672d?_state=xl7fEdnnGNN0jZc9OXqZqPbk5FH2NS7DDs7FtkgJqip7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiMmI2OTY5YmYtODZlNS00MGU5LTljYzEtMDBjZjUwMGE2NzJkIiwiT2Zmc2V0IjoxMDgyNTY5NzksIlN0YXJ0ZWRBdCI6IjIwMjAtMDktMjJUMDU6NTc6MDJaIn0%3D&digest=sha256%3Aa4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"108256979","content-type":"application/octet-stream","docker-content-digest":"sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:a4ad33703fa83c968fe06b3576f6a202630ad251f8ff729384d32b15e1fa5344\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 404 {"content-type":"application/json; charset=utf-8","docker-distribution-api-version":"registry/2.0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","content-length":"157","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/
+request: POST {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","content-type":"","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb?_state=uXyDxhg7IzF91Sf0Hzt5imtdvP0Pcgj4mfpEh4FTFdh7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjNmMmVjMDMtMDhhOS00NGZmLWJkNWMtZmNlY2Y4YTYzZWViIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjI5LjA4Njc5NVoifQ%3D%3D","range":"0-0","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb?_state=uXyDxhg7IzF91Sf0Hzt5imtdvP0Pcgj4mfpEh4FTFdh7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjNmMmVjMDMtMDhhOS00NGZmLWJkNWMtZmNlY2Y4YTYzZWViIiwiT2Zmc2V0IjowLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjI5LjA4Njc5NVoifQ%3D%3D
+request: PATCH {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","transfer-encoding":"chunked","accept-encoding":"gzip","connection":"close"}
+responce: 202 {"content-length":"0","docker-distribution-api-version":"registry/2.0","docker-upload-uuid":"f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/uploads/f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb?_state=o_fJQBwBp3OIpluCvtybEGeFaq-EyyelCHfd4Zi7dYp7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjNmMmVjMDMtMDhhOS00NGZmLWJkNWMtZmNlY2Y4YTYzZWViIiwiT2Zmc2V0Ijo3MDgzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjI5WiJ9","range":"0-7082","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/uploads/f3f2ec03-08a9-44ff-bd5c-fcecf8a63eeb?_state=o_fJQBwBp3OIpluCvtybEGeFaq-EyyelCHfd4Zi7dYp7Ik5hbWUiOiJzaGluaHdhZ2svdGVzdDQiLCJVVUlEIjoiZjNmMmVjMDMtMDhhOS00NGZmLWJkNWMtZmNlY2Y4YTYzZWViIiwiT2Zmc2V0Ijo3MDgzLCJTdGFydGVkQXQiOiIyMDIwLTA5LTIyVDA1OjU3OjI5WiJ9&digest=sha256%3A9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"0","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"content-length":"0","docker-content-digest":"sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/blobs/sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/blobs/sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a
+request: HEAD {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","connection":"close"}
+responce: 200 {"accept-ranges":"bytes","cache-control":"max-age=31536000","content-length":"7083","content-type":"application/octet-stream","docker-content-digest":"sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a","docker-distribution-api-version":"registry/2.0","etag":"\"sha256:9cfcce23593a93135ca6dbf3ed544d1db9324d4c40b5c0d56958165bfaa2d46a\"","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","connection":"close"}
+============================
+============================
+serve: /v2/shinhwagk/test4/manifests/latest
+request: PUT {"host":"127.0.0.1:8000","user-agent":"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))","content-length":"2621","content-type":"application/vnd.docker.distribution.manifest.v2+json","accept-encoding":"gzip","connection":"close"}
+responce: 201 {"docker-content-digest":"sha256:0563b36ec2d1a262f79e1d8562e61f642a0f64f93306d8a709047cdea0444d0a","docker-distribution-api-version":"registry/2.0","location":"http://127.0.0.1:8000/v2/shinhwagk/test4/manifests/sha256:0563b36ec2d1a262f79e1d8562e61f642a0f64f93306d8a709047cdea0444d0a","x-content-type-options":"nosniff","date":"Tue, 22 Sep 2020 05:57:29 GMT","content-length":"0","connection":"close"}
+============================

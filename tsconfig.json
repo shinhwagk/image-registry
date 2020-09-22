@@ -3,7 +3,7 @@
     "target": "ESNext",
     "module": "CommonJS",
     "strict": false,
-    "outDir": "out"
+    "outDir": "dist"
   },
   "files": [
     "src/v21.ts"

@@ -1,44 +1,75 @@
-import { existsSync } from 'fs';
-import { statSync } from 'fs';
-import { createWriteStream } from 'fs';
+import { readFileSync } from 'fs';
+import { createReadStream } from 'fs';
+import { writeFileSync, createWriteStream, statSync, existsSync } from 'fs';
+import { mkdirpSync, moveSync } from 'fs-extra';
 import * as http from 'http';
-import * as uuid from 'uuid'
+import * as url from 'url'
 
+import * as uuid from 'uuid'
+import { sha256sum } from './helper';
+
+import { ManifestSchema } from './image'
+
+function print_view(s: string[]) {
+    for (const _s of s) {
+        console.log(_s)
+    }
+}
 const requestListener: http.RequestListener = (req, res) => {
-    if (req?.method === 'PATCH' && req.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(req.url)) {
+    const view = []
+    if (req.method === 'PATCH' && req.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(req.url)) {
         const params = /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.exec(req.url)
         const name = params[1]
         const uid = params[2]
-        console.log('PATCH',)
-        const x = []
-        req.pipe(createWriteStream('notes/test/blobs')).on('finish', () => {
-            console.log('PATCH ' + x.length)
+        view.push("==============================")
+        view.push(req.method + " " + req.url)
+        view.push(JSON.stringify(req.headers))
+        view.push("==============================")
+        mkdirpSync(`notes/test/${name}/blobs/cache`)
+        const writeStream = createWriteStream(`notes/test/${name}/blobs/cache/${uid}`);
+        req.pipe(writeStream).on('finish', () => {
+            console.log("finish1");
+            // req.on('end', () => {
+            const fstat = statSync(`notes/test/${name}/blobs/cache/${uid}`)
+            console.log(uid, fstat.size)
             res.writeHead(202, {
-                'Location': `/v2/${name}/blobs/uploads/${uid}`, 'Docker-Upload-UUID': uid, 'range': `0-${x.length}`
-            })
-            res.end()
+                'Location': `/v2/${name}/blobs/uploads/${uid}`,
+                'Docker-Upload-UUID': uid,
+                "docker-distribution-api-version": "registry/2.0",
+                'range': `0-${fstat.size}` // must
+            }).on('error', (e) => console.log(e))
+            res.end(() => print_view(view))
+            // })
         })
+
         // req.on('data', (d) => { x.push(d) })
         // req.on('end', () => {
 
         // })
 
-    } else if (req?.method === 'GET' && req?.url === '/v2/') {
-        console.log('//222')
+    } else if (req.method === 'GET' && req?.url === '/v2/') {
+        console.log('/123')
         res.end()
-    } else if (req?.method === 'HEAD' && req?.url && /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.test(req.url)) {
-        console.log('checkblobs')
-        if (existsSync('notes/test/blobs')) {
-            const s = statSync('notes/test/blobs')
+    } else if (req.method === 'HEAD' && req?.url && /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.test(req.url)) {
+        const params = /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.exec(req.url)
+        const name = params[1]
+        const sha = params[2]
+
+        console.log('checkblobs', req.method, req.url)
+        if (existsSync(`notes/test/${name}/blobs/sha256:${sha}`)) {
+            console.log("exist1", `notes/test/${name}/blobs/sha256:${sha}`)
+            const s = statSync(`notes/test/${name}/blobs/sha256:${sha}`)
             res.writeHead(200, {
                 'content-length': s.size,
-                'Docker-Content-Digest': 'sha256:8a29a15cefaeccf6545f7ecf11298f9672d2f0cdaf9e357a95133ac3ad3e1f07'
+                "docker-distribution-api-version": "registry/2.0",
+                'Docker-Content-Digest': `sha256:${sha}`
             })
         } else {
+            console.log("no exist", req.url)
             res.writeHead(404)
         }
         res.end()
-    } else if (req?.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.test(req.url)) {
+    } else if (req.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.test(req.url)) {
         const uid = uuid.v4()
         console.log('postBlobs',)
         const x = []
@@ -46,40 +77,99 @@ const requestListener: http.RequestListener = (req, res) => {
         req.on('data', (d) => { x.push(d) })
         req.on('end', () => {
             console.log('postBlobs ' + x.length)
-            res.writeHead(202, { 'Location': `/v2/${name}/blobs/uploads/${uid}`, 'Docker-Upload-UUID': uid })
+            res.writeHead(202, {
+                'Location': `/v2/${name}/blobs/uploads/${uid}`,
+                "docker-distribution-api-version": "registry/2.0",
+                'Docker-Upload-UUID': uid
+            })
             res.end()
         })
-    } else if (req?.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/$/.test(req.url)) {
+    } else if (req.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/$/.test(req.url)) {
         const params = /^\/v2\/(.+?)\/blobs\/uploads\/$/.exec(req.url)
         const name = params[1]
         const uid = uuid.v4()
         res.writeHead(202, { 'Location': `/v2/${name}/blobs/uploads/${uid}`, 'Docker-Upload-UUID': uid })
         res.end()
-    } else if (req?.method === 'PUT' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(req.url)) {
-        console.log('putBlobs..', req.method, req.url,)
-        const params = /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.exec(req.url)
+    } else if (req.method === 'PUT' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(url.parse(req.url).pathname)) {
+        console.log('putBlobs...', req.method, req.url,)
+        const digest = url.parse(req.url, true).query.digest
+        const params = /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.exec(url.parse(req.url).pathname)
         const name = params[1]
         const uid = params[2]
         // const uid = uuid.v4()
         const x = []
         req.on('data', (d) => { x.push(d) })
         req.on('end', () => {
+            moveSync(`notes/test/${name}/blobs/cache/${uid}`, `notes/test/${name}/blobs/${digest}`, { overwrite: true })
             console.log('putBlobs ' + x.length)
-            res.writeHead(202,)
+            res.writeHead(201, {
+                "docker-distribution-api-version": "registry/2.0",
+            })
             res.end()
         })
-    } else if (req?.method === 'PUT' && req?.url && /v2\/(.*?)\/manifests\/(.*)$/.test(req.url)) {
+    } else if (req.method === 'PUT' && req?.url && /v2\/(.*?)\/manifests\/(.*)$/.test(req.url)) {
         console.log('put manifests', req.method, req.url, req.headers)
+        const params = /v2\/(.*?)\/manifests\/(.*)$/.exec(req.url)
+        const name = params[1]
+        const tag = params[2]
         const x = []
         req.on('data', (d) => { x.push(d) })
         req.on('end', () => {
             console.log('put manifests ' + x.length)
-            res.writeHead(202,)
-            res.end()
+            mkdirpSync(`notes/test/${name}/manifests`)
+            const ms = JSON.parse(Buffer.concat(x).toString()) as ManifestSchema
+            console.log(Buffer.concat(x).toString())
+            mkdirpSync(`notes/test/${name}/manifests/${tag}/`)
+            let mfile = ''
+            if (ms.schemaVersion === 1) {
+                mfile = `notes/test/${name}/manifests/${tag}/v1`
+
+            } else {
+                mfile = `notes/test/${name}/manifests/${tag}/${ms.mediaType.substr(12)}`
+
+            }
+            writeFileSync(mfile, Buffer.concat(x).toString(), { encoding: 'utf8' })
+            sha256sum(mfile).then(sha => {
+                res.writeHead(201, {
+                    "docker-distribution-api-version": "registry/2.0",
+                    'docker-content-digest': 'sha256:' + sha
+                });
+                res.end()
+            })
+
         })
+    } else if (req.method === 'GET' && req.url && /v2\/(.*?)\/manifests\/(.*)$/.test(req.url)) {
+        console.log('get manifests', req.method, req.url, req.headers)
+        const params = /v2\/(.*?)\/manifests\/(.*)$/.exec(req.url)
+        const name = params[1]
+        const tag = params[2]
+
+        if (existsSync(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`)) {
+            sha256sum(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`).then(s => {
+                res.writeHead(200, {
+                    'content-type': "application/vnd.docker.distribution.manifest.v2+json",
+                    "docker-distribution-api-version": "registry/2.0",
+                    'Docker-Content-Digest': `sha256:${s}`
+                }).end(readFileSync(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`, { encoding: 'utf8' }))
+            })
+
+        } else {
+            res.writeHead(404, {
+                "docker-distribution-api-version": "registry/2.0",
+            }).end()
+        }
+
+    } else if (req.method === 'GET' && req?.url && /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.test(req.url)) {
+        const params = /^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/.exec(req.url)
+        const name = params[1]
+        const sha = params[2]
+        res.writeHead(200, {
+            "docker-distribution-api-version": "registry/2.0",
+        })
+        createReadStream(`notes/test/${name}/blobs/sha256:${sha}`).pipe(res)
     } else {
         console.log("=========================================")
-        console.log(req.method, req.url)
+        console.log(req.method, req.url, req.headers)
         console.log("other")
         console.log("=========================================")
     }
