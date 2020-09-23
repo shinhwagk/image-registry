@@ -7,6 +7,8 @@
     "async": "^3.2.0",
     "fs-extra": "^9.0.1",
     "got": "^11.7.0",
+    "koa": "^2.13.0",
+    "koa-router": "^9.4.0",
     "tunnel": "0.0.6",
     "uuid": "^8.3.0",
     "winston": "^3.3.3"
@@ -16,6 +18,8 @@
     "@types/fs-extra": "^9.0.1",
     "@types/got": "^9.6.11",
     "@types/jest": "^26.0.14",
+    "@types/koa": "^2.11.4",
+    "@types/koa-router": "^7.4.1",
     "@types/node": "^14.11.2",
     "@types/tunnel": "0.0.1",
     "@types/uuid": "^8.3.0",
@@ -23,14 +27,15 @@
     "@typescript-eslint/parser": "^4.2.0",
     "eslint": "^7.9.0",
     "jest": "^26.4.2",
+    "nodemon": "^2.0.4",
     "ts-jest": "^26.4.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   },
   "scripts": {
-    "compile": "tsc -d -p .",
-    "running": "level=debug ts-node src/app.ts",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "compile-watch": "tsc -p ./tsconfig.json -w",
+    "execute-watch": "nodemon --watch dist dist/v21.js"
   },
   "keywords": [],
   "author": "",

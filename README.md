@@ -17,3 +17,13 @@ docker pull 127.0.0.1:6660/coreos/etcd-operator:dev
 docker pull 127.0.0.1:6661/library/node:10
 ```
 
+## directory
+```
+|<name>
+|____|blobs
+|__________|sha256:xxxxxxxx
+|____|manifests
+|_____________|vnd.docker.distribution.manifest.list.v2+json
+|_____________|vnd.docker.distribution.manifest.v2+json
+|_____________|vnd.docker.distribution.manifest.v1+json
+```

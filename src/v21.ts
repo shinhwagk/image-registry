@@ -10,11 +10,27 @@ import { sha256sum } from './helper';
 
 import { ManifestSchema } from './image'
 
-function print_view(s: string[]) {
-    for (const _s of s) {
-        console.log(_s)
-    }
-}
+import Koa from 'koa'
+import Router from 'koa-router'
+import { _get_blobs, _get_manifests, _head_blobs, _head_manifests, _patch_blobs, _post_blobs, _put_blobs, _put_manifests } from './middleware1';
+
+const router = new Router();
+const app = new Koa()
+
+router.get('/v2', (ctx) => { ctx.status = 200 })
+router.patch(/^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/, _patch_blobs)
+router.head(/^\/v2\/(.+?)\/manifests\/(.*)/, _head_manifests)
+router.post(/^\/v2\/(.+?)\/blobs\/uploads\//, _post_blobs)
+router.head(/^\/v2\/(.+?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/, _head_blobs)
+router.put(/^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/, _put_blobs)
+router.put(/^\/v2\/(.*?)\/manifests\/(.*)$/, _put_manifests)
+router.get(/^\/v2\/(.*?)\/manifests\/(.*)$/, _get_manifests)
+router.get(/^\/v2\/(.*?)\/blobs\/sha256:([0-9a-zA-Z]{64})$/, _get_blobs)
+
+
+app.use(router.routes())
+app.use(router.allowedMethods())
+app.listen(8000, () => console.log('start'));
 const requestListener: http.RequestListener = (req, res) => {
     const view = []
     if (req.method === 'PATCH' && req.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(req.url)) {
@@ -38,7 +54,7 @@ const requestListener: http.RequestListener = (req, res) => {
                 "docker-distribution-api-version": "registry/2.0",
                 'range': `0-${fstat.size}` // must
             }).on('error', (e) => console.log(e))
-            res.end(() => print_view(view))
+            res.end(() => { })
             // })
         })
 
@@ -84,14 +100,14 @@ const requestListener: http.RequestListener = (req, res) => {
             })
             res.end()
         })
-    } else if (req.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/$/.test(req.url)) {
-        const params = /^\/v2\/(.+?)\/blobs\/uploads\/$/.exec(req.url)
+    } else if (req.method === 'POST' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\//.test(req.url)) {
+        const params = /^\/v2\/(.+?)\/blobs\/uploads\//.exec(req.url)
         const name = params[1]
         const uid = uuid.v4()
         res.writeHead(202, { 'Location': `/v2/${name}/blobs/uploads/${uid}`, 'Docker-Upload-UUID': uid })
         res.end()
     } else if (req.method === 'PUT' && req?.url && /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.test(url.parse(req.url).pathname)) {
-        console.log('putBlobs...', req.method, req.url,)
+        console.log('putBlobs...1', req.method, req.url,)
         const digest = url.parse(req.url, true).query.digest
         const params = /^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/.exec(url.parse(req.url).pathname)
         const name = params[1]
