@@ -3,3 +3,7 @@ HEAD http://127.0.0.1:8000/v2/shinhwagk/centos/blobs/sha256:8a29a15cefaeccf6545f
 
 ###
 GET http://127.0.0.1:8000/v2 HTTP/1.1
+
+
+###
+GET http://127.0.0.1:8000/v2/test/test1/manifests/latest HTTP/1.1

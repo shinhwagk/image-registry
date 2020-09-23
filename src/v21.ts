@@ -7,13 +7,14 @@ const app = new Koa()
 
 router.get('/v2', (ctx) => { ctx.status = 200; ctx.body = '{}' })
 router.patch(/^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/, _patch_blobs)
-router.head(/^\/v2\/(.+?)\/manifests\/(.*)/, _head_manifests)
 router.post(/^\/v2\/(.+?)\/blobs\/uploads\//, _post_blobs)
-router.head(/^\/v2\/(.+?)\/blobs\/(sha256:[0-9a-zA-Z]{64})$/, _head_blobs)
 router.put(/^\/v2\/(.+?)\/blobs\/uploads\/(.*)$/, _put_blobs)
 router.put(/^\/v2\/(.*?)\/manifests\/(.*)$/, _put_manifests)
 router.get(/^\/v2\/(.*?)\/manifests\/(.*)$/, _get_manifests)
+router.head(/^\/v2\/(.+?)\/manifests\/(.*)/, _head_manifests)
+router.head(/^\/v2\/(.+?)\/blobs\/(sha256:[0-9a-zA-Z]{64})$/, _head_blobs)
 router.get(/^\/v2\/(.*?)\/blobs\/(sha256:[0-9a-zA-Z]{64})$/, _get_blobs)
+router.all(/.*/, (ctx) => console.log(ctx.method, ctx.url, ctx.headers))
 
 
 app.use(async (ctx, next) => {
@@ -22,9 +23,6 @@ app.use(async (ctx, next) => {
     await next()
 })
 app.use(router.routes())
-app.use(async (ctx) => {
-    console.log("all")
-})
 app.use(router.allowedMethods())
 app.listen(8000, () => console.log('start1'));
 

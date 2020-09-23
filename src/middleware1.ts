@@ -4,7 +4,7 @@ import * as url from 'url'
 import * as uuid from 'uuid'
 
 import Router from 'koa-router'
-import { checkBlobsExist, checkBlobsSha, getBlobsPath, getBlobsSize, getCache, getManifestPath, ManifestSchema, mkdirCache } from './image/image'
+import { checkBlobsExist, checkBlobsSha, getBlobsPath, getBlobsSize, getBlobsCacheDirectory, getManifestsDirectory, ManifestSchema, createBlobsCacheDirectory, getManifest, getManifestFile } from './image/image'
 import { createWriteStream } from 'fs';
 import { statSync } from 'fs';
 import { existsSync } from 'fs';
@@ -14,6 +14,8 @@ import { mkdirpSync, readJsonSync, removeSync } from 'fs-extra';
 import { copyFileSync } from 'fs';
 import { readdirSync } from 'fs';
 import { renameSync } from 'fs';
+import { createReadStream } from 'fs';
+import { proxyRepo, storageDir } from './constants';
 
 export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_patch_blobs11111111")
@@ -23,12 +25,12 @@ export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContex
     // view.push(req.method + " " + req.url)
     // view.push(JSON.stringify(req.headers))
     // view.push("==============================")
-    mkdirCache(name)
-    const blobsUid = path.join(getCache(name), uid)
+    createBlobsCacheDirectory(name)
+    const blobsUid = path.join(getBlobsCacheDirectory(name), uid)
     await new Promise<void>((res) => {
         const cws = createWriteStream(blobsUid)
         ctx.req.pipe(cws).on('finish', () => {
-            for (const f of readdirSync(getCache(name))) {
+            for (const f of readdirSync(getBlobsCacheDirectory(name))) {
                 if (blobsUid.endsWith(f)) {
                     console.log(f, blobsUid.endsWith(f))
                 }
@@ -106,9 +108,9 @@ export const _put_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext)
     // const uid = uuid.v4()
     const digest: string = url.parse(ctx.req.url, true).query.digest as string
     mkdirpSync(path.dirname(getBlobsPath(name, digest)))
-    copyFileSync(path.join(getCache(name), uid), getBlobsPath(name, digest))
-    removeSync(path.join(getCache(name), uid))
-    console.log("copy", path.join(getCache(name), uid), getBlobsPath(name, digest))
+    copyFileSync(path.join(getBlobsCacheDirectory(name), uid), getBlobsPath(name, digest))
+    removeSync(path.join(getBlobsCacheDirectory(name), uid))
+    console.log("copy", path.join(getBlobsCacheDirectory(name), uid), getBlobsPath(name, digest))
     console.log('copy success')
     ctx.status = 201
 
@@ -119,20 +121,20 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     console.log('put manifests', ctx.req.method, ctx.req.url, ctx.req.headers)
     const name = ctx.params[0]
     const tag = ctx.params[1]
-    mkdirpSync(path.join(getManifestPath(name), tag))
+    mkdirpSync(path.join(getManifestsDirectory(name), tag))
     await new Promise<void>((res) => {
-        ctx.req.pipe(createWriteStream(path.join(getManifestPath(name), tag, 'file'))).on('finish', res)
+        ctx.req.pipe(createWriteStream(path.join(getManifestsDirectory(name), 'manifests', tag, 'file'))).on('finish', res)
     })
 
-    const ms = readJsonSync(path.join(getManifestPath(name), tag, 'file')) as ManifestSchema
+    const ms = readJsonSync(path.join(getManifestsDirectory(name), 'manifests', tag, 'file')) as ManifestSchema
     console.log("put", ms.schemaVersion)
     if (ms.schemaVersion === 1) {
-        renameSync(path.join(getManifestPath(name), tag, 'file'), path.join(getManifestPath(name), tag, 'vnd.docker.distribution.manifest.v1+json'))
-        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestPath(name), tag, 'vnd.docker.distribution.manifest.v1+json')))
+        renameSync(path.join(getManifestsDirectory(name), 'manifests', tag, 'file'), path.join(getManifestsDirectory(name), tag, 'vnd.docker.distribution.manifest.v1+json'))
+        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestsDirectory(name), 'manifests', tag, 'vnd.docker.distribution.manifest.v1+json')))
     } else {
-        console.log(path.join(getManifestPath(name), tag, 'file'), path.join(getManifestPath(name), tag, ms.mediaType.substr(12)))
-        renameSync(path.join(getManifestPath(name), tag, 'file'), path.join(getManifestPath(name), tag, ms.mediaType.substr(12)))
-        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestPath(name), tag, ms.mediaType.substr(12))))
+        console.log(path.join(getManifestsDirectory(name), 'manifests', tag, 'file'), path.join(getManifestsDirectory(name), tag, ms.mediaType.substr(12)))
+        renameSync(path.join(getManifestsDirectory(name), 'manifests', tag, 'file'), path.join(getManifestsDirectory(name), tag, ms.mediaType.substr(12)))
+        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestsDirectory(name), tag, ms.mediaType.substr(12))))
     }
     ctx.status = 201
 
@@ -143,13 +145,17 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     const name = ctx.params[0]
     const tag = ctx.params[1]
 
-    if (existsSync(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`)) {
-        const sha = await sha256sum(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`)
+    if (getManifestFile(name, tag)) {
+        console.log("exist")
+        const sha = await sha256sum(getManifestFile(name, tag))
+        // const obj = JSON.parse(getManifestFile(name, tag)) as ManifestSchema
         ctx.status = 200
-        ctx.set('content-type', "application/vnd.docker.distribution.manifest.v2+json")
+        ctx.type = 'application/vnd.docker.distribution.manifest.v2+json'
         ctx.set('Docker-Content-Digeste', "sha256:" + sha)
-        ctx.body = readFileSync(`notes/test/${name}/manifests/${tag}/vnd.docker.distribution.manifest.v2+json`, { encoding: 'utf8' })
+        console.log(readFileSync(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', tag, 'vnd.docker.distribution.manifest.v2+json'), { encoding: 'utf8' }))
+        ctx.body = readFileSync(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', tag, 'vnd.docker.distribution.manifest.v2+json'), { encoding: 'utf8' })
     } else {
+        console.log("not exist")
         ctx.status = 404
     }
 }
@@ -157,8 +163,14 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
 export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_get_blobs")
     const name = ctx.params[0]
-    ctx.status = 100
+    const sha = ctx.params[1]
 
-    // createReadStream(getBlobsPath(name, sha)).pipe(ctx.res)
+    if (checkBlobsExist(name, sha)) {
+        ctx.type = "application/octet-stream"
+        ctx.status = 200
+        createReadStream(getBlobsPath(name, sha)).pipe(ctx.res)
+    } else {
+        ctx.status = 404
+    }
     console.log("_get_blobs", "end")
 }
