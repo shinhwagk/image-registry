@@ -4,22 +4,49 @@ import { RegistryClient } from '../registry/client'
 import { proxyRepo } from "../constants";
 import { storageDir } from '../constants'
 import { sha256sum } from '../helper'
+import { statSync } from 'fs';
 
 export interface ManifestSchema {
     schemaVersion: 1 | 2
-    mediaType: 'application/vnd.docker.distribution.manifest.v2+json' | 'application/vnd.docker.distribution.manifest.list.v2+json'
+    mediaType: 'application/vnd.docker.distribution.manifest.v2+json' | 'application/vnd.docker.distribution.manifest.list.v2+json' | 'vnd.docker.distribution.manifest.v1+json'
 }
 
+export function mkdirCache(name: string): void {
+    mkdirpSync(getCache(name))
+}
 
-export function checkBlobsExist(name, sha) {
-    return existsSync(path.join(storageDir, name, 'blobs', sha))
+export function getCache(name): string {
+    return path.join(storageDir, proxyRepo, name, 'cache')
+}
+
+export function genUUID(name): string {
+    return ''
+}
+
+export function getBlobsPath(name: string, sha: string): string {
+    return path.join(storageDir, proxyRepo, name, 'blobs', sha)
+}
+
+export function checkBlobsExist(name, sha): boolean {
+    return existsSync(path.join(storageDir, proxyRepo, name, 'blobs', sha))
+}
+
+export function getManifestPath(name): string {
+    return path.join(storageDir, proxyRepo, name, 'manifests')
+}
+
+export function getBlobsSize(name, sha): number {
+    return statSync(getBlobsPath(name, sha)).size
+}
+
+export async function checkBlobsSha(name, sha: string): Promise<boolean> {
+    return (await sha256sum(getBlobsPath(name, sha))) === sha.substr(7)
 }
 
 export function checkManifestExist(name, ref, version: 'v1' | 'v2' | 'v2list') {
     if (version === 'v2') {
         return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v2+json'))
     }
-
     if (version === 'v1') {
         return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v1+json'))
     }

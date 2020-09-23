@@ -3,5 +3,8 @@
     "editor.formatOnSave": true,
     "files.eol": "\n",
     "eslint.enable": true,
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "files.exclude": {
+        "node_modules": true
+    }
 }

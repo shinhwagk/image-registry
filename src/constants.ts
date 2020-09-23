@@ -1,6 +1,6 @@
 // mutable
-export const storageDir = process.env['storage'] || '/var/lib/registry';
-export const proxyRepo = process.env['proxy-repo'] || 'https://quay.io' //'https://registry-1.docker.io'
+export const storageDir = process.env['storage'] || 'notes/test'// '/var/lib/registry';
+export const proxyRepo = process.env['proxy-repo'] || 'quay.io' //'https://registry-1.docker.io'
 export const logLevel = process.env['log-level'] || 'info';
 
 // fix immutable
