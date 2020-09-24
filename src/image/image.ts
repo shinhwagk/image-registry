@@ -11,35 +11,60 @@ export interface ManifestSchema {
     mediaType: 'application/vnd.docker.distribution.manifest.v2+json' | 'application/vnd.docker.distribution.manifest.list.v2+json' | 'vnd.docker.distribution.manifest.v1+json'
 }
 
-export function createBlobsCacheDirectory(name: string): void {
-    mkdirpSync(getBlobsCacheDirectory(name))
+export function createBlobsCacheDirectory(): void {
+    mkdirpSync(getBlobsCacheDirectory())
 }
 
-export function getBlobsCacheDirectory(name: string): string {
-    return path.join(storageDir, proxyRepo, name, 'cache')
+export function createManifestsCacheDirectory(): void {
+    mkdirpSync(getManifestsCacheDirectory())
 }
+
+export function getBlobsCacheDirectory(): string {
+    return path.join(storageDir, 'cache', 'blobs')
+}
+
+export function getManifestsCacheDirectory(): string {
+    return path.join(storageDir, 'cache', 'manifests')
+}
+
+export function createManifestsDirectory(name: string, ref: string): void {
+    mkdirpSync(getManifestsDirectory(name, ref))
+}
+
+export function createBlobsDirectory(name: string): void {
+    mkdirpSync(getBlobsDirectory(name))
+}
+
+export function getBlobsDirectory(name: string): string {
+    return path.join(storageDir, proxyRepo, name, 'blobs')
+}
+
 
 export function genUUID(name: string): string {
     return ''
 }
 
 export function getBlobsPath(name: string, sha: string): string {
-    return path.join(storageDir, proxyRepo, name, 'blobs', sha)
+    return path.join(getBlobsDirectory(name), sha)
 }
 
 export function checkBlobsExist(name: string, sha: string): boolean {
-    return existsSync(path.join(storageDir, proxyRepo, name, 'blobs', sha))
+    return existsSync(getBlobsPath(name, sha))
 }
 
-export function getManifestsDirectory(name: string): string {
-    return path.join(storageDir, proxyRepo, name, 'manifests')
+export function getManifestsDirectory(name: string, ref: string): string {
+    if (ref.startsWith('sha256')) {
+        return path.join(storageDir, proxyRepo, name, 'manifests', 'digests')
+    } else {
+        return path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref)
+    }
 }
 
 export function getBlobsSize(name: string, sha: string): number {
     return statSync(getBlobsPath(name, sha)).size
 }
 
-export async function checkBlobsSha(name: string, sha: string): Promise<boolean> {
+export async function checkBlobsSha256sum(name: string, sha: string): Promise<boolean> {
     return (await sha256sum(getBlobsPath(name, sha))) === sha.substr(7)
 }
 
@@ -71,36 +96,64 @@ function checkManifestV1Exist(name: string, ref: string) {
 //     }
 // }
 
+// function getManifestFileForTags(name: string, ref: string) {
+//     return path.join(getManifestsDirectory(name, 'tags'), ref)
+// }
+
+function getManifestFileForDigest(name: string, ref: string) {
+    return path.join(getManifestsDirectory(name, ref), ref)
+}
+
 export function getManifestFile(name: string, ref: string): string | undefined {
-    if (existsSync(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.list.v2+json'))) {
-        return path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.list.v2+json')
+    if (ref.startsWith('sha256')) {
+        if (existsSync(getManifestFileForDigest(name, ref))) {
+            return getManifestFileForDigest(name, ref)
+        }
+    } else {
+        return getManifestFileForTags(name, ref)
     }
-    console.log(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v2+json'))
-    if (existsSync(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v2+json'))) {
-        return path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v2+json')
+    return undefined
+}
+function getManifestFileForTags(name: string, tag: string): string | undefined {
+    const tagDirectory = getManifestsDirectory(name, tag)
+    console.log("tagDirectory", tagDirectory)
+    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json'))) {
+        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json')
     }
-    if (existsSync(path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v1+json'))) {
-        return path.join(storageDir, proxyRepo, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v1+json')
+    console.log(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json'))
+    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json'))) {
+        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json')
+    }
+    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v1+json'))) {
+        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.v1+json')
     }
     return undefined
 }
 
-export function getManifest(name: string, reference: string): string | undefined {
-    if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.list.v2+json")) {
-        return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.list.v2+json'), { encoding: 'utf8' })
-    }
-    if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v2+json")) {
-        return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v2+json'), { encoding: 'utf8' })
-    }
-    if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v1+json")) {
-        return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v1+json'), { encoding: 'utf8' })
-    }
-    return undefined
-}
+// export function getManifestFile(name: string, ref: string): string | undefined {
+//     if (ref.startsWith('sha256')) {
+//         return getManifestFile(name, ref)
+//     }
+
+
+// }
+
+// export function getManifest(name: string, reference: string): string | undefined {
+//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.list.v2+json")) {
+//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.list.v2+json'), { encoding: 'utf8' })
+//     }
+//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v2+json")) {
+//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v2+json'), { encoding: 'utf8' })
+//     }
+//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v1+json")) {
+//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v1+json'), { encoding: 'utf8' })
+//     }
+//     return undefined
+// }
 
 export function readManifestString(name: string, reference: string): string {
     if (reference.startsWith('sha256:')) {
-        return readFileSync(path.join(storageDir, name, 'manifests', 'digests', reference), { encoding: 'utf8' })
+        return readFileSync(path.join(getManifestsDirectory(name, reference), reference), { encoding: 'utf8' })
     }
 }
 
@@ -142,3 +195,7 @@ export async function requestBlobs(name: string, sha: string): Promise<void> {
     await rc.login()
     // await rc.reqBlobs(sha)
 }
+
+
+createManifestsCacheDirectory()
+createBlobsCacheDirectory()

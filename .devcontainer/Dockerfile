@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:12
 
 RUN npm config set registry https://registry.npm.taobao.org
 
