@@ -19,3 +19,4 @@ jobs:
           done
           wait;
       - run: cat test.log
+      - run: ls -l notes/test/quay.io/openshift/okd-content/blobs | wc -l
