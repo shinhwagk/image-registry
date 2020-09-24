@@ -34,6 +34,7 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
+    "compile": "tsc -p ./tsconfig.json",
     "compile-watch": "tsc -p ./tsconfig.json -w",
     "execute-watch": "nodemon --watch dist dist/v21.js"
   },
