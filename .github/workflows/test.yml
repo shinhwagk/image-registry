@@ -15,9 +15,10 @@ jobs:
           docker pull centos:8
           docker pull centos:7
       - run: npm run compile
-      - run: node dist/v21.js && sleep 5 &
+      - run: node dist/v21.js > test.log && sleep 5 &
       - run: |
-          docker tag centos:8 127.0.0.1:8000/centos:8
-          docker tag centos:7 127.0.0.1:8000/centos:7
-          docker push 127.0.0.1:8000/centos:8
-          docker push 127.0.0.1:8000/centos:7
+          docker tag centos:8 127.0.0.1:8000/test/centos:8
+          docker tag centos:7 127.0.0.1:8000/test/centos:7
+          docker push 127.0.0.1:8000/test/centos:8
+          docker push 127.0.0.1:8000/test/centos:7
+      - run: cat test.log
