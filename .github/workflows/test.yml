@@ -18,6 +18,7 @@ jobs:
             for tag in `curl -s "https://quay.io/api/v1/repository/openshift/okd-content/tag/?limit=100&page=${i}&onlyActiveTags=true" | jq -r '.tags[].name'`; do
               docker pull openshift/okd-content:${tag} && docker tag openshift/okd-content:${tag} 127.0.0.1:8000/openshift/okd-content:${tag} && dockre push 127.0.0.1:8000/openshift/okd-content:${tag} &
             done
+            wait
           done
           wait
       - run: cat test.log
