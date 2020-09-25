@@ -35,7 +35,6 @@ export function getBlobsDirectory(name: string): string {
     return path.join(storageDir, name, 'blobs')
 }
 
-
 export function genUUID(name: string): string {
     return ''
 }
@@ -125,51 +124,6 @@ function getManifestFileForTags(name: string, tag: string): string | undefined {
     }
     return undefined
 }
-
-// export function getManifestFile(name: string, ref: string): string | undefined {
-//     if (ref.startsWith('sha256')) {
-//         return getManifestFile(name, ref)
-//     }
-
-
-// }
-
-// export function getManifest(name: string, reference: string): string | undefined {
-//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.list.v2+json")) {
-//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.list.v2+json'), { encoding: 'utf8' })
-//     }
-//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v2+json")) {
-//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v2+json'), { encoding: 'utf8' })
-//     }
-//     if (checkManifestExist(name, reference, "vnd.docker.distribution.manifest.v1+json")) {
-//         return readFileSync(path.join(storageDir, name, 'manifests', 'tags', reference, 'vnd.docker.distribution.manifest.v1+json'), { encoding: 'utf8' })
-//     }
-//     return undefined
-// }
-
-export function readManifestString(name: string, reference: string): string {
-    if (reference.startsWith('sha256:')) {
-        return readFileSync(path.join(getManifestsDirectory(name, reference), reference), { encoding: 'utf8' })
-    }
-}
-
-export function checkLayerValidity(name: string, digest: string): boolean {
-    const df = path.join(storageDir, name, 'blobs', digest)
-    return false
-    // return existsSync(df) ? sha256sum(df) === digest : false
-}
-
-// export function checkImageValidity(name, reference): boolean {
-//     const m = getManifest(name, reference)
-//     for (const l of m.layers) {
-//         const d: string = l.digest
-//         const digest = d.substr(7)
-//         if (!checkLayerValidity(name, digest)) {
-//             return false
-//         }
-//     }
-//     return true
-// }
 
 export function checkpointManifest(name: string, ref: string, manifest: string) {
     console.log(manifest)
