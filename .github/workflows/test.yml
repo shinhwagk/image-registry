@@ -14,6 +14,7 @@ jobs:
       - run: npm run compile-webpack
       - run: node dist/repository.min.js > test.log && sleep 5 &
       - run: |
+          curl http://127.0.0.1:8000/v2/
           cat test/images | while read image; do
             docker pull -q quay.io/${image} > /dev/null && docker tag quay.io/${image} 127.0.0.1:8000/${image} && docker push 127.0.0.1:8000/${image} &
           done
