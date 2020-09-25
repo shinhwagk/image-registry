@@ -14,8 +14,8 @@ jobs:
       - run: npm run compile-webpack
       - run: node dist/repository.min.js > test.log && sleep 5 &
       - run: |
-          for tag in `curl -s "https://quay.io/api/v1/repository/openshift/okd-content/tag/?limit=10&page=1&onlyActiveTags=true" | jq -r '.tags[].name'`; do
-            docker pull -q quay.io/openshift/okd-content:${tag} > /dev/null && docker tag quay.io/openshift/okd-content:${tag} 127.0.0.1:8000/openshift/okd-content:${tag} && docker push 127.0.0.1:8000/openshift/okd-content:${tag} &
+          cat test/images | while read image; do
+            docker pull -q ${image} > /dev/null && docker tag ${image} 127.0.0.1:8000/${image} && docker push 127.0.0.1:8000/${image} &
           done
           wait;
       - run: cat test.log
