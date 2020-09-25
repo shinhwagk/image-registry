@@ -37,11 +37,7 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
-<<<<<<< Updated upstream
-    "compile": "tsc -p ./tsconfig.json",
-=======
     "compile-webpack": "webpack",
->>>>>>> Stashed changes
     "compile-watch": "tsc -p ./tsconfig.json -w",
     "execute-watch": "nodemon --watch dist dist/v21.js"
   },
