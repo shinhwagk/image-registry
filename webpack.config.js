@@ -11,6 +11,5 @@ module.exports = {
     output: {
         filename: 'repository.min.js',
         path: path.resolve(__dirname, 'dist'),
-    },
-    watch: true
+    }
 };
