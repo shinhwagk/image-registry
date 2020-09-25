@@ -2,7 +2,6 @@
   "name": "registry",
   "version": "0.2.6",
   "description": "a simple image layer proxy",
-  "main": "index.js",
   "dependencies": {
     "async": "^3.2.0",
     "fs-extra": "^9.0.1",
@@ -38,8 +37,8 @@
     "test": "jest --detectOpenHandles",
     "compile-tsc": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
-    "compile-watch": "npm rum compile -w",
-    "execute-watch": "nodemon --watch dist dist/v21.js"
+    "compile-tsc-watch": "npm rum compile-tsc -w",
+    "execute-watch": "nodemon --watch dist dist/app.js"
   },
   "keywords": [],
   "author": "",

@@ -1,7 +1,7 @@
 
 import * as path from 'path'
 
-import { statSync, existsSync, mkdirpSync, readFileSync, readJsonSync, writeFileSync, writeJsonSync } from 'fs-extra'
+import { statSync, existsSync, mkdirpSync, writeFileSync } from 'fs-extra'
 
 import { storageDir } from './constants'
 import { sha256sum } from './helper'
@@ -35,16 +35,16 @@ export function getBlobsDirectory(name: string): string {
     return path.join(storageDir, name, 'blobs')
 }
 
-export function genUUID(name: string): string {
+export function genUUID(): string {
     return ''
 }
 
-export function getBlobsPath(name: string, sha: string): string {
-    return path.join(getBlobsDirectory(name), sha)
+export function getBlobsFilePath(name: string, digest: string): string {
+    return path.join(getBlobsDirectory(name), digest)
 }
 
-export function checkBlobsExist(name: string, sha: string): boolean {
-    return existsSync(getBlobsPath(name, sha))
+export function checkBlobsExist(name: string, digest: string): boolean {
+    return existsSync(getBlobsFilePath(name, digest))
 }
 
 export function getManifestsDirectory(name: string, ref: string): string {
@@ -56,44 +56,12 @@ export function getManifestsDirectory(name: string, ref: string): string {
 }
 
 export function getBlobsSize(name: string, sha: string): number {
-    return statSync(getBlobsPath(name, sha)).size
+    return statSync(getBlobsFilePath(name, sha)).size
 }
 
 export async function checkBlobsSha256sum(name: string, sha: string): Promise<boolean> {
-    return (await sha256sum(getBlobsPath(name, sha))) === sha.substr(7)
+    return (await sha256sum(getBlobsFilePath(name, sha))) === sha.substr(7)
 }
-
-export function checkManifestExist(name: string, ref: string, version: string) {
-    if (version === 'v2') {
-        return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v2+json'))
-    }
-    if (version === 'v1') {
-        return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v1+json'))
-    }
-    if (version === 'v2list') {
-        return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.list.v2+json'))
-    }
-}
-
-function checkManifestV2ListExist(name: string, ref: string) {
-    return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.list.v2+json'))
-}
-
-function checkManifestV1Exist(name: string, ref: string) {
-    return existsSync(path.join(storageDir, name, 'manifests', 'tags', ref, 'vnd.docker.distribution.manifest.v1+json'))
-}
-
-// export function checkManifestExist(name: string, reference: string): boolean {
-//     if (reference.startsWith('sha256:')) {
-//         return existsSync(path.join(storageDir, name, 'manifests', 'tags', reference))
-//     } else {
-//         return existsSync(path.join(storageDir, name, 'manifests', 'digests', reference))
-//     }
-// }
-
-// function getManifestFileForTags(name: string, ref: string) {
-//     return path.join(getManifestsDirectory(name, 'tags'), ref)
-// }
 
 function getManifestFileForDigest(name: string, ref: string) {
     return path.join(getManifestsDirectory(name, ref), ref)

@@ -5,7 +5,7 @@ import { moveSync, readJsonSync, removeSync, readdirSync, createReadStream, read
 import * as uuid from 'uuid'
 import Router from 'koa-router'
 
-import { checkBlobsExist, getBlobsPath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, ManifestSchema, getManifestFile, ManifestsCacheDirectory, createManifestsDirectory, createBlobsDirectory, checkBlobsSha256sum } from './storage'
+import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, ManifestSchema, getManifestFile, ManifestsCacheDirectory, createManifestsDirectory, createBlobsDirectory, checkBlobsSha256sum } from './storage'
 import { sha256sum } from './helper';
 
 export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
@@ -89,11 +89,14 @@ export const _put_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext)
     console.log('putBlobs...1', ctx.req.method, ctx.req.url,)
     const name = ctx.params[0]
     const uid = ctx.params[1]
-    // const uid = uuid.v4()
     const digest: string = url.parse(ctx.req.url, true).query.digest as string
-    createBlobsDirectory(name)
-    moveSync(path.join(BlobsCacheDirectory, uid), getBlobsPath(name, digest))
-    console.log("copy", path.join(BlobsCacheDirectory, uid), getBlobsPath(name, digest))
+    if (checkBlobsExist(name, digest)) {
+        removeSync(path.join(BlobsCacheDirectory, uid))
+    } else {
+        createBlobsDirectory(name)
+        moveSync(path.join(BlobsCacheDirectory, uid), getBlobsFilePath(name, digest))
+    }
+    console.log("copy", path.join(BlobsCacheDirectory, uid), getBlobsFilePath(name, digest))
     console.log('copy success')
     ctx.status = 201
 }
@@ -153,7 +156,7 @@ export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext)
     if (checkBlobsExist(name, sha)) {
         ctx.type = "application/octet-stream"
         ctx.status = 200
-        createReadStream(getBlobsPath(name, sha)).pipe(ctx.res)
+        createReadStream(getBlobsFilePath(name, sha)).pipe(ctx.res)
     } else {
         ctx.status = 404
     }

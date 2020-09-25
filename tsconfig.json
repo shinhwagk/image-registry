@@ -6,10 +6,7 @@
     "outDir": "dist",
     "esModuleInterop": true
   },
-  "files": [
-    "src-repository/v21.ts"
+  "include": [
+    "src-repository"
   ]
-  // "include": [
-  //   "src"
-  // ]
 }
