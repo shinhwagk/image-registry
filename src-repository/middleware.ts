@@ -1,30 +1,17 @@
 import * as path from 'path';
 import * as url from 'url'
 
+import { moveSync, readJsonSync, removeSync, readdirSync, createReadStream, readFileSync, createWriteStream, statSync, existsSync } from 'fs-extra';
 import * as uuid from 'uuid'
-
 import Router from 'koa-router'
-import { checkBlobsExist, getBlobsPath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, ManifestSchema, createBlobsCacheDirectory, getManifestFile, ManifestsCacheDirectory, createManifestsDirectory, createBlobsDirectory, checkBlobsSha256sum } from './storage'
-import { createWriteStream } from 'fs';
-import { statSync } from 'fs';
-import { existsSync } from 'fs';
+
+import { checkBlobsExist, getBlobsPath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, ManifestSchema, getManifestFile, ManifestsCacheDirectory, createManifestsDirectory, createBlobsDirectory, checkBlobsSha256sum } from './storage'
 import { sha256sum } from './helper';
-import { readFileSync } from 'fs';
-import { moveSync, readJsonSync, removeSync } from 'fs-extra';
-import { readdirSync } from 'fs';
-import { createReadStream } from 'fs';
-import { reject } from 'async';
-import { nextTick } from 'process';
 
 export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_patch_blobs11111111")
     const name = ctx.params[0]
     const uid = ctx.params[1]
-    // view.push("==============================")
-    // view.push(req.method + " " + req.url)
-    // view.push(JSON.stringify(req.headers))
-    // view.push("==============================")
-    createBlobsCacheDirectory()
     const blobsUid = path.join(BlobsCacheDirectory, uid)
     await new Promise<void>((res) => {
         const cws = createWriteStream(blobsUid)
@@ -111,7 +98,7 @@ export const _put_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext)
     ctx.status = 201
 }
 
-export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<any>) => {
+export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log('put manifests', ctx.req.method, ctx.req.url, ctx.req.headers)
     const name = ctx.params[0]
     const ref = ctx.params[1]

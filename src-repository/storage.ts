@@ -1,8 +1,10 @@
-import { existsSync, mkdirpSync, readFileSync, readJsonSync, writeFileSync, writeJsonSync } from 'fs-extra'
+
 import * as path from 'path'
+
+import { statSync, existsSync, mkdirpSync, readFileSync, readJsonSync, writeFileSync, writeJsonSync } from 'fs-extra'
+
 import { storageDir } from './constants'
 import { sha256sum } from './helper'
-import { statSync } from 'fs';
 
 export interface ManifestSchema {
     schemaVersion: 1 | 2
