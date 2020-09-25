@@ -29,12 +29,19 @@
     "jest": "^26.4.2",
     "nodemon": "^2.0.4",
     "ts-jest": "^26.4.0",
+    "ts-loader": "^8.0.4",
     "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
+<<<<<<< Updated upstream
     "compile": "tsc -p ./tsconfig.json",
+=======
+    "compile-webpack": "webpack",
+>>>>>>> Stashed changes
     "compile-watch": "tsc -p ./tsconfig.json -w",
     "execute-watch": "nodemon --watch dist dist/v21.js"
   },
