@@ -37,8 +37,9 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
+    "compile": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
-    "compile-watch": "tsc -p ./tsconfig.json -w",
+    "compile-watch": "npm rum compile -w",
     "execute-watch": "nodemon --watch dist dist/v21.js"
   },
   "keywords": [],
