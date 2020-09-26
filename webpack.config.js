@@ -5,7 +5,7 @@ module.exports = {
     mode: 'production',
     target: 'node',
     module: {
-        rules: [{ test: /\.ts$/, use: 'ts-loader', exclude: /node_modules/ }],
+        rules: [{ test: /\.ts$/, use: 'ts-loader' }],
     },
     resolve: { extensions: ['.ts', '.js'] },
     output: {
