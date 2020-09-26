@@ -1,50 +1,26 @@
 import * as path from 'path';
 import * as url from 'url'
 
-import { moveSync, readJsonSync, removeSync, readdirSync, createReadStream, readFileSync, createWriteStream, statSync, existsSync } from 'fs-extra';
+import { moveSync, readJsonSync, removeSync, readdirSync, createReadStream, readFileSync, createWriteStream, statSync, existsSync, copySync, writeFileSync } from 'fs-extra';
 import * as uuid from 'uuid'
 import Router from 'koa-router'
 
-import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, ManifestSchema, getManifestFile, ManifestsCacheDirectory, createManifestsDirectory, createBlobsDirectory, checkBlobsSha256sum } from './storage'
+import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, getManifestFilePath, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkBlobsSha256sum, ManifestSchema, getManifestFileForDigest } from './storage'
 import { sha256sum } from './helper';
+import { MANIFEST_UNKNOWN } from './p';
 
 export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_patch_blobs11111111")
     const name = ctx.params[0]
     const uid = ctx.params[1]
     const blobsUid = path.join(BlobsCacheDirectory, uid)
-    await new Promise<void>((res) => {
-        const cws = createWriteStream(blobsUid)
-        ctx.req.pipe(cws).on('finish', () => {
-            for (const f of readdirSync(BlobsCacheDirectory)) {
-                if (blobsUid.endsWith(f)) {
-                    console.log(f, blobsUid.endsWith(f))
-                }
-            }
-
-            console.log("end", existsSync(blobsUid), statSync(blobsUid).size)
-            // p.end()
-            res()
-        })
-    })
-
-    console.log("end wa", existsSync(blobsUid), statSync(blobsUid).size)
-    // console.log("1111111", existsSync(blobsUid))
-    // let fstat: Stats
-    // try {
-    //     fstat = statSync(blobsUid)
-    //     console.log("fstat.............", fstat.size, statSync(blobsUid).size)
-    // } catch (e) {
-    //     console.log("error_patch_blobs11111111 stat 1111111111111111111111111111111111111111111111")
-    // }
+    await new Promise<void>((res) => ctx.req.pipe(createWriteStream(blobsUid)).on('finish', res))
     ctx.status = 202
     ctx.set('Location', `/v2/${name}/blobs/uploads/${uid}`)
     ctx.set('Docker-Upload-UUID', uid)
     ctx.set('range', `0-${statSync(blobsUid).size - 1}`) // must
-
     ctx.body = '{}'
     console.log("end.........................")
-    // return await next()
 }
 
 export const _post_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
@@ -57,27 +33,25 @@ export const _post_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext
     ctx.set('Docker-Upload-UUID', uid)
     ctx.type = 'application/json'
     ctx.body = '{}'
-    // return await next();
 }
 
 export const _head_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log('_head_blobs', ctx.req.method, ctx.req.url)
     const name = ctx.params[0]
     const sha = ctx.params[1]
-    if (checkBlobsExist(name, sha) && await checkBlobsSha256sum(name, sha)) {
-        console.log("blobs vaild")
-        ctx.status = 200
-        ctx.type = 'application/json'
-        ctx.set('content-length', getBlobsSize(name, sha).toString())
-        ctx.set('Accept-Ranges', 'bytes')
-    } else {
-        console.log("no exist", ctx.req.url)
-        ctx.status = 404
+    if (!checkBlobsExist(name, sha)) {
+        ctx.throw(404)
+    }
+    if (!await checkBlobsSha256sum(name, sha)) {
+        removeSync(getBlobsFilePath(name, sha))
+        ctx.throw(404)
     }
 
-    // console.log("_head_blobs", "end")
-    // return await next()
-    console.log("111")
+    console.log("blobs vaild")
+    ctx.status = 200
+    ctx.type = 'application/json'
+    ctx.set('content-length', `${getBlobsSize(name, sha)}`)
+    ctx.set('Accept-Ranges', 'bytes')
 }
 
 export const _head_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
@@ -113,50 +87,53 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
             .on('finish', res)
             .on('error', (e) => rej(e.message))
     })
+    const sha256: string = await sha256sum(tempManifest)
 
     const ms = readJsonSync(tempManifest) as ManifestSchema
     console.log("put version", ms.schemaVersion)
-    createManifestsDirectory(name, ref)
-    if (ms.schemaVersion === 1) {
-        moveSync(tempManifest, path.join(getManifestsDirectory(name, ref), 'vnd.docker.distribution.manifest.v1+json'), { overwrite: true })
-        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestsDirectory(name, ref), 'vnd.docker.distribution.manifest.v1+json')))
-    } else {
-        moveSync(tempManifest, path.join(getManifestsDirectory(name, ref), ms.mediaType.substr(12)), { overwrite: true })
-        ctx.set('docker-content-digest', 'sha256:' + await sha256sum(path.join(getManifestsDirectory(name, ref), ms.mediaType.substr(12))))
-    }
+    createManifestsDirectories(name, ref)
+    const mediaType: string = ms.schemaVersion === 1 ? 'vnd.docker.distribution.manifest.v1+json' : ms.mediaType.substr(12)
+    writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType), `sha256:${sha256}`, { encoding: "utf8" })
+    ctx.set('docker-content-digest', 'sha256:' + sha256)
+    console.log(getManifestFileForDigest(name, 'sha256:' + sha256))
+    copySync(tempManifest, getManifestFileForDigest(name, 'sha256:' + sha256), { overwrite: true })
+    removeSync(tempManifest)
     ctx.status = 201
-    ctx.state.a = 1
 }
 
 export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_get_manifests", ctx.url)
-    const name = ctx.params[0]
-    const ref = ctx.params[1]
+    const name: string = ctx.params[0]
+    const ref: string = ctx.params[1]
 
-    const mf = getManifestFile(name, ref)
-    console.log("manifests", mf)
-    if (mf) {
-        const mfObj = readJsonSync(mf, { encoding: 'utf8' }) as ManifestSchema
-        const sha = await sha256sum(mf)
-        ctx.status = 200
-        ctx.type = (mfObj.schemaVersion === 1 ? 'application/vnd.docker.distribution.manifest.v1+json' : mfObj.mediaType)
-        ctx.set('Docker-Content-Digeste', "sha256:" + sha)
-        ctx.body = readFileSync(mf, { encoding: 'utf8' })
-    } else {
+    if (!existsSync(getManifestFilePath(name, ref))) {
         console.log("not exist")
         ctx.status = 404
+        ctx.body = MANIFEST_UNKNOWN
+        return
     }
+
+    const manifestFilePath = ref.startsWith('sha256:') ?
+        getManifestFilePath(name, ref) :
+        getManifestFilePath(name, readFileSync(getManifestFilePath(name, ref), { encoding: 'utf8' }))
+
+    console.log("manifests", ref)
+    const mfObj = readJsonSync(manifestFilePath) as ManifestSchema;
+    ctx.status = 200
+    ctx.type = (mfObj.schemaVersion === 1 ? 'application/vnd.docker.distribution.manifest.v1+json' : mfObj.mediaType)
+    ctx.set('Docker-Content-Digeste', path.basename(manifestFilePath))
+    ctx.body = readFileSync(manifestFilePath, { encoding: 'utf8' })
+    console.log(ctx.body)
 }
 
 export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_get_blobs")
     const name = ctx.params[0]
-    const sha = ctx.params[1]
-
-    if (checkBlobsExist(name, sha)) {
+    const digest = ctx.params[1]
+    if (checkBlobsExist(name, digest)) {
         ctx.type = "application/octet-stream"
         ctx.status = 200
-        createReadStream(getBlobsFilePath(name, sha)).pipe(ctx.res)
+        createReadStream(getBlobsFilePath(name, digest)).pipe(ctx.res)
     } else {
         ctx.status = 404
     }

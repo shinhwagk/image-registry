@@ -38,8 +38,8 @@
     "test": "jest --detectOpenHandles",
     "compile-tsc": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
-    "compile-tsc-watch": "npm rum compile-tsc -w",
-    "execute-watch": "nodemon --watch dist dist/app.js"
+    "compile-tsc-watch": "npm rum compile-tsc -- -w",
+    "execute-watch": "nodemon dist/app.js"
   },
   "keywords": [],
   "author": "",

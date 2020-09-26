@@ -2,8 +2,10 @@ FROM node:14
 
 RUN npm config set registry https://registry.npm.taobao.org
 
-# RUN sed -i 's/deb\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list && \
-#     sed -i 's/security\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list && \
+RUN sed -i 's/deb\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list && \
+    sed -i 's/security\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list
+RUN apt update
+RUN apt install -y jq
 #     apt update && \
 #     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
 #     apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common && \

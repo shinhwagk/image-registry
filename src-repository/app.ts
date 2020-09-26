@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import Router from 'koa-router'
+import { envPort } from './constants';
 
 import { _get_blobs, _get_manifests, _head_blobs, _head_manifests, _patch_blobs, _post_blobs, _put_blobs, _put_manifests, _delete_uploads_blobs } from './middleware';
 
@@ -21,8 +22,8 @@ router.all(/.*/, (ctx) => console.log(ctx.method, ctx.url, ctx.headers))
 app.use(async (ctx, next) => {
     ctx.set("docker-distribution-api-version", "registry/2.0");
     await next()
-    console.log(ctx.method, ctx.url, ctx.state.a, ctx.res.getHeaders())
+    console.log(ctx.method, ctx.url, ctx.res.getHeaders())
 })
 app.use(router.routes())
 app.use(router.allowedMethods())
-app.listen(8000, () => console.log('start'));
+app.listen(envPort, () => console.log('start'));
