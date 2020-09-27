@@ -40,8 +40,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
       - run: |
-          docker build -t shinhwagk/registry:$(cat package.json | jq -r .version) .
+          version=`cat VERSION`
+          docker build -t shinhwagk/registry:$version .
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag shinhwagk/registry:$(cat package.json | jq -r .version) shinhwagk/registry:latest
-          docker push shinhwagk/registry:$(cat package.json | jq -r .version)
+          docker tag shinhwagk/registry:$version shinhwagk/registry:latest
+          docker push shinhwagk/registry:$version
           docker push shinhwagk/registry:latest
