@@ -64,7 +64,7 @@ export const _put_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext)
     const name = ctx.params[0]
     const uid = ctx.params[1]
     const digest: string = url.parse(ctx.req.url, true).query.digest as string
-    if (checkBlobsExist(name, digest)) {
+    if (checkBlobsExist(name, digest) && await checkBlobsSha256sum(name, digest)) {
         removeSync(path.join(BlobsCacheDirectory, uid))
     } else {
         createBlobsDirectory(name)
