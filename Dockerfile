@@ -11,5 +11,5 @@ FROM node:14-alpine3.12
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 EXPOSE 8000
-COPY --from=0 /build/src-repository/dist/app.js .
+COPY --from=0 /build/dist/app.js .
 CMD node app.js
