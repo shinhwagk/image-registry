@@ -3,6 +3,7 @@ WORKDIR build
 COPY src-repository/ ./src-repository
 COPY webpack.config.js .
 COPY package.json .
+COPY tsconfig.json .
 RUN npm i
 RUN npm run compile-webpack
 
