@@ -7,7 +7,7 @@ COPY tsconfig.json .
 RUN npm i
 RUN npm run compile-webpack
 
-FROM node:14
+FROM node:14-alpine3.12
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 EXPOSE 8000
