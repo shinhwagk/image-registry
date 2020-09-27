@@ -2,25 +2,36 @@ import * as http from 'http';
 import * as zlib from 'zlib';
 
 import * as logger from './logger'
-import { ProxyLayer } from './image/layer';
+import { ProxyLayer } from './layer';
+import got from 'got/dist/source';
 
 const log = logger.create('request')
 
+import Koa from 'koa'
+import Router from 'koa-router'
+import { envPort } from './constants';
+
+const router = new Router();
+const app = new Koa()
+
+router.get('/v2', (ctx) => { ctx.status = 200; ctx.body = '{}' })
+router.get(/^\/v2\/(.*?)\/manifests\/(.*)$/, _get_manifests)
+
+// curl http://127.0.0.1/quay.io/shinhwagk/abc
 http.createServer((req, res) => {
-    if (req.url) {
-        if (req.url === '/check') {
-            res.statusCode = 200;
-            res.end();
-        } else if (req.url.startsWith('/proxy/layer')) {
-            proxyLayerController(req, res)
-        } else {
-            log.debug(JSON.stringify(req.rawHeaders))
-            proxyLayerController(req, res)
-        }
-    } else {
-        res.statusCode = 500;
+    if (req.url == "/v2/") {
+        res.end()
+    } else if (req.url === '/check') {
+        res.statusCode = 200;
         res.end();
+    } else if (req.url.startsWith('/proxy/layer')) {
+        proxyLayerController(req, res)
+    } else {
+        log.debug(JSON.stringify(req.rawHeaders))
+        proxyLayerController(req, res)
     }
+    res.statusCode = 500;
+    res.end();
 }).listen(3001, () => log.info('Proxy Laryer Blobs Server Start.\nlisten port 3001.'))
 
 const proxyLayerController: http.RequestListener = async (req, res) => {

@@ -1,12 +1,12 @@
 import * as fs from 'fs-extra';
 import * as path from 'path'
 
-import { storageDir, proxyRepo } from '../constants'
-import { sha256sum } from '../helper';
-import { dmgr } from '../down/manager';
+import { envStorageDir } from '../constants'
+import { sha256sum } from './helper';
+import { DownMangerService } from '../down/manager';
 import { ReadStream } from 'fs-extra';
 import { DownTask } from '../down/down';
-import * as logger from '../logger'
+import * as logger from '../down/logger'
 
 /**
  * 1. check layer of image exist
@@ -24,12 +24,12 @@ export class ProxyLayer {
     private readonly layerFile: string
 
     constructor(private readonly name: string, private readonly sha256: string, private readonly auth?: string) {
-        this.layerFile = path.join(storageDir, proxyRepo, name, sha256, 'blobs')
+        this.layerFile = path.join(envStorageDir, proxyRepo, name, sha256, 'blobs')
         this.init()
     }
 
     private init() {
-        fs.mkdirpSync(path.join(storageDir, proxyRepo))
+        fs.mkdirpSync(path.join(envStorageDir, proxyRepo))
     }
 
     private checkExist() {
@@ -48,7 +48,7 @@ export class ProxyLayer {
         this.log.debug('create down task: ' + `${this.url()}:${this.dest()}:${this.name}:${this.sha256}:${this.auth}`)
         const task = new DownTask(this.url(), this.dest(), this.name, this.sha256, this.auth)
         this.log.debug('add task to DownManager.')
-        await dmgr.wait(task)
+        await DownMangerService.wait(task)
         this.log.info('down success')
     }
 
@@ -57,7 +57,7 @@ export class ProxyLayer {
     }
 
     private dest() {
-        return path.join(storageDir, proxyRepo, this.name, this.sha256)
+        return path.join(envStorageDir, proxyRepo, this.name, this.sha256)
     }
 
     public async verify(): Promise<void> {

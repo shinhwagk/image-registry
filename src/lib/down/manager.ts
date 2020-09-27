@@ -1,5 +1,5 @@
 import { DownTask } from './down';
-import * as logger from '../logger'
+import * as logger from './logger'
 
 export class DownManager {
 
@@ -50,4 +50,4 @@ export class DownManager {
     }
 }
 
-export const dmgr = new DownManager();
+export const DownMangerService = new DownManager();

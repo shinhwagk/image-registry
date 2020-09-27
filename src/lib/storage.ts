@@ -1,10 +1,10 @@
 
 import * as path from 'path'
 
-import { statSync, existsSync, mkdirpSync, readJSON, readJsonSync } from 'fs-extra'
+import { statSync, existsSync, mkdirpSync, readJSON, readJsonSync, writeFileSync } from 'fs-extra'
 
 import { envStorageDir } from './constants'
-import { sha256sum } from './helper'
+import { sha256sum, sha256sumForString } from './helper'
 import { readFileSync } from 'fs'
 
 export interface ManifestSchema {
@@ -48,7 +48,9 @@ export function createManifestsCacheDirectory(): void {
 }
 
 export function createManifestsDirectories(name: string, ref: string): void {
-    mkdirpSync(getManifestsDirectory(name, ref))
+    if (!ref.startsWith('sha256:')) {
+        mkdirpSync(getManifestsDirectory(name, ref))
+    }
     mkdirpSync(getManifestsDirectory(name, 'sha256'))
 }
 
@@ -96,6 +98,19 @@ export function getManifestFilePath(name: string, ref: string): string {
     }
 }
 
+export function persistentManifest(name: string, ref: string, content: string): void {
+    const ms = JSON.parse(content) as ManifestSchema
+    const sha256 = sha256sumForString(content)
+    console.log(sha256)
+    createManifestsDirectories(name, ref)
+    const mediaType: string = ms.schemaVersion === 1 ? 'vnd.docker.distribution.manifest.v1+json' : ms.mediaType.substr(12)
+    if (!ref.startsWith('sha256:')) {
+        writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType), `sha256:${sha256}`, { encoding: "utf8" })
+    }
+    const manifestFile = getManifestFilePath(name, `sha256:${sha256}`)
+    writeFileSync(manifestFile, content, { encoding: 'utf8' })
+}
+
 // export function getManifest(name: string, ref: string): ManifestSchema {
 //     const manifestFile = ref.startsWith('sha256:') ?
 //         getManifestFilePath(name, ref) :
@@ -105,11 +120,9 @@ export function getManifestFilePath(name: string, ref: string): string {
 
 function getManifestFileForTags(name: string, tag: string): string | undefined {
     const tagDirectory = getManifestsDirectory(name, tag)
-    console.log("tagDirectory", tagDirectory)
     if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json'))) {
         return path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json')
     }
-    console.log(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json'))
     if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json'))) {
         return path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json')
     }

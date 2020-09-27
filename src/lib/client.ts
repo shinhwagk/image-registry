@@ -1,6 +1,9 @@
 import { format as sfmt } from 'util'
 
 import got from "got/dist/source";
+import { DownTask } from './down/down';
+import { getBlobsFilePath } from './storage';
+import { DownMangerService } from './down/manager';
 
 type ManifestType = 'application/vnd.docker.distribution.manifest.list.v2+json' | 'application/vnd.docker.distribution.manifest.v2+json'
 
@@ -16,8 +19,10 @@ export class RegistryClient {
     isAuth = false
     manifest: string
     manifestType?: ManifestType
-
-    constructor(private readonly registryUrl: string, private readonly name: string, private readonly ref: string = 'latest') { }
+    registryUrl: string
+    constructor(repo: string, private readonly name: string, private readonly ref: string = 'latest') {
+        this.registryUrl = `https://${repo}`
+    }
 
     async ping() {
         const res = await got(sfmt('%s/%s/', this.registryUrl, 'v2'), { throwHttpErrors: false })
@@ -48,6 +53,7 @@ export class RegistryClient {
         }
         // console.log(this.registryUrl, this.serviceUrl, headers)
         const url = sfmt('%s/v2/%s/manifests/%s', this.registryUrl, this.name, this.ref)
+        console.log(url)
         const res = await got(url, { headers })
         console.log(res.headers)
         if (res.headers['content-type']) {
@@ -55,6 +61,27 @@ export class RegistryClient {
         }
         this.manifest = res.body
     }
+
+    async downBlobs(digest: string): Promise<void> {
+        const task = new DownTask(this.registryUrl, getBlobsFilePath(this.name, `sha256:${digest}`), this.name, digest, this.token)
+        // this.log.debug('add task to DownManager.')
+        await DownMangerService.wait(task)
+
+        // await .wait(task)
+    }
+    // async saveManifests() {
+    //     const headers = {
+    //         accept: 'application/json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json',
+    //         'accept-encoding': 'gzip'
+    //     }
+    //     if (this.isAuth && this.token) {
+    //         headers['authorization'] = sfmt('Bearer %s', this.token)
+    //     }
+    //     // console.log(this.registryUrl, this.serviceUrl, headers)
+    //     const url = sfmt('%s/v2/%s/manifests/%s', this.registryUrl, this.name, this.ref)
+    //     const tempManifest = path.join(ManifestsCacheDirectory, mfuid)
+    //     await got.stream(url, { headers }).pipe(fs.createWriteStream(tempManifest))
+    // }
 
     // async reqBlobs(sha) {
 

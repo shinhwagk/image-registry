@@ -1,4 +1,4 @@
-import { ProxyLayer } from '../src/image/layer'
+// import { ProxyLayer } from '../src/lib/image/layer'
 import { sha256sum, sleep } from '../src/helper'
 import { mkdirpSync, removeSync } from 'fs-extra'
 import { storageDir } from '../src/constants'

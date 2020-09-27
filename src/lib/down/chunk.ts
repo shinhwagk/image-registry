@@ -6,9 +6,9 @@ import * as fs from 'fs-extra';
 import got from 'got';
 import { Logger } from 'winston';
 
-import * as logger from '../logger'
+import * as logger from './logger'
 import { ReqHeader, ITask } from './types';
-import { agent } from '../constants';
+// import { agent } from '../constants';
 
 export class DownTaskChunk implements ITask {
     public static create(
@@ -63,7 +63,7 @@ export class DownTaskChunk implements ITask {
         }
         this.setHeaders()
         const pipeline = promisify(stream.pipeline);
-        const source = got.stream(this.url, { headers: this.headers, timeout: 20 * 1000, agent: agent })
+        const source = got.stream(this.url, { headers: this.headers, timeout: 20 * 1000 })//, agent: agent
             .on('request', request => setTimeout(() => request.destroy(), 30 * 1000));
         const target = fs.createWriteStream(this.chunk)
         await pipeline(source, target)

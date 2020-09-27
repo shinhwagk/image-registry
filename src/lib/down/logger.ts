@@ -1,6 +1,6 @@
 import { createLogger, format, transports, Logger } from 'winston'
 
-import { logLevel } from './constants'
+import { envLogLevel } from '../constants'
 
 const { combine, timestamp, printf } = format;
 
@@ -11,6 +11,6 @@ export function create(module: string,): Logger {
             timestamp(),
             customFormat
         ),
-        transports: [new transports.Console({ level: logLevel })]
+        transports: [new transports.Console({ level: envLogLevel })]
     })
 }

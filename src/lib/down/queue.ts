@@ -2,9 +2,8 @@ import * as async from 'async';
 
 import { ITask } from './types';
 import { sleep } from '../helper';
-import { logLevel } from '../constants';
-import { create } from '../logger';
-
+import { envLogLevel } from '../constants';
+import { create } from './logger';
 
 const log = create('queue')
 
@@ -20,7 +19,7 @@ function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ 
 
 export const chunksQueue = makeTasksQueue(10, 10, 1000);
 
-if (logLevel === 'debug') {
+if (envLogLevel === 'debug') {
     (async () => {
         // eslint-disable-next-line no-constant-condition
         while (true) {

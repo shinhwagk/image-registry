@@ -1,13 +1,15 @@
 import * as path from 'path';
 import * as url from 'url'
 
-import { moveSync, readJsonSync, removeSync, readdirSync, createReadStream, readFileSync, createWriteStream, statSync, existsSync, copySync, writeFileSync } from 'fs-extra';
+import { moveSync, readJsonSync, removeSync, createReadStream, readFileSync, createWriteStream, statSync, existsSync, copySync, writeFileSync } from 'fs-extra';
 import * as uuid from 'uuid'
 import Router from 'koa-router'
 
-import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, getManifestFilePath, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkBlobsSha256sum, ManifestSchema, getManifestFileForDigest } from './storage'
+import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, getManifestFilePath, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkBlobsSha256sum, ManifestSchema, getManifestFileForDigest, persistentManifest } from './storage'
 import { sha256sum } from './helper';
-import { MANIFEST_UNKNOWN } from './p';
+import { MANIFEST_UNKNOWN } from './protocols';
+import { proxyRepos } from './constants';
+import { RegistryClient } from './client';
 
 export const _patch_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_patch_blobs11111111")
@@ -101,7 +103,7 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     ctx.status = 201
 }
 
-export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
+export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
     console.log("_get_manifests", ctx.url)
     const name: string = ctx.params[0]
     const ref: string = ctx.params[1]
@@ -110,7 +112,7 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
         console.log("not exist")
         ctx.status = 404
         ctx.body = MANIFEST_UNKNOWN
-        return
+        return await next()
     }
 
     const manifestFilePath = ref.startsWith('sha256:') ?
@@ -123,7 +125,6 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     ctx.type = (mfObj.schemaVersion === 1 ? 'application/vnd.docker.distribution.manifest.v1+json' : mfObj.mediaType)
     ctx.set('Docker-Content-Digeste', path.basename(manifestFilePath))
     ctx.body = readFileSync(manifestFilePath, { encoding: 'utf8' })
-    console.log(ctx.body)
 }
 
 export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
@@ -147,4 +148,42 @@ export const _delete_uploads_blobs: Router.IMiddleware = async (ctx: Router.IRou
     const blobsUid = path.join(BlobsCacheDirectory, uid)
     removeSync(blobsUid)
     ctx.status = 200
+}
+
+export const _try_down_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+    console.log("_try_down_manifests")
+    const name: string = ctx.params[0]
+    const ref: string = ctx.params[1]
+    console.log(getManifestFilePath(name, ref))
+    if (existsSync(getManifestFilePath(name, ref))) {
+        return await next()
+    }
+
+    const formatName = name.split('/')
+    if (formatName.length === 3 && proxyRepos.includes(formatName[0])) {
+        console.log("download ")
+        const rc = new RegistryClient(formatName[0], formatName.slice(1).join('/'), ref)
+        await rc.ping()
+        await rc.login()
+        await rc.reqManifests()
+        persistentManifest(name, ref, rc.manifest)
+    }
+}
+
+export const _try_down_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+    console.log("_try_down_blobs")
+    const name: string = ctx.params[0]
+    const digest = ctx.params[1]
+    if (checkBlobsExist(name, digest)) {
+        return await next()
+    }
+
+    const formatName = name.split('/')
+    if (formatName.length === 3 && proxyRepos.includes(formatName[0])) {
+        console.log("download ")
+        const rc = new RegistryClient(formatName[0], formatName.slice(1).join('/'))
+        await rc.ping()
+        await rc.login()
+        await rc.downBlobs(digest)
+    }
 }
