@@ -6,7 +6,7 @@ COPY package.json .
 RUN npm i
 RUN npm run compile-webpack
 
-FROM shinhwagk/node:14
+FROM node:14
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 EXPOSE 8000
