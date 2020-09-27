@@ -40,6 +40,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           version=`cat VERSION`
+          version="repo-${version}"
           docker build -t shinhwagk/registry:$version .
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker tag shinhwagk/registry:$version shinhwagk/registry:latest
