@@ -1,43 +1,15 @@
 
 import * as path from 'path'
 
-import { statSync, existsSync, mkdirpSync, readJSON, readJsonSync, writeFileSync } from 'fs-extra'
+import { statSync, existsSync, mkdirpSync, writeFileSync } from 'fs-extra'
 
-import { envStorageDir } from './constants'
+import { envStorageDirectory } from './constants'
 import { sha256sum, sha256sumForString } from './helper'
-import { readFileSync } from 'fs'
+import { ManifestSchema } from './types'
 
-export interface ManifestSchema {
-    schemaVersion: 1 | 2
-    mediaType: 'application/vnd.docker.distribution.manifest.v2+json' | 'application/vnd.docker.distribution.manifest.list.v2+json'
-}
+export const BlobsCacheDirectory = path.join(envStorageDirectory, 'cache', 'blobs')
 
-// export interface ManifestSchemaV1 extends ManifestSchema {
-//     schemaVersion: 1
-//     mediaType: 'vnd.docker.distribution.manifest.v1+json'
-// }
-
-// export interface ManifestSchemaV2 extends ManifestSchema {
-//     schemaVersion: 2
-//     mediaType: 'application/vnd.docker.distribution.manifest.v2+json'
-// }
-
-// export interface ManifestSchemaV2List extends ManifestSchema {
-//     schemaVersion: 2
-//     mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json'
-// }
-
-// export function instanceOfA(object: ManifestSchema): object is ManifestSchemaV2 {
-//     return object.schemaVersion === 2;
-// }
-
-// export function instanceOfB(object: ManifestSchema): object is ManifestSchemaV1 {
-//     return object.schemaVersion === 1;
-// }
-
-export const BlobsCacheDirectory = path.join(envStorageDir, 'cache', 'blobs')
-
-export const ManifestsCacheDirectory = path.join(envStorageDir, 'cache', 'manifests')
+export const ManifestsCacheDirectory = path.join(envStorageDirectory, 'cache', 'manifests')
 
 export function createBlobsCacheDirectory(): void {
     mkdirpSync(BlobsCacheDirectory)
@@ -59,7 +31,7 @@ export function createBlobsDirectory(name: string): void {
 }
 
 export function getBlobsDirectory(name: string): string {
-    return path.join(envStorageDir, name, 'blobs')
+    return path.join(envStorageDirectory, name, 'blobs')
 }
 
 export function getBlobsFilePath(name: string, digest: string): string {
@@ -72,9 +44,9 @@ export function checkBlobsExist(name: string, digest: string): boolean {
 
 export function getManifestsDirectory(name: string, ref: string): string {
     if (ref.startsWith('sha256')) {
-        return path.join(envStorageDir, name, 'manifests', 'digests')
+        return path.join(envStorageDirectory, name, 'manifests', 'digests')
     } else {
-        return path.join(envStorageDir, name, 'manifests', 'tags', ref)
+        return path.join(envStorageDirectory, name, 'manifests', 'tags', ref)
     }
 }
 

@@ -1,9 +1,9 @@
 import * as async from 'async';
 
-import { ITask } from './types';
+import { ITask } from '../types';
 import { sleep } from '../helper';
 import { envLogLevel } from '../constants';
-import { create } from './logger';
+import { create } from '../logger';
 
 const log = create('queue')
 

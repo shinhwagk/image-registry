@@ -1,9 +1,9 @@
 export const MANIFEST_UNKNOWN = {
-    "errors": [
+    errors: [
         {
-            "code": "MANIFEST_UNKNOWN",
-            "detail": {},
-            "message": "manifest unknown"
+            code: "MANIFEST_UNKNOWN",
+            detail: {},
+            message: "manifest unknown"
         }
     ]
 }

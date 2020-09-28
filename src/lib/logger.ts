@@ -1,6 +1,6 @@
 import { createLogger, format, transports, Logger } from 'winston'
 
-import { envLogLevel } from '../constants'
+import { envLogLevel } from './constants'
 
 const { combine, timestamp, printf } = format;
 

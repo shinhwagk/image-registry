@@ -1,5 +1,5 @@
 import { DownTask } from './down';
-import * as logger from './logger'
+import * as logger from '../logger'
 
 export class DownManager {
 
@@ -13,7 +13,6 @@ export class DownManager {
             return
         }
         this.tasks[t.getId()] = { running: t.start(), count: 1 }
-
         const reqSum = Object.values(this.tasks).map(v => v.count).reduce((a, b) => a + b, 0)
         this.log.info(`current task list info: ${Object.keys(this.tasks).length}/${reqSum}`)
     }

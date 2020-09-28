@@ -6,10 +6,10 @@ import { Logger } from 'winston';
 
 import { chunksQueue } from './queue'
 import { mergeFile, sha256sum, sleep } from '../helper';
-import { chunkSize } from '../constants'
+import { envDownChunkSize } from '../constants'
 import { DownTaskChunk } from './chunk';
-import { ReqHeader } from './types';
-import * as logger from './logger'
+import { ReqHeader } from '../types';
+import * as logger from '../logger'
 
 export class DownTask {
 
@@ -18,17 +18,19 @@ export class DownTask {
     private blobsBytes = 0;
     private readonly cacheDest: string;
     private chunks: DownTaskChunk[] = []
+    private readonly name: string
 
     constructor(
         public readonly url: string,
-        public readonly destFile: string,
-        private readonly name: string,
+        public readonly dest: string,
         private readonly sha256: string,
         public readonly auth?: string
     ) {
-        this.cacheDest = path.join('/tmp', name, 'cache');
+        this.name = "aaaa"
+        this.cacheDest = path.join('/tmp', 'cache');
         this.id = this.getId()
         this.log = logger.create(`DownTask ${this.id}`)
+        mkdirpSync(path.dirname(dest))
     }
 
     getId(): string {
@@ -40,13 +42,14 @@ export class DownTask {
     }
 
     private async reqBlobsSize(): Promise<void> {
-        const headers: ReqHeader = this.auth ? { 'authorization': `Bearer ${this.auth}` } : {}
+        const headers: ReqHeader = this.auth ? { 'authorization': this.auth } : {}
         const res = (await got.head(this.url, { headers }))
         this.blobsBytes = Number(res.headers['content-length'])
+
     }
 
     private makeChunks(): void {
-        const cs = Number(chunkSize)
+        const cs = Number(envDownChunkSize)
         const chunksNumber = (this.blobsBytes / cs >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * cs
@@ -60,13 +63,15 @@ export class DownTask {
     }
 
     private cleanBlobs(): void {
-        removeSync(this.destFile)
+        removeSync(this.dest)
     }
 
     private async combineChunks(): Promise<void> {
         this.cleanBlobs()
+        this.log.info(this.id + " combineChunks")
         for (const cf of Object.keys(this.chunks).map((id) => path.join(this.cacheDest, id))) {
-            await mergeFile(cf, this.destFile)
+            console.log(cf, this.dest)
+            await mergeFile(cf, this.dest)
         }
         this.log.info(this.id + ' combine chunks success.')
     }
@@ -76,11 +81,11 @@ export class DownTask {
     }
 
     private async checkBlobsShasum(): Promise<boolean> {
-        return await sha256sum(this.destFile) === this.sha256
+        return await sha256sum(this.dest) === this.sha256
     }
 
     private checkIsDown(): boolean {
-        if (existsSync(this.destFile)) {
+        if (existsSync(this.dest)) {
             if (this.checkBlobsShasum()) {
                 return false
             }
@@ -114,15 +119,13 @@ export class DownTask {
             throw new Error('down error')
         }
 
-        console.log("ssssssssssssssssssss")
-
-        // await this.combineChunks()
-        // if (this.checkBlobsShasum()) {
-        //     this.log.info('blobs sha256sum ok')
-        //     this.cleanCache()
-        // } else {
-        //     this.log.info('blobs sha256sum faile')
-        //     this.cleanBlobs()
-        // }
+        await this.combineChunks()
+        if (this.checkBlobsShasum()) {
+            this.log.info('blobs sha256sum ok')
+            this.cleanCache()
+        } else {
+            this.log.info('blobs sha256sum faile')
+            this.cleanBlobs()
+        }
     }
 }

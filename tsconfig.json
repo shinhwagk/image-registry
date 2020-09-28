@@ -6,7 +6,8 @@
     "outDir": "dist",
     "esModuleInterop": true
   },
-  "files": [
-    "src/app-all.ts"
+  "include": [
+    "src",
+    "test"
   ]
 }

@@ -6,8 +6,8 @@ import * as fs from 'fs-extra';
 import got from 'got';
 import { Logger } from 'winston';
 
-import * as logger from './logger'
-import { ReqHeader, ITask } from './types';
+import * as logger from '../logger'
+import { ReqHeader, ITask } from '../types';
 // import { agent } from '../constants';
 
 export class DownTaskChunk implements ITask {

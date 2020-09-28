@@ -1,7 +1,7 @@
 import Koa from 'koa'
 import Router from 'koa-router'
 
-import { envAppRepoPort } from './lib/constants';
+import { envRepoPort } from './lib/constants';
 import { _get_blobs, _get_manifests, _head_blobs, _head_manifests, _patch_blobs, _post_blobs, _put_blobs, _put_manifests, _delete_uploads_blobs } from './lib/middleware';
 
 const router = new Router();
@@ -26,4 +26,4 @@ app.use(async (ctx, next) => {
 })
 app.use(router.routes())
 app.use(router.allowedMethods())
-app.listen(envAppRepoPort, () => console.log('start'));
+app.listen(envRepoPort, () => console.log('start'));

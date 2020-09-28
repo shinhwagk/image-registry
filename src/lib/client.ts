@@ -2,8 +2,8 @@ import { format as sfmt } from 'util'
 
 import got from "got/dist/source";
 import { DownTask } from './down/down';
-import { getBlobsFilePath } from './storage';
 import { DownMangerService } from './down/manager';
+import { join } from 'path';
 
 type ManifestType = 'application/vnd.docker.distribution.manifest.list.v2+json' | 'application/vnd.docker.distribution.manifest.v2+json'
 
@@ -19,13 +19,13 @@ export class RegistryClient {
     isAuth = false
     manifest: string
     manifestType?: ManifestType
-    registryUrl: string
-    constructor(repo: string, private readonly name: string, private readonly ref: string = 'latest') {
-        this.registryUrl = `https://${repo}`
+    proxyRepoUrl: string
+    constructor(repo: string, private readonly name: string, private readonly distribution: string, private readonly ref: string = 'latest') {
+        this.proxyRepoUrl = `https://${repo}`
     }
 
-    async ping() {
-        const res = await got(sfmt('%s/%s/', this.registryUrl, 'v2'), { throwHttpErrors: false })
+    async ping(): Promise<void> {
+        const res = await got(sfmt('%s/%s/', this.proxyRepoUrl, 'v2'), { throwHttpErrors: false })
         if (res.statusCode === 401 && res.headers["www-authenticate"]) {
             const [authUrl, serviceUrl] = parserHeaderWWWAuthenticate(res.headers["www-authenticate"])
             if (authUrl) {
@@ -35,15 +35,16 @@ export class RegistryClient {
             }
         }
     }
-    async login() {
+    async login(): Promise<void> {
         if (this.isAuth) {
             const url = sfmt('%s?service=%s&scope=repository:%s:pull', this.authUrl, this.serviceUrl, this.name)
             const res = await got(url, { responseType: 'json' })
-            this.token = res.body['token']
+            console.log(res.body)
+            this.token = sfmt('Bearer %s', res.body['token'])
         }
     }
 
-    async reqManifests() {
+    async reqManifests(): Promise<void> {
         const headers = {
             accept: 'application/json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.docker.distribution.manifest.list.v2+json',
             'accept-encoding': 'gzip'
@@ -52,7 +53,7 @@ export class RegistryClient {
             headers['authorization'] = sfmt('Bearer %s', this.token)
         }
         // console.log(this.registryUrl, this.serviceUrl, headers)
-        const url = sfmt('%s/v2/%s/manifests/%s', this.registryUrl, this.name, this.ref)
+        const url = sfmt('%s/v2/%s/manifests/%s', this.proxyRepoUrl, this.name, this.ref)
         console.log(url)
         const res = await got(url, { headers })
         console.log(res.headers)
@@ -63,7 +64,7 @@ export class RegistryClient {
     }
 
     async downBlobs(digest: string): Promise<void> {
-        const task = new DownTask(this.registryUrl, getBlobsFilePath(this.name, `sha256:${digest}`), this.name, digest, this.token)
+        const task = new DownTask(`${join(this.proxyRepoUrl, 'v2', this.name, 'blobs', 'sha256:' + digest)}`, `${this.distribution}/sha256:${digest}`, digest, this.token)
         // this.log.debug('add task to DownManager.')
         await DownMangerService.wait(task)
 
