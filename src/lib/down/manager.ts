@@ -1,42 +1,50 @@
-import { DownTask } from './down';
+import { DownTask, DownTaskConfig } from './down';
 import * as logger from '../logger'
 
 export class DownManager {
 
-    private readonly tasks: { [id: string]: { running: Promise<void>, count: number } } = {}
+    private readonly tasks: { [id: string]: Promise<void> } = {}
     private readonly log = logger.create('DownManager')
 
-    public addTask(t: DownTask): void {
-        if (this.checkTaskRunning(t)) {
-            this.log.info(`${t.getId()} in task list`)
-            this.tasks[t.getId()].count += 1
+    public addTask(dtc: DownTaskConfig): void {
+        const tid = this.getTaskId(dtc)
+        if (this.checkTaskRunning(tid)) {
+            this.log.info(`${tid} in task list`)
             return
         }
-        this.tasks[t.getId()] = { running: t.start(), count: 1 }
-        const reqSum = Object.values(this.tasks).map(v => v.count).reduce((a, b) => a + b, 0)
-        this.log.info(`current task list info: ${Object.keys(this.tasks).length}/${reqSum}`)
+        this.tasks[tid] = (new DownTask(dtc)).start()
+        this.log.info(`current task list info`)
     }
 
-    public cleanTask(tid: string): void {
-        this.tasks[tid].count -= 1;
-        if (this.tasks[tid].count === 0) {
-            delete this.tasks[tid]
-        }
+    private cleanTask(tid: string): void {
+        delete this.tasks[tid]
     }
 
-    private pickTask(tid: string): Promise<void> {
-        return this.tasks[tid].running
+    private pickTask(tid: string): Promise<void> | undefined {
+        return this.tasks[tid]
     }
 
-    private checkTaskRunning(t: DownTask): boolean {
-        return t.getId() in this.tasks
+    private checkTaskRunning(tid: string): boolean {
+        return tid in this.tasks
     }
 
-    async wait(t: DownTask): Promise<void> {
-        this.addTask(t)
-        const tid = t.getId()
+    public async addAndWait(tc: DownTaskConfig): Promise<void> {
+        this.addTask(tc)
+        await this.wait(tc)
+    }
+
+    private getTaskId(dtc: DownTaskConfig): string {
+        return dtc.name + '@sha256:' + dtc.sha256.substr(0, 12)
+    }
+
+    public async wait(tc: DownTaskConfig): Promise<void> {
+        const tid = this.getTaskId(tc)
         this.log.debug(tid + ' add to tasklist')
         const ptask = this.pickTask(tid)
+        if (!ptask) {
+            this.log.info(tid + ' is not in list, might have been completed')
+            return
+        }
         try {
             await ptask
             this.log.info(tid + ' success')

@@ -17,7 +17,7 @@ function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ 
     }, qc);
 }
 
-export const chunksQueue = makeTasksQueue(10, 10, 1000);
+export const chunksQueue = makeTasksQueue(2, 10, 1000);
 
 if (envLogLevel === 'debug') {
     (async () => {

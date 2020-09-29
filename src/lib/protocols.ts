@@ -7,3 +7,14 @@ export const MANIFEST_UNKNOWN = {
         }
     ]
 }
+
+export const BLOB_UNKNOWN = {
+    errors: [
+        {
+            code: "BLOB_UNKNOWN",
+            message: "blob unknown to registry",
+            detail: {}
+        },
+
+    ]
+}

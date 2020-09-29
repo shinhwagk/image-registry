@@ -6,7 +6,7 @@ export function sleep(ms: number): Promise<void> {
     return new Promise((res) => setTimeout(res, ms));
 }
 
-export async function sha256sum(file: string): Promise<string> {
+export async function sha256sumOnFile(file: string): Promise<string> {
     return new Promise<string>((res) => {
         const fd = fs.createReadStream(file);
         const hash = crypto.createHash('sha256');
@@ -21,4 +21,4 @@ export async function mergeFile(input: string, output: string, flags = 'a'): Pro
     })
 }
 
-export const sha256sumForString = (content: string) => crypto.createHash('sha256').update(content).digest('hex');
+export const sha256sumOnString = (content: string) => crypto.createHash('sha256').update(content).digest('hex');

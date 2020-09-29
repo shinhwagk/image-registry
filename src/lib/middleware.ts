@@ -4,10 +4,10 @@ import { moveSync, readJsonSync, removeSync, createReadStream, readFileSync, cre
 import * as uuid from 'uuid'
 import Router from 'koa-router'
 
-import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, getManifestFilePath, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkBlobsSha256sum, getManifestFileForDigest, persistentManifest, getBlobsDirectory } from './storage'
-import { sha256sum } from './helper';
-import { MANIFEST_UNKNOWN } from './protocols';
-import { envDownProxyRepos, envStorageDirectory } from './constants';
+import { checkBlobsExist, getBlobsFilePath, getBlobsSize, BlobsCacheDirectory, getManifestsDirectory, getManifestFilePath, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkBlobsSha256sum, getManifestFileForDigest } from './storage'
+import { sha256sumOnFile } from './helper';
+import { BLOB_UNKNOWN, MANIFEST_UNKNOWN } from './protocols';
+import { envDownProxyPrefix, envDownProxyRepos } from './constants';
 import { RegistryClient } from './client';
 import { ManifestSchema } from './types';
 
@@ -40,19 +40,23 @@ export const _post_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext
 export const _head_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log('_head_blobs', ctx.req.method, ctx.req.url)
     const name = ctx.params[0]
-    const sha = ctx.params[1]
-    if (!checkBlobsExist(name, sha)) {
-        ctx.throw(404)
+    const digest = ctx.params[1]
+    if (!checkBlobsExist(name, digest)) {
+        ctx.status = 404
+        ctx.body = BLOB_UNKNOWN
+        return
     }
-    if (!await checkBlobsSha256sum(name, sha)) {
-        removeSync(getBlobsFilePath(name, sha))
-        ctx.throw(404)
+    if (!await checkBlobsSha256sum(name, digest)) {
+        removeSync(getBlobsFilePath(name, digest))
+        ctx.status = 404
+        ctx.body = BLOB_UNKNOWN
+        return
     }
 
     console.log("blobs vaild")
     ctx.status = 200
     ctx.type = 'application/json'
-    ctx.set('content-length', `${getBlobsSize(name, sha)}`)
+    ctx.set('content-length', `${getBlobsSize(name, digest)}`)
     ctx.set('Accept-Ranges', 'bytes')
 }
 
@@ -90,7 +94,7 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
             .on('finish', res)
             .on('error', (e) => rej(e.message))
     })
-    const sha256: string = await sha256sum(tempManifest)
+    const sha256: string = await sha256sumOnFile(tempManifest)
 
     const ms = readJsonSync(tempManifest) as ManifestSchema
     console.log("put version", ms.schemaVersion)
@@ -108,25 +112,26 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     console.log("_get_manifests")
     const name: string = ctx.params[0]
     const fmtName = name.split('/')
-    ctx.state.down = false
     ctx.state.name = ctx.params[0]
     ctx.state.ref = ctx.params[1]
-    if (fmtName.length === 4 && name.startsWith('proxy/')
-        && envDownProxyRepos.includes(fmtName[1])) {
-        ctx.state.down = true
+    if (fmtName.length === 4 && name.startsWith(`${envDownProxyPrefix}/`)
+        && envDownProxyRepos.includes(fmtName[1])
+        && !existsSync(getManifestFilePath(name, ctx.state.ref))) {
         ctx.state.name = fmtName.slice(2).join('/')
         ctx.state.proxyRepo = fmtName[1]
+        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name)
+        await next()
     }
-    await next()
+
     console.log("_get_manifests", ctx.params)
     const iname: string = ctx.state.name
     const iref: string = ctx.state.ref
 
     if (!existsSync(getManifestFilePath(iname, iref))) {
-        console.log("not exist")
+        console.log("manifest not exist")
         ctx.status = 404
         ctx.body = MANIFEST_UNKNOWN
-        return await next()
+        return
     }
 
     const manifestFilePath = iref.startsWith('sha256:') ?
@@ -142,70 +147,47 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
 }
 
 export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
-    console.log("_get_manifests")
+    console.log("_get_blobs")
     const name: string = ctx.params[0]
     const fmtName = name.split('/')
-    ctx.state.down = false
     ctx.state.name = ctx.params[0]
     ctx.state.digest = ctx.params[1]
-    if (fmtName.length === 4 && name.startsWith('proxy/')
-        && envDownProxyRepos.includes(fmtName[1])) {
-        ctx.state.down = true
+    if (fmtName.length === 4 && name.startsWith(`${envDownProxyPrefix}/`)
+        && envDownProxyRepos.includes(fmtName[1])
+        && !(checkBlobsExist(ctx.state.name, ctx.state.digest)
+            && checkBlobsSha256sum(ctx.state.name, ctx.state.digest))) {
         ctx.state.name = fmtName.slice(2).join('/')
         ctx.state.proxyRepo = fmtName[1]
-        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name, getBlobsDirectory(ctx.state.name))
+        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name)
+        await next()
     }
 
-    await next()
-
-    console.log("_get_blobs", ctx.params)
-    const iname = ctx.params[0]
-    const idigest = ctx.params[1]
-    if (checkBlobsExist(iname, idigest)) {
+    if (checkBlobsExist(ctx.state.name, ctx.state.digest) && checkBlobsSha256sum(ctx.state.name, ctx.state.digest)) {
         ctx.type = "application/octet-stream"
-        ctx.status = 200
-        createReadStream(getBlobsFilePath(iname, idigest)).pipe(ctx.res)
+        ctx.body = createReadStream(getBlobsFilePath(ctx.state.name, ctx.state.digest))
     } else {
         ctx.status = 404
+        ctx.body = BLOB_UNKNOWN
     }
-    console.log("_get_blobs", "end")
 }
 
 export const _delete_uploads_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     const uid = ctx.params[1]
     console.log('_delete_blobs')
-    console.log(ctx.req.url, ctx.req.method)
     const blobsUid = path.join(BlobsCacheDirectory, uid)
     removeSync(blobsUid)
     ctx.status = 200
 }
 
-export const _try_down_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+export const _try_down_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_try_down_manifests")
-    const name: string = ctx.state.name
     const ref: string = ctx.state.ref
-    if (!ctx.state.down || existsSync(getManifestFilePath(name, ref))) {
-        return await next()
-    }
-    console.log("down manifest ", name, ref)
-    const rc = new RegistryClient(ctx.state.proxyRepo, name, envStorageDirectory, ref)
-    await rc.ping()
-    await rc.login()
-    await rc.reqManifests()
-    persistentManifest(name, ref, rc.manifest)
-    return await next()
+    const rc: RegistryClient = ctx.state.registryClient
+    await rc.downManifest(ref)
 }
 
-export const _try_down_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+export const _try_down_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_try_down_blobs")
-    if (ctx.state.down) {
-        console.log(ctx.state.proxyRepo, ctx.state.name, ctx.state.digest, getBlobsDirectory(ctx.state.name))
-        const rc = ctx.state.registryClient
-        console.log("start ok")
-        await rc.ping()
-        console.log("ping ok")
-        await rc.login()
-        console.log("login ok")
-        await rc.downBlobs(ctx.state.digest)
-    }
+    const rc: RegistryClient = ctx.state.registryClient
+    await rc.downBlobs(ctx.state.digest)
 }

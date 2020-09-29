@@ -5,45 +5,49 @@ import { existsSync, mkdirpSync, rmdirSync, removeSync } from 'fs-extra';
 import { Logger } from 'winston';
 
 import { chunksQueue } from './queue'
-import { mergeFile, sha256sum, sleep } from '../helper';
+import { mergeFile, sha256sumOnFile } from '../helper';
 import { envDownChunkSize } from '../constants'
 import { DownTaskChunk } from './chunk';
 import { ReqHeader } from '../types';
 import * as logger from '../logger'
+
+export interface DownTaskConfig {
+    readonly name: string;
+    readonly url: string;
+    readonly fname: string;
+    readonly dest: string;
+    readonly cacheDest: string;
+    readonly sha256: string;
+    readonly auth?: string;
+}
 
 export class DownTask {
 
     private readonly id: string;
     private readonly log: Logger;
     private blobsBytes = 0;
-    private readonly cacheDest: string;
     private chunks: DownTaskChunk[] = []
-    private readonly name: string
+    private destFile: string;
 
-    constructor(
-        public readonly url: string,
-        public readonly dest: string,
-        private readonly sha256: string,
-        public readonly auth?: string
-    ) {
-        this.name = "aaaa"
-        this.cacheDest = path.join('/tmp', 'cache');
+    constructor(public readonly c: DownTaskConfig) {
         this.id = this.getId()
         this.log = logger.create(`DownTask ${this.id}`)
-        mkdirpSync(path.dirname(dest))
+        this.destFile = path.join(this.c.dest, this.c.fname)
     }
 
     getId(): string {
-        return this.name + '@sha256:' + this.sha256.substr(0, 12)
+        return this.c.name + '@sha256:' + this.c.sha256.substr(0, 12)
     }
 
-    private mkdirCacheDest() {
-        mkdirpSync(this.cacheDest)
+    private mkdirDests() {
+        console.log(this.c.dest, this.c.cacheDest)
+        mkdirpSync(this.c.dest)
+        mkdirpSync(this.c.cacheDest)
     }
 
     private async reqBlobsSize(): Promise<void> {
-        const headers: ReqHeader = this.auth ? { 'authorization': this.auth } : {}
-        const res = (await got.head(this.url, { headers }))
+        const headers: ReqHeader = this.c.auth ? { 'authorization': this.c.auth } : {}
+        const res = (await got.head(this.c.url, { headers }))
         this.blobsBytes = Number(res.headers['content-length'])
 
     }
@@ -54,78 +58,71 @@ export class DownTask {
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * cs
             if (chunksNumber - 1 === i) {
-                this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, this.blobsBytes - 1))
+                this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.c.url, this.c.auth, this.c.cacheDest, r_start, this.blobsBytes - 1))
                 continue
             }
             const r_end = r_start + cs - 1
-            this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.url, this.auth, this.cacheDest, r_start, r_end))
+            this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.c.url, this.c.auth, this.c.cacheDest, r_start, r_end))
         }
     }
 
     private cleanBlobs(): void {
-        removeSync(this.dest)
+        removeSync(this.destFile)
     }
 
     private async combineChunks(): Promise<void> {
         this.cleanBlobs()
         this.log.info(this.id + " combineChunks")
-        for (const cf of Object.keys(this.chunks).map((id) => path.join(this.cacheDest, id))) {
-            console.log(cf, this.dest)
-            await mergeFile(cf, this.dest)
+        for (const cf of Object.keys(this.chunks)
+            .map((id) => path.join(this.c.cacheDest, id))) {
+            await mergeFile(cf, this.destFile)
         }
         this.log.info(this.id + ' combine chunks success.')
     }
 
     private cleanCache() {
-        rmdirSync(this.cacheDest, { recursive: true })
+        rmdirSync(this.c.cacheDest, { recursive: true })
     }
 
     private async checkBlobsShasum(): Promise<boolean> {
-        return await sha256sum(this.dest) === this.sha256
+        return await sha256sumOnFile(this.destFile) === this.c.sha256
     }
 
-    private checkIsDown(): boolean {
-        if (existsSync(this.dest)) {
-            if (this.checkBlobsShasum()) {
-                return false
-            }
+    private async checkIsDown(): Promise<boolean> {
+        if (existsSync(this.destFile) && await this.checkBlobsShasum()) {
+            return false
         }
         return true
     }
 
     async start(): Promise<void> {
         this.log.info('start')
-        if (!this.checkIsDown()) {
-            this.log.info('blobs exist')
+        if (!(await this.checkIsDown())) {
+            this.log.info('blobs exist and vaild.')
             return
         }
+        this.mkdirDests()
         await this.reqBlobsSize()
-        this.mkdirCacheDest()
         this.makeChunks()
-        const succes: number[] = []
-        for (const task of this.chunks) {
-            chunksQueue.push({ task }, (err) => {
-                if (err) {
-                    succes.push(0)
-                } else {
-                    succes.push(1)
-                }
+        const execChunks = this.chunks.map(chunk => {
+            return new Promise<void>((res, rej) => {
+                chunksQueue.push({ task: chunk }, (e) => {
+                    if (e) {
+                        rej(e.message)
+                    } else {
+                        res()
+                    }
+                })
             })
-        }
-        while (succes.length !== this.chunks.length) {
-            await sleep(5000)
-        }
-        if (succes.filter(s => s === 0).length >= 1) {
-            throw new Error('down error')
-        }
-
-        await this.combineChunks()
-        if (this.checkBlobsShasum()) {
+        })
+        try {
+            await Promise.all(execChunks)
+            await this.combineChunks()
+            console.log("blobs sha256sum ok")
             this.log.info('blobs sha256sum ok')
+        } finally {
+            this.log.info('end')
             this.cleanCache()
-        } else {
-            this.log.info('blobs sha256sum faile')
-            this.cleanBlobs()
         }
     }
 }
