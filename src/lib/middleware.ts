@@ -37,17 +37,15 @@ export const _post_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext
     ctx.body = '{}'
 }
 
-export const _head_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
+export const _head_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
     console.log('_head_blobs', ctx.req.method, ctx.req.url)
-    const name = ctx.params[0]
-    const digest = ctx.params[1]
-    if (!checkBlobsExist(name, digest)) {
-        ctx.status = 404
-        ctx.body = BLOB_UNKNOWN
-        return
-    }
-    if (!await checkBlobsSha256sum(name, digest)) {
-        removeSync(getBlobsFilePath(name, digest))
+    ctx.state.digest = ctx.params[1]
+    await next()
+
+    if (!checkBlobsExist(ctx.state.name, ctx.state.digest)) {
+        if (!await checkBlobsSha256sum(ctx.state.name, ctx.state.digest)) {
+            removeSync(getBlobsFilePath(ctx.state.name, ctx.state.digest))
+        }
         ctx.status = 404
         ctx.body = BLOB_UNKNOWN
         return
@@ -56,12 +54,16 @@ export const _head_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext
     console.log("blobs vaild")
     ctx.status = 200
     ctx.type = 'application/json'
-    ctx.set('content-length', `${getBlobsSize(name, digest)}`)
+    ctx.set('content-length', `${getBlobsSize(ctx.state.name, ctx.state.digest)}`)
     ctx.set('Accept-Ranges', 'bytes')
 }
 
-export const _head_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
+export const _head_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+    console.log("_head_manifests")
+    ctx.state.ref = ctx.params[1]
+    await next()
     console.log("_head_manifests", "start")
+    ctx.status = 200
     ctx.body = ""
 }
 
@@ -110,35 +112,22 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
 
 export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
     console.log("_get_manifests")
-    const name: string = ctx.params[0]
-    const fmtName = name.split('/')
-    ctx.state.name = ctx.params[0]
-    ctx.state.ref = ctx.params[1]
-    if (fmtName.length === 4 && name.startsWith(`${envDownProxyPrefix}/`)
-        && envDownProxyRepos.includes(fmtName[1])
-        && !existsSync(getManifestFilePath(name, ctx.state.ref))) {
-        ctx.state.name = fmtName.slice(2).join('/')
-        ctx.state.proxyRepo = fmtName[1]
-        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name)
-        await next()
-    }
-
-    console.log("_get_manifests", ctx.params)
-    const iname: string = ctx.state.name
-    const iref: string = ctx.state.ref
-
-    if (!existsSync(getManifestFilePath(iname, iref))) {
-        console.log("manifest not exist")
+    const ref: string = ctx.state.ref = ctx.params[1]
+    await next()
+    if (!getManifestFilePath(ctx.state.name, ctx.state.ref)) {
+        ctx.type = 'json'
         ctx.status = 404
         ctx.body = MANIFEST_UNKNOWN
         return
     }
 
-    const manifestFilePath = iref.startsWith('sha256:') ?
-        getManifestFilePath(iname, iref) :
-        getManifestFilePath(iname, readFileSync(getManifestFilePath(iname, iref), { encoding: 'utf8' }))
+    const name: string = ctx.state.name
+    console.log(name)
+    const manifestFilePath = ref.startsWith('sha256:') ?
+        getManifestFilePath(name, ref) :
+        getManifestFilePath(name, readFileSync(getManifestFilePath(name, ref), { encoding: 'utf8' }))
 
-    console.log("manifests", iref)
+    console.log("manifests", ref)
     const mfObj = readJsonSync(manifestFilePath) as ManifestSchema;
     ctx.status = 200
     ctx.type = (mfObj.schemaVersion === 1 ? 'application/vnd.docker.distribution.manifest.v1+json' : mfObj.mediaType)
@@ -148,23 +137,12 @@ export const _get_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
 
 export const _get_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
     console.log("_get_blobs")
-    const name: string = ctx.params[0]
-    const fmtName = name.split('/')
-    ctx.state.name = ctx.params[0]
-    ctx.state.digest = ctx.params[1]
-    if (fmtName.length === 4 && name.startsWith(`${envDownProxyPrefix}/`)
-        && envDownProxyRepos.includes(fmtName[1])
-        && !(checkBlobsExist(ctx.state.name, ctx.state.digest)
-            && checkBlobsSha256sum(ctx.state.name, ctx.state.digest))) {
-        ctx.state.name = fmtName.slice(2).join('/')
-        ctx.state.proxyRepo = fmtName[1]
-        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name)
-        await next()
-    }
+    const digest = ctx.state.digest = ctx.params[1]
+    await next()
 
-    if (checkBlobsExist(ctx.state.name, ctx.state.digest) && checkBlobsSha256sum(ctx.state.name, ctx.state.digest)) {
+    if (checkBlobsExist(ctx.state.name, digest) && checkBlobsSha256sum(ctx.state.name, digest)) {
         ctx.type = "application/octet-stream"
-        ctx.body = createReadStream(getBlobsFilePath(ctx.state.name, ctx.state.digest))
+        ctx.body = createReadStream(getBlobsFilePath(ctx.state.name, digest))
     } else {
         ctx.status = 404
         ctx.body = BLOB_UNKNOWN
@@ -181,13 +159,50 @@ export const _delete_uploads_blobs: Router.IMiddleware = async (ctx: Router.IRou
 
 export const _try_down_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_try_down_manifests")
-    const ref: string = ctx.state.ref
     const rc: RegistryClient = ctx.state.registryClient
-    await rc.downManifest(ref)
+    try {
+        await rc.downManifest(ctx.state.ref)
+    } catch (e) {
+        console.log("_try_down_manifest false", e.message)
+    }
 }
 
 export const _try_down_blobs: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
     console.log("_try_down_blobs")
     const rc: RegistryClient = ctx.state.registryClient
-    await rc.downBlobs(ctx.state.digest)
+    try {
+        await rc.downBlobs(ctx.state.digest)
+    } catch (e) {
+        console.log("_try_down_blobs false", e.message)
+    }
+}
+
+export const _set_proxy: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+    console.log("_check_down")
+    const name: string = ctx.state.name = ctx.params[0]
+    const sName = name.split('/')
+    if (name.startsWith(`${envDownProxyPrefix}/`)
+        && envDownProxyRepos.includes(sName[1])) {
+        ctx.state.name = sName.slice(2).join('/')
+        ctx.state.proxyRepo = sName[1]
+        ctx.state.registryClient = new RegistryClient(ctx.state.proxyRepo, ctx.state.name)
+        ctx.state.down = true
+        await next()
+    }
+}
+
+export const _check_manifest: Router.IMiddleware = async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+    await next()
+    console.log(ctx.state.ref)
+    console.log(getManifestFilePath(ctx.state.name, ctx.state.ref))
+    if (!getManifestFilePath(ctx.state.name, ctx.state.ref)) {
+        console.log("_check_manifest")
+        console.log("manifest not exist")
+        ctx.type = 'json'
+        ctx.status = 404
+        ctx.body = MANIFEST_UNKNOWN
+        ctx.throw(404, JSON.stringify({ error: 'Encountered an error' }), { expose: true });
+        // ctx.res.end()
+        return
+    }
 }

@@ -84,6 +84,5 @@ export class RegistryClient {
             auth: this.auth,
         }
         await DownMangerService.addAndWait(dtc)
-        console.log("success down22222222222222222222", digest)
     }
 }

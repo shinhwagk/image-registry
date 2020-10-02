@@ -1,20 +1,9 @@
-export const MANIFEST_UNKNOWN = {
-    errors: [
-        {
-            code: "MANIFEST_UNKNOWN",
-            detail: {},
-            message: "manifest unknown"
-        }
-    ]
+const gen = (code, message) => {
+    return {
+        errors: [{ code, detail: {}, message }]
+    }
 }
 
-export const BLOB_UNKNOWN = {
-    errors: [
-        {
-            code: "BLOB_UNKNOWN",
-            message: "blob unknown to registry",
-            detail: {}
-        },
+export const MANIFEST_UNKNOWN = gen('MANIFEST_UNKNOWN', 'manifest unknown')
 
-    ]
-}
+export const BLOB_UNKNOWN = gen('BLOB_UNKNOWN', 'blob unknown to registry')

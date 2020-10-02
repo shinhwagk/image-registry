@@ -38,7 +38,7 @@
     "compile-tsc": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
     "compile-tsc-watch": "npm rum compile-tsc -- -w",
-    "execute-watch": "nodemon dist/app.js"
+    "execute-watch": "nodemon dist/src/app-all.js"
   },
   "keywords": [],
   "author": "",
