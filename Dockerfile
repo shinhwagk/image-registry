@@ -1,5 +1,5 @@
 FROM node
-WORKDIR build
+WORKDIR /build
 COPY src-repository/ ./src-repository
 COPY webpack.config.js .
 COPY package.json .

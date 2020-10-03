@@ -81,7 +81,7 @@ export class RegistryClient {
             dest: dest || getBlobsDirectory(this.name),
             cacheDest: cacheDest || getDownBlobCacheDirectory(this.name, digest),
             sha256: digest,
-            auth: this.auth,
+            headers: { 'authorization': this.auth },
         }
         await DownMangerService.addAndWait(dtc)
     }

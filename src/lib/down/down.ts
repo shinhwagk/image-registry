@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as http from 'http';
 
 import got from 'got';
 import { existsSync, mkdirpSync, rmdirSync, removeSync } from 'fs-extra';
@@ -7,8 +8,7 @@ import { Logger } from 'winston';
 import { chunksQueue } from './queue'
 import { mergeFile, sha256sumOnFile } from '../helper';
 import { envDownChunkSize } from '../constants'
-import { DownTaskChunk } from './chunk';
-import { ReqHeader } from '../types';
+import { DownTaskChunk, DownTaskChunkConfig } from './chunk';
 import * as logger from '../logger'
 
 export interface DownTaskConfig {
@@ -18,7 +18,7 @@ export interface DownTaskConfig {
     readonly dest: string;
     readonly cacheDest: string;
     readonly sha256: string;
-    readonly auth?: string;
+    readonly headers?: http.IncomingHttpHeaders;
 }
 
 export class DownTask {
@@ -26,7 +26,7 @@ export class DownTask {
     private readonly id: string;
     private readonly log: Logger;
     private blobsBytes = 0;
-    private chunks: DownTaskChunk[] = []
+    private chunks: DownTaskChunkConfig[] = []
     private destFile: string;
 
     constructor(public readonly c: DownTaskConfig) {
@@ -46,10 +46,9 @@ export class DownTask {
     }
 
     private async reqBlobsSize(): Promise<void> {
-        const headers: ReqHeader = this.c.auth ? { 'authorization': this.c.auth } : {}
+        const headers = this.c.headers || {}
         const res = (await got.head(this.c.url, { headers }))
         this.blobsBytes = Number(res.headers['content-length'])
-
     }
 
     private makeChunks(): void {
@@ -57,12 +56,17 @@ export class DownTask {
         const chunksNumber = (this.blobsBytes / cs >> 0) + 1
         for (let i = 0; i < chunksNumber; i++) {
             const r_start = i * cs
+            const headers: http.IncomingHttpHeaders = JSON.parse(JSON.stringify(this.c.headers))
             if (chunksNumber - 1 === i) {
-                this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.c.url, this.c.auth, this.c.cacheDest, r_start, this.blobsBytes - 1))
+                const size = this.blobsBytes - r_start
+                headers.range = `bytes=${r_start}-${this.blobsBytes - 1}`
+                this.chunks.push({ id: "", seq: `${i}`, url: this.c.url, headers, dest: this.c.cacheDest, size })
                 continue
             }
             const r_end = r_start + cs - 1
-            this.chunks.push(DownTaskChunk.create(this.getId() + '@chunk:' + i.toString(), i.toString(), this.c.url, this.c.auth, this.c.cacheDest, r_start, r_end))
+            const size = r_end - r_start + 1
+            headers.range = `bytes=${r_start}-${r_end}`
+            this.chunks.push({ id: "", seq: `${i} `, url: this.c.url, headers, dest: this.c.cacheDest, size })
         }
     }
 
@@ -105,8 +109,9 @@ export class DownTask {
         await this.reqBlobsSize()
         this.makeChunks()
         const execChunks = this.chunks.map(chunk => {
+            const task = new DownTaskChunk(chunk)
             return new Promise<void>((res, rej) => {
-                chunksQueue.push({ task: chunk }, (e) => {
+                chunksQueue.push({ task }, (e) => {
                     if (e) {
                         rej(e.message)
                     } else {

@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"shinhwagk.vscode-note",
+		"dbaeumer.vscode-eslint",
+		"humao.rest-client",
+		"howardzuo.vscode-npm-dependency",
+		"shinhwagk.vscode-googletran-zh"
+	]
+}
