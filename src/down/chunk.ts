@@ -13,20 +13,21 @@ import { ITask } from '../types';
 
 export interface DownTaskChunkConfig {
     id: string,
-    seq: string,
+    seq: number,
     url: string,
-    headers: http.IncomingHttpHeaders,
-    dest: string, size: number
+    headers?: http.IncomingHttpHeaders,
+    dest: string,
+    size: number
 }
 
 export class DownTaskChunk implements ITask {
-    private readonly chunk: string
+    private readonly destFile: string
     private readonly log: Logger;
 
     constructor(
         public readonly c: DownTaskChunkConfig
     ) {
-        this.chunk = path.join(this.c.dest, this.c.seq)
+        this.destFile = path.join(this.c.dest, this.c.seq.toString())
         this.log = logger.create(`DownTaskChunk ${this.c.id}`)
     }
 
@@ -46,7 +47,7 @@ export class DownTaskChunk implements ITask {
         const pipeline = promisify(stream.pipeline);
         const source = got.stream(this.c.url, { headers: this.c.headers, timeout: 20 * 1000 })//, agent: agent
             .on('request', request => setTimeout(() => request.destroy(), 30 * 1000));
-        const target = fs.createWriteStream(this.chunk)
+        const target = fs.createWriteStream(this.destFile)
         await pipeline(source, target)
         if (this.checkExist()) {
             if (this.checkValid()) {
@@ -60,15 +61,15 @@ export class DownTaskChunk implements ITask {
     }
 
     private remove() {
-        fs.removeSync(this.chunk)
+        fs.removeSync(this.destFile)
     }
 
     private checkExist(): boolean {
-        return fs.existsSync(this.chunk)
+        return fs.existsSync(this.destFile)
     }
 
     private checkValid(): boolean {
-        return fs.statSync(this.chunk).size === this.c.size
+        return fs.statSync(this.destFile).size === this.c.size
     }
 
 }

@@ -4,6 +4,7 @@
   "description": "a simple image layer proxy",
   "dependencies": {
     "async": "^3.2.0",
+    "compression-webpack-plugin": "^6.0.2",
     "fs-extra": "^9.0.1",
     "got": "^11.7.0",
     "koa": "^2.13.0",
@@ -35,6 +36,7 @@
   },
   "scripts": {
     "test": "mocha dist/test --timeout 100000",
+    "test-watch": "mocha dist/test --timeout 100000",
     "compile-tsc": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
     "compile-tsc-watch": "npm rum compile-tsc -- -w",

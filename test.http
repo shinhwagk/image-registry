@@ -23,7 +23,7 @@ GET http://127.0.0.1:3001/v2/ HTTP/1.1
 GET http://127.0.0.1:3001/v2/openshift/okd-content/manifests/4.5.0-0.okd-2020-08-12-020541-coredns HTTP/1.1
 
 ###test 
-GET http://127.0.0.1:3001/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95 HTTP/1.1
+HEAD http://127.0.0.1:3001/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95 HTTP/1.1
 
 
 ### test nginx
