@@ -3,6 +3,35 @@ import { existsSync, mkdirpSync, rmdirSync } from "fs-extra";
 import { RegistryClient } from "../src/client";
 import { DownManager } from "../src/down/manager";
 import { sha256sumOnFile } from "../src/helper";
+import { ThirdRegistry } from "../src/registry";
+import { DistributionFS } from "../src/storage";
+
+// describe('got manfiest', () => {
+//     const fs = new DistributionFS('quay.io/outline/shadowbox');
+//     const rc = new RegistryClient('quay.io', 'outline/shadowbox', fs)
+//     it("xxx", async () => {
+//         await rc.gotManifest('daily')
+//         assert.strictEqual(1, 1)
+//     }).timeout(10000)
+// })
+
+// describe('got blob', () => {
+//     const fs = new DistributionFS('quay.io/outline/shadowbox');
+//     const rc = new RegistryClient('quay.io', 'outline/shadowbox', fs)
+//     it("xxx", async () => {
+//         await rc.gotBlob('sha256:01dd96e21c1a39e310ccec12dc27f88574a1ebf8fd5952fdb352324d5488a873')
+//         assert.strictEqual(1, 1)
+//     }).timeout(10000)
+// })
+
+describe('got manfiest', () => {
+    const fs = new DistributionFS('docker.io', 'library/node');
+    const rc = new RegistryClient(ThirdRegistry['docker.io'], 'library/node', fs)
+    it("docker.io node", async () => {
+        await rc.gotBlob('sha256:e5c5821cd8891e4cb78b57e971882385cf3d9541a6071c9ae64263c7ed8152b4')
+        assert.strictEqual(1, 1)
+    }).timeout(10000)
+})
 
 // const dest = "storage"
 // async function test_client() {

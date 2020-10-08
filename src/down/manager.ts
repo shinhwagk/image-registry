@@ -34,7 +34,7 @@ export class DownManager {
     }
 
     private getTaskId(dtc: DownTaskConfig): string {
-        return dtc.name + '@sha256:' + dtc.sha256.substr(0, 12)
+        return dtc.name + '@' + dtc.sha256.substr(0, 19)
     }
 
     public async wait(tc: DownTaskConfig): Promise<void> {

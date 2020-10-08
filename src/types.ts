@@ -26,14 +26,17 @@ export interface IDistribution {
     statBlob(digest: string): { size: number };
     readerBlob(digest: string): ReadStream;
     saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void;
+    saveRawManifest(ref: string, type: string, digest: string, raw: string): void;
     writerBlob(digest: string): WriteStream;
     findManifest(ref: string): ManifestSchema | undefined;
-    statManifest(ms: ManifestSchema): ManifestStat
+    statManifest(ref: string, ms: ManifestSchema): ManifestStat;
+    readerRawManfiest(digest: string): string
 }
 
 export abstract class AbsDistribution implements IDistribution {
+    protected readonly daemon: string
     protected readonly name: string
-    constructor(name: string) { this.name = name }
+    constructor(daemon: string, name: string) { this.daemon = daemon; this.name = name }
     abstract validateManifest(ref: string): Promise<boolean>
     abstract validateBlob(digest: string): Promise<boolean>
     abstract statBlob(digest: string): { size: number; }
@@ -42,7 +45,12 @@ export abstract class AbsDistribution implements IDistribution {
     abstract saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void
     abstract writerBlob(digest: string): WriteStream
     abstract findManifest(ref: string): ManifestSchema | undefined
-    abstract statManifest(ms: ManifestSchema): ManifestStat
+    abstract statManifest(ref: string, ms: ManifestSchema): ManifestStat
+    abstract saveRawManifest(ref: string, type: string, digest: string, raw: string): void;
+    abstract readerRawManfiest(digest: string): string
+    protected checkRefType(ref: string): 'tag' | 'digest' {
+        return ref.startsWith('sha256:') ? "digest" : "tag"
+    }
 }
 
 export interface ManifestStat {
@@ -52,10 +60,11 @@ export interface ManifestStat {
 export type ManifestMedia = 'application/vnd.docker.distribution.manifest.list.v2+json' | 'application/vnd.docker.distribution.manifest.v2+json'
 
 export interface GlobalState {
+    fullName: string;
     name: string;
     ref: string; // tag or sha256
     digest: string; // blob dig
-    proxyRepo: string;
+    proxyDaemon: string;
     registryClient: RegistryClient;
     storage: IDistribution;
     proxy: boolean;

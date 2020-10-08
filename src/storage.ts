@@ -5,7 +5,7 @@ import { statSync, existsSync, mkdirpSync, writeFileSync, ReadStream, createRead
 
 import { envDistribution } from './constants'
 import { sha256sumOnFile, sha256sumOnString as sha256sumOnString } from './helper'
-import { ManifestSchema, IDistribution, ManifestSchemaV2, AbsDistribution, ManifestStat } from './types'
+import { ManifestSchema, ManifestSchemaV2, AbsDistribution, ManifestStat } from './types'
 
 export const CacheDirectory = path.join(envDistribution, 'cache')
 
@@ -39,11 +39,11 @@ export function createblobDirectory(name: string): void {
 }
 
 export function getblobDirectory(name: string): string {
-    return path.join(envDistribution, name, 'blob')
+    return path.join(envDistribution, name, 'blobs')
 }
 
 export function getblobFilePath(name: string, digest: string): string {
-    return path.join(getblobDirectory(name), 'sha256:' + digest)
+    return path.join(getblobDirectory(name), digest)
 }
 
 export function checkblobExist(name: string, digest: string): boolean {
@@ -70,7 +70,7 @@ export function getManifestFileForDigest(name: string, digest: string): string {
     return path.join(envDistribution, name, 'manifests', 'digests', digest)
 }
 
-export function getManifestFilePath(name: string, ref: string): string {
+function getManifestFilePath(name: string, ref: string): string {
     if (ref.startsWith('sha256:')) {
         return getManifestFileForDigest(name, ref)
     } else {
@@ -79,101 +79,111 @@ export function getManifestFilePath(name: string, ref: string): string {
     }
 }
 
-export function persistentManifest(name: string, ref: string, content: string): void {
-    const ms = JSON.parse(content) as ManifestSchema
-    const sha256 = sha256sumOnString(content)
+function persistentManifest(name: string, ref: string, rawManifest: string, mediaType: string, digest: string): void {
     createManifestsDirectories(name, ref)
-    const mediaType: string = ms.schemaVersion === 1
-        ? 'vnd.docker.distribution.manifest.v1+json'
-        : (ms as ManifestSchemaV2).mediaType.substr(12)
     if (!ref.startsWith('sha256:')) {
-        writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType), `sha256:${sha256}`, { encoding: "utf8" })
+        writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType.substr(12)), digest, { encoding: "utf8" })
     }
-    const manifestFile = getManifestFilePath(name, `sha256:${sha256}`)
-    writeFileSync(manifestFile, content, { encoding: 'utf8' })
+    const manifestFile = getManifestFilePath(name, digest)
+    writeFileSync(manifestFile, rawManifest, { encoding: 'utf8' })
 }
 
 function getManifestFileForTags(name: string, tag: string): string | undefined {
     const tagDirectory = getManifestsDirectory(name, tag)
-    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json'))) {
-        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.list.v2+json')
-    }
-    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json'))) {
-        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.v2+json')
-    }
-    if (existsSync(path.join(tagDirectory, 'vnd.docker.distribution.manifest.v1+json'))) {
-        return path.join(tagDirectory, 'vnd.docker.distribution.manifest.v1+json')
+    const mediaTypes = ['vnd.docker.distribution.manifest.list.v2+json'
+        , 'vnd.docker.distribution.manifest.v2+json'
+        , 'vnd.docker.distribution.manifest.v1+json']
+    for (const mt of mediaTypes) {
+        const tagFile = path.join(tagDirectory, mt)
+        if (existsSync(tagFile)) {
+            return tagFile
+        }
     }
     return undefined
 }
 
 export class DistributionFS extends AbsDistribution {
-    constructor(name: string) { super(name) }
+    constructor(daemon: string, name: string) { super(daemon, name) }
 
     public findManifest(ref: string): ManifestSchema | undefined {
-        if (ref.startsWith('sha256:')) {
-            return this.findManifestByDigest(ref.substr(7))
+        if (this.checkRefType(ref) === 'digest') {
+            return this.findManifestByDigest(ref)
         }
         return this.findManifestByTag(ref)
     }
 
     public findManifestByDigest(digest: string): ManifestSchema | undefined {
-        return readJsonSync(getManifestFileForDigest(this.name, digest), { encoding: 'utf8' })
+        if (existsSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest))) {
+            return readJsonSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest), { encoding: 'utf8' })
+        }
+        return undefined
     }
 
     public findManifestByTag(tag: string): ManifestSchema | undefined {
-        const tagFile = getManifestFileForTags(this.name, tag)
+        const tagFile = getManifestFileForTags(this.daemon + '/' + this.name, tag)
         if (tagFile === undefined) return undefined
         return this.findManifestByDigest(readFileSync(tagFile, { encoding: 'utf8' }))
     }
 
     async validateManifest(ref: string): Promise<boolean> {
         if (ref.startsWith('sha256:')) {
-            const mfile = getManifestFileForDigest(this.name, ref)
+            const mfile = getManifestFileForDigest(this.daemon + '/' + this.name, ref)
             return (await sha256sumOnFile(mfile)) === ref.substr(7)
         }
-        const mftag = getManifestFileForTags(this.name, ref)
+        const mftag = getManifestFileForTags(this.daemon + '/' + this.name, ref)
         if (!mftag) { return false }
         const digest = readFileSync(mftag, { encoding: 'utf8' })
         return this.validateManifest(digest)
     }
 
-    statManifest(ms: ManifestSchema): ManifestStat {
+    public statManifest(ref: string, ms: ManifestSchema): ManifestStat {
         const mediaType = ms.schemaVersion === 1
             ? 'application/vnd.docker.distribution.manifest.v1+json'
             : (ms as ManifestSchemaV2).mediaType
-        const digest = sha256sumOnString(JSON.stringify(ms))
-        return { version: ms.schemaVersion, mediaType, digest, size: JSON.stringify(ms).length }
+        let digest = ref
+        if (this.checkRefType(ref) === 'tag') {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const tagpath = getManifestFileForTags(this.daemon + '/' + this.name, ref)!
+            digest = readFileSync(tagpath, { encoding: 'utf8' })
+        }
+        const size = this.readerRawManfiest(digest).length
+        // digest = ref.substr(7)
+        return { version: ms.schemaVersion, mediaType, digest, size }
     }
 
     public saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void {
-        persistentManifest(this.name, ref, JSON.stringify(manifest))
-        // createManifestsDirectories(this.name, ref)
+        // persistentManifest(this.daemon+'/'+this.name, ref, JSON.stringify(manifest))
+        // createManifestsDirectories(this.daemon+'/'+this.name, ref)
         // if (ref.startsWith('sha256:')) {
 
         // } else {
         //     if (manifest.SchemaVersion === 1) {
-        //         saveManifestForV1(this.name, ref)
+        //         saveManifestForV1(this.daemon+'/'+this.name, ref)
         //     }
         // }
         // return
+    }
+    public readerRawManfiest(digest: string): string {
+        return readFileSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest), { encoding: 'utf8' })
+    }
+
+    public saveRawManifest(ref: string, type: string, digest: string, raw: string): void {
+        // const manifest = JSON.parse(raw) as ManifestSchema
+        // const { digest, version, mediaType } = this.statManifest(manifest)
+        persistentManifest(this.daemon + '/' + this.name, ref, raw, type, digest)
+
     }
 
     public existManifest(ref: string): boolean {
         return false
     }
 
-    public readerBlob(sha256: string): ReadStream {
-        return createReadStream('./')
+    public readerBlob(digest: string): ReadStream {
+        return createReadStream(getblobFilePath(this.daemon + '/' + this.name, digest))
     }
 
-    async validateBlob(sha256: string): Promise<boolean> {
-        if (this.existBlob(sha256)) {
-            return true
-        } else {
-            return false
-        }
-        return false
+    async validateBlob(digest: string): Promise<boolean> {
+        return this.existBlob(digest)
     }
 
     public saveBlob(buffer: ReadStream): void {
@@ -181,21 +191,21 @@ export class DistributionFS extends AbsDistribution {
     }
 
     public writerBlob(digest: string): WriteStream {
-        return createWriteStream(getblobFilePath(this.name, digest))
+        return createWriteStream(getblobFilePath(this.daemon + '/' + this.name, digest))
     }
 
-    public removeBlob(sha256: string): void {
+    public removeBlob(digest: string): void {
         return
     }
 
-    public statBlob(sha256: string): { size: number } {
+    public statBlob(digest: string): { size: number } {
         return {
             size: 1
         }
     }
 
-    public existBlob(sha256: string): boolean {
-        return false
+    public existBlob(digest: string): boolean {
+        return checkblobExist(this.daemon + '/' + this.name, digest)
     }
 
 }

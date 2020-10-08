@@ -8,6 +8,7 @@ import { DownTaskChunk, DownTaskChunkConfig } from "../src/down/chunk"
 import { DownMangerService } from '../src/down/manager'
 import { RegistryClient } from '../src/client'
 import { DistributionFS } from '../src/storage'
+import { ThirdRegistry } from '../src/registry'
 
 describe('down', () => {
     const dest = 'storage'
@@ -74,8 +75,8 @@ describe('down', () => {
 
 describe('client', () => {
     it("", async () => {
-        const d = new DistributionFS(`quay.io/outline/shadowbox`)
-        const rc = new RegistryClient('quay.io', 'outline/shadowbox', d)
+        const d = new DistributionFS('quay.io', `/outline/shadowbox`)
+        const rc = new RegistryClient(ThirdRegistry['quay.io'], 'outline/shadowbox', d)
         await rc.gotManifest('server-2020-09-28')
         assert.strictEqual(1, 1)
     }).timeout(60 * 1000)

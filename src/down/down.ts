@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as http from 'http';
 
 import got from 'got';
-import { existsSync, mkdirpSync, rmdirSync, removeSync, WriteStream } from 'fs-extra';
+import { existsSync, mkdirpSync, rmdirSync, removeSync } from 'fs-extra';
 import { Logger } from 'winston';
 
 import { chunksQueue } from './queue'
@@ -10,6 +10,7 @@ import { mergeFile, sha256sumOnFile } from '../helper';
 import { envDownChunkSize } from '../constants'
 import { DownTaskChunk, DownTaskChunkConfig } from './chunk';
 import * as logger from '../logger'
+import { v4 } from 'uuid';
 
 export interface DownTaskConfig {
     readonly name: string;
@@ -28,21 +29,22 @@ export class DownTask {
     private blobBytes = 0;
     private readonly chunks: DownTaskChunkConfig[] = []
     private readonly destFile: string;
+    private readonly cacheDest: string;
 
     constructor(public readonly c: DownTaskConfig) {
         this.id = this.getId()
         this.log = logger.create(`DownTask ${this.id}`)
         this.destFile = path.join(this.c.dest, this.c.fname)
+        this.cacheDest = path.join(c.cacheDest, v4())
     }
 
     getId(): string {
-        return this.c.name + '@sha256:' + this.c.sha256.substr(0, 12)
+        return this.c.name + '@' + this.c.sha256.substr(0, 19)
     }
 
     private mkdirDests() {
-        console.log(this.c.dest, this.c.cacheDest)
         mkdirpSync(this.c.dest)
-        mkdirpSync(this.c.cacheDest)
+        mkdirpSync(this.cacheDest)
     }
 
     private async reqblobSize(): Promise<void> {
@@ -60,13 +62,13 @@ export class DownTask {
             if (chunksNumber - 1 === i) {
                 const size = this.blobBytes - r_start
                 headers.range = `bytes=${r_start}-${this.blobBytes - 1}`
-                this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.c.cacheDest, size })
+                this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
                 continue
             }
             const r_end = r_start + cs - 1
             const size = r_end - r_start + 1
             headers.range = `bytes=${r_start}-${r_end}`
-            this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.c.cacheDest, size })
+            this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
         }
     }
 
@@ -78,14 +80,14 @@ export class DownTask {
         this.cleanblob()
         this.log.info(this.id + " combineChunks")
         for (const cf of Object.keys(this.chunks)
-            .map((id) => path.join(this.c.cacheDest, id))) {
+            .map((id) => path.join(this.cacheDest, id))) {
             await mergeFile(cf, this.destFile)
         }
         this.log.info(this.id + ' combine chunks success.')
     }
 
     private cleanCache() {
-        rmdirSync(this.c.cacheDest, { recursive: true })
+        rmdirSync(this.cacheDest, { recursive: true })
     }
 
     private async checkblobShasum(): Promise<boolean> {
@@ -115,6 +117,7 @@ export class DownTask {
                     if (e) {
                         rej(e.message)
                     } else {
+                        console.log(chunk.seq, this.chunks.length, this.c.sha256.substr(19), 'success')
                         res()
                     }
                 })

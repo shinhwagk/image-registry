@@ -46,8 +46,13 @@ GET http://127.0.0.1:8000/v2/library/node/manifests/12 HTTP/1.1
 GET http://127.0.0.1:3000/v2/ HTTP/1.1
 
 ###
-GET http://quay.io/v2 HTTP/1.1
+GET https://quay.io/v2 HTTP/1.1
 
+###
+GET https://docker.io/v2/ HTTP/1.1
+docker-distribution-api-version: registry/2.0
+user-agent:"docker/19.03.12 go/go1.13.10 git-commit/48a66213fe kernel/4.19.84-microsoft-standard os/linux arch/amd64 UpstreamClient(Docker-Client/19.03.12 \\(linux\\))"
+accept-encoding:"gzip"
 
 ###
 GET  https://quay.io/v2/auth?service=quay.io&scope=repository:outline/shadowbox:pull HTTP/1.1

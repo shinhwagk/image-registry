@@ -1,0 +1,5 @@
+{
+    "bootstrap": "dist/src/app.js",
+    "watch": "dist/src",
+    "interval": 1000
+}

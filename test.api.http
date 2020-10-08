@@ -13,7 +13,12 @@ HEAD http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/manifests/latest HTTP/1.
 GET http://127.0.0.1:8003/v2/quay.io/coreos/etcd/manifests/latest HTTP/1.1
 
 ###
+HEAD http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/manifests/latest HTTP/1.1
+
+###
 HEAD http://127.0.0.1:8003/v2/quay.io/coreos/etcd/manifests/latest HTTP/1.1
 
 ###
 HEAD http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/blobs/sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4 HTTP/1.1
+###
+GET http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/blobs/sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4 HTTP/1.1
