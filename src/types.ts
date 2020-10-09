@@ -27,7 +27,7 @@ export interface IDistribution {
     readerBlob(digest: string): ReadStream;
     saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void;
     saveRawManifest(ref: string, type: string, digest: string, raw: string): void;
-    writerBlob(digest: string): WriteStream;
+    writerBlob(digest: string, uuid: string): Promise<void>
     findManifest(ref: string): ManifestSchema | undefined;
     statManifest(ref: string, ms: ManifestSchema): ManifestStat;
     readerRawManfiest(digest: string): string
@@ -36,14 +36,15 @@ export interface IDistribution {
 export abstract class AbsDistribution implements IDistribution {
     protected readonly daemon: string
     protected readonly name: string
-    constructor(daemon: string, name: string) { this.daemon = daemon; this.name = name }
+    protected readonly fullName: string
+    constructor(daemon: string, name: string) { this.daemon = daemon; this.name = name, this.fullName = this.daemon + '/' + this.name }
     abstract validateManifest(ref: string): Promise<boolean>
     abstract validateBlob(digest: string): Promise<boolean>
     abstract statBlob(digest: string): { size: number; }
     // abstract statManifest(ref: string): { size: number; }
     abstract readerBlob(digest: string): ReadStream
     abstract saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void
-    abstract writerBlob(digest: string): WriteStream
+    abstract writerBlob(digest: string, uuid: string): Promise<void>
     abstract findManifest(ref: string): ManifestSchema | undefined
     abstract statManifest(ref: string, ms: ManifestSchema): ManifestStat
     abstract saveRawManifest(ref: string, type: string, digest: string, raw: string): void;
@@ -65,10 +66,12 @@ export interface GlobalState {
     ref: string; // tag or sha256
     digest: string; // blob dig
     proxyDaemon: string;
+    daemon: string;
     registryClient: RegistryClient;
     storage: IDistribution;
     proxy: boolean;
     proxyPrefix: string;
+    logger: any
 }
 
 export type KoaStateContext = Koa.ParameterizedContext<GlobalState>

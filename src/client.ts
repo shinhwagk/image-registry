@@ -17,7 +17,7 @@ function parserHeaderWWWAuthenticate(header: string): [string | undefined, strin
 
 export class RegistryClient {
     auth?: string
-    authUrl?: string = undefined
+    authUrl?: string
     serviceUrl?: string
     isAuth = false
     manifestType = ""
@@ -75,18 +75,28 @@ export class RegistryClient {
         this.distribution.saveRawManifest(ref, this.manifestType, this.manifestDigest, rawManifest)
     }
 
-    public async gotBlob(digest: string, dest?: string, cacheDest?: string): Promise<void> {
+    public async _gotBlob(digest: string, dest?: string, cacheDest?: string): Promise<void> {
         await this.tryGetAuth()
-        console.log(this.getblobUrl(digest))
         const dtc: DownTaskConfig = {
             name: `${this.name}`,
             url: this.getblobUrl(digest),
             fname: digest,
             dest: dest || getblobDirectory(this.registry.daemon + '/' + this.name),
-            cacheDest: DownCache,
-            sha256: digest.substr(7),
+            cacheDest: cacheDest || DownCache,
+            shasum: digest.substr(7),
             headers: { 'authorization': this.auth }
         }
         await DownMangerService.addAndWait(dtc)
+    }
+
+    public async gotBlob(digest: string, dest?: string, cacheDest?: string, retry = 5): Promise<void> {
+        for (const _i of Array(retry)) {
+            try {
+                await this._gotBlob(digest, dest, cacheDest)
+                return;
+            } catch (e) {
+                throw new Error(e.message)
+            }
+        }
     }
 }

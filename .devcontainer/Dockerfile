@@ -1,7 +1,7 @@
 FROM node:14
 
 RUN npm config set registry https://registry.npm.taobao.org
-RUN npm i -g webpack webpack-cli typescript ts-node nodemon mocha
+RUN npm i -g webpack webpack-cli typescript ts-node monproc mocha
 
 RUN sed -i 's/deb\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list && \
     sed -i 's/security\.debian\.org/mirrors\.aliyun\.com/' /etc/apt/sources.list

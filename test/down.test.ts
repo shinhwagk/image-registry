@@ -38,7 +38,7 @@ describe('down', () => {
                 fname: 'sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
                 dest,
                 cacheDest: 'storage/cache',
-                sha256: '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
+                shasum: '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
                 headers: {}
             }
             const tw = new DownTask(config)

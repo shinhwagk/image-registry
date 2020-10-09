@@ -12,6 +12,7 @@ import { ITask } from '../types';
 // import { agent } from '../constants';
 
 export interface DownTaskChunkConfig {
+    name: string;
     id: string,
     seq: number,
     url: string,
@@ -28,7 +29,7 @@ export class DownTaskChunk implements ITask {
         public readonly c: DownTaskChunkConfig
     ) {
         this.destFile = path.join(this.c.dest, this.c.seq.toString())
-        this.log = logger.create(`DownTaskChunk ${this.c.id}`)
+        this.log = logger.create(`DownTaskChunk`)(this.c.name)
     }
 
     checkIsDown(): boolean {
@@ -51,7 +52,7 @@ export class DownTaskChunk implements ITask {
         await pipeline(source, target)
         if (this.checkExist()) {
             if (this.checkValid()) {
-                this.log.info('done')
+                this.log.info(this.c.seq + ' done')
                 return
             } else {
                 this.remove()

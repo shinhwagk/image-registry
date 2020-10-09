@@ -5,8 +5,13 @@ import { sleep } from '../helper';
 import { envLogLevel } from '../constants';
 import { create } from '../logger';
 
-const log = create('queue')
+const log = create('queue')('')
 
+/**
+ * @param qc concurrency number
+ * @param rt retry number
+ * @param ri 1s retry interval
+ */
 function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ task: ITask }> {
     return async.queue<{ task: ITask }>(({ task }, qcb) => {
         async.retry({ times: rt, interval: ri }, (rcb) => {
@@ -17,7 +22,7 @@ function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ 
     }, qc);
 }
 
-export const chunksQueue = makeTasksQueue(2, 10, 1000);
+export const chunksQueue = makeTasksQueue(10, 10, 1000);
 
 if (envLogLevel === 'debug') {
     (async () => {

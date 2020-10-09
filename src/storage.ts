@@ -1,11 +1,12 @@
 
 import * as path from 'path'
 
-import { statSync, existsSync, mkdirpSync, writeFileSync, ReadStream, createReadStream, WriteStream, createWriteStream, readFileSync, readJsonSync } from 'fs-extra'
+import { statSync, existsSync, mkdirpSync, writeFileSync, ReadStream, createReadStream, WriteStream, createWriteStream, readFileSync, readJsonSync, removeSync, moveSync } from 'fs-extra'
 
 import { envDistribution } from './constants'
 import { sha256sumOnFile, sha256sumOnString as sha256sumOnString } from './helper'
 import { ManifestSchema, ManifestSchemaV2, AbsDistribution, ManifestStat } from './types'
+import { ManifestMediaTypes } from './protocols'
 
 export const CacheDirectory = path.join(envDistribution, 'cache')
 
@@ -34,20 +35,20 @@ export function createManifestsDirectories(name: string, ref: string): void {
     mkdirpSync(getManifestsDirectory(name, 'sha256'))
 }
 
-export function createblobDirectory(name: string): void {
+export function createBlobsDirectory(name: string): void {
     mkdirpSync(getblobDirectory(name))
 }
 
-export function getblobDirectory(name: string): string {
-    return path.join(envDistribution, name, 'blobs')
+export function getblobDirectory(fullName: string): string {
+    return path.join(envDistribution, fullName, 'blobs')
 }
 
-export function getblobFilePath(name: string, digest: string): string {
-    return path.join(getblobDirectory(name), digest)
+export function getblobFilePath(fullName: string, digest: string): string {
+    return path.join(getblobDirectory(fullName), digest)
 }
 
-export function checkblobExist(name: string, digest: string): boolean {
-    return existsSync(getblobFilePath(name, digest))
+export function checkblobExist(fullName: string, digest: string): boolean {
+    return existsSync(getblobFilePath(fullName, digest))
 }
 
 export function getManifestsDirectory(name: string, ref: string): string {
@@ -62,8 +63,8 @@ export function getblobSize(name: string, sha: string): number {
     return statSync(getblobFilePath(name, sha)).size
 }
 
-export async function checkblobSha256sum(name: string, digest: string): Promise<boolean> {
-    return (await sha256sumOnFile(getblobFilePath(name, digest))) === digest
+export async function checkblobSha256sum(name: string, digest: string, shasum: string): Promise<boolean> {
+    return (await sha256sumOnFile(getblobFilePath(name, digest))) === shasum
 }
 
 export function getManifestFileForDigest(name: string, digest: string): string {
@@ -90,10 +91,7 @@ function persistentManifest(name: string, ref: string, rawManifest: string, medi
 
 function getManifestFileForTags(name: string, tag: string): string | undefined {
     const tagDirectory = getManifestsDirectory(name, tag)
-    const mediaTypes = ['vnd.docker.distribution.manifest.list.v2+json'
-        , 'vnd.docker.distribution.manifest.v2+json'
-        , 'vnd.docker.distribution.manifest.v1+json']
-    for (const mt of mediaTypes) {
+    for (const mt of ManifestMediaTypes) {
         const tagFile = path.join(tagDirectory, mt)
         if (existsSync(tagFile)) {
             return tagFile
@@ -113,24 +111,24 @@ export class DistributionFS extends AbsDistribution {
     }
 
     public findManifestByDigest(digest: string): ManifestSchema | undefined {
-        if (existsSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest))) {
-            return readJsonSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest), { encoding: 'utf8' })
+        if (existsSync(getManifestFileForDigest(this.fullName, digest))) {
+            return readJsonSync(getManifestFileForDigest(this.fullName, digest), { encoding: 'utf8' })
         }
         return undefined
     }
 
     public findManifestByTag(tag: string): ManifestSchema | undefined {
-        const tagFile = getManifestFileForTags(this.daemon + '/' + this.name, tag)
+        const tagFile = getManifestFileForTags(this.fullName, tag)
         if (tagFile === undefined) return undefined
         return this.findManifestByDigest(readFileSync(tagFile, { encoding: 'utf8' }))
     }
 
     async validateManifest(ref: string): Promise<boolean> {
         if (ref.startsWith('sha256:')) {
-            const mfile = getManifestFileForDigest(this.daemon + '/' + this.name, ref)
+            const mfile = getManifestFileForDigest(this.fullName, ref)
             return (await sha256sumOnFile(mfile)) === ref.substr(7)
         }
-        const mftag = getManifestFileForTags(this.daemon + '/' + this.name, ref)
+        const mftag = getManifestFileForTags(this.fullName, ref)
         if (!mftag) { return false }
         const digest = readFileSync(mftag, { encoding: 'utf8' })
         return this.validateManifest(digest)
@@ -143,7 +141,7 @@ export class DistributionFS extends AbsDistribution {
         let digest = ref
         if (this.checkRefType(ref) === 'tag') {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const tagpath = getManifestFileForTags(this.daemon + '/' + this.name, ref)!
+            const tagpath = getManifestFileForTags(this.fullName, ref)!
             digest = readFileSync(tagpath, { encoding: 'utf8' })
         }
         const size = this.readerRawManfiest(digest).length
@@ -164,13 +162,13 @@ export class DistributionFS extends AbsDistribution {
         // return
     }
     public readerRawManfiest(digest: string): string {
-        return readFileSync(getManifestFileForDigest(this.daemon + '/' + this.name, digest), { encoding: 'utf8' })
+        return readFileSync(getManifestFileForDigest(this.fullName, digest), { encoding: 'utf8' })
     }
 
     public saveRawManifest(ref: string, type: string, digest: string, raw: string): void {
         // const manifest = JSON.parse(raw) as ManifestSchema
         // const { digest, version, mediaType } = this.statManifest(manifest)
-        persistentManifest(this.daemon + '/' + this.name, ref, raw, type, digest)
+        persistentManifest(this.fullName, ref, raw, type, digest)
 
     }
 
@@ -179,23 +177,26 @@ export class DistributionFS extends AbsDistribution {
     }
 
     public readerBlob(digest: string): ReadStream {
-        return createReadStream(getblobFilePath(this.daemon + '/' + this.name, digest))
+        return createReadStream(getblobFilePath(this.fullName, digest))
     }
 
     async validateBlob(digest: string): Promise<boolean> {
-        return this.existBlob(digest)
+        const v = this.existBlob(digest) && await checkblobSha256sum(this.fullName, digest, digest.substr(7))
+        if (v === false) { this.removeBlob(digest) }
+        return v
     }
 
     public saveBlob(buffer: ReadStream): void {
         return
     }
 
-    public writerBlob(digest: string): WriteStream {
-        return createWriteStream(getblobFilePath(this.daemon + '/' + this.name, digest))
+    public async writerBlob(digest: string, uuid: string): Promise<void> {
+        createBlobsDirectory(this.fullName)
+        moveSync(path.join(blobsCacheDirectory, uuid), getblobFilePath(this.fullName, digest), { overwrite: true })
     }
 
     public removeBlob(digest: string): void {
-        return
+        return removeSync(getblobFilePath(this.fullName, digest))
     }
 
     public statBlob(digest: string): { size: number } {
@@ -205,7 +206,7 @@ export class DistributionFS extends AbsDistribution {
     }
 
     public existBlob(digest: string): boolean {
-        return checkblobExist(this.daemon + '/' + this.name, digest)
+        return checkblobExist(this.fullName, digest)
     }
 
 }

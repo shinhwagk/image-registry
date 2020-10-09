@@ -34,7 +34,8 @@ GET http://reverse:8888/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612
 GET http://127.0.0.1:8000/v2/openshift/okd-content/manifests/121 HTTP/1.1
 
 ###
-GET https://quay.io/v2/openshift/okd-content/manifests/121 HTTP/1.1
+GET https://quay.io/v2/coreos/etcd/manifests/latest HTTP/1.1
+Accept: 'application/vnd.docker.distribution.manifest.v1'
 
 
 ###

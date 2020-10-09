@@ -4,7 +4,7 @@ import * as logger from '../logger'
 export class DownManager {
 
     private readonly tasks: { [id: string]: Promise<void> } = {}
-    private readonly log = logger.create('DownManager')
+    private readonly log = logger.create('DownManager')('')
 
     public addTask(dtc: DownTaskConfig): void {
         const tid = this.getTaskId(dtc)
@@ -34,7 +34,7 @@ export class DownManager {
     }
 
     private getTaskId(dtc: DownTaskConfig): string {
-        return dtc.name + '@' + dtc.sha256.substr(0, 19)
+        return dtc.name + '@' + dtc.shasum.substr(0, 19)
     }
 
     public async wait(tc: DownTaskConfig): Promise<void> {
@@ -47,7 +47,7 @@ export class DownManager {
         }
         try {
             await ptask
-            this.log.info(tid + ' success')
+            this.log.info(tid + ' success\n')
         } catch (e) {
             this.log.info(tid + ' failure: ' + e.message)
             throw new Error(e.message)

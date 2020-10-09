@@ -18,7 +18,7 @@ export interface DownTaskConfig {
     readonly fname: string;
     readonly dest: string;
     readonly cacheDest: string;
-    readonly sha256: string;
+    readonly shasum: string;
     readonly headers: http.IncomingHttpHeaders;
 }
 
@@ -33,13 +33,13 @@ export class DownTask {
 
     constructor(public readonly c: DownTaskConfig) {
         this.id = this.getId()
-        this.log = logger.create(`DownTask ${this.id}`)
+        this.log = logger.create('DownTask')(this.c.name)
         this.destFile = path.join(this.c.dest, this.c.fname)
         this.cacheDest = path.join(c.cacheDest, v4())
     }
 
     getId(): string {
-        return this.c.name + '@' + this.c.sha256.substr(0, 19)
+        return this.c.name + '@' + this.c.shasum.substr(0, 19)
     }
 
     private mkdirDests() {
@@ -62,13 +62,13 @@ export class DownTask {
             if (chunksNumber - 1 === i) {
                 const size = this.blobBytes - r_start
                 headers.range = `bytes=${r_start}-${this.blobBytes - 1}`
-                this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
+                this.chunks.push({ name: this.getId(), id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
                 continue
             }
             const r_end = r_start + cs - 1
             const size = r_end - r_start + 1
             headers.range = `bytes=${r_start}-${r_end}`
-            this.chunks.push({ id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
+            this.chunks.push({ name: this.getId(), id: "", seq: i, url: this.c.url, headers, dest: this.cacheDest, size })
         }
     }
 
@@ -91,7 +91,7 @@ export class DownTask {
     }
 
     private async checkblobShasum(): Promise<boolean> {
-        return await sha256sumOnFile(this.destFile) === this.c.sha256
+        return await sha256sumOnFile(this.destFile) === this.c.shasum
     }
 
     private async checkIsDown(): Promise<boolean> {
@@ -99,6 +99,22 @@ export class DownTask {
             return false
         }
         return true
+    }
+
+    private async actionChunks() {
+        return Promise.all(this.chunks.map(chunk => {
+            const task = new DownTaskChunk(chunk)
+            return new Promise<void>((res, rej) => {
+                chunksQueue.push({ task }, (e) => {
+                    if (e) {
+                        rej(e.message)
+                    } else {
+                        this.log.info(chunk.seq.toString(), this.chunks.length, this.c.shasum.substr(19), 'success')
+                        res()
+                    }
+                })
+            })
+        }))
     }
 
     async start(): Promise<void> {
@@ -110,27 +126,17 @@ export class DownTask {
         this.mkdirDests()
         await this.reqblobSize()
         this.makeChunks()
-        const execChunks = this.chunks.map(chunk => {
-            const task = new DownTaskChunk(chunk)
-            return new Promise<void>((res, rej) => {
-                chunksQueue.push({ task }, (e) => {
-                    if (e) {
-                        rej(e.message)
-                    } else {
-                        console.log(chunk.seq, this.chunks.length, this.c.sha256.substr(19), 'success')
-                        res()
-                    }
-                })
-            })
-        })
+
         try {
-            await Promise.all(execChunks)
+            await this.actionChunks()
             await this.combineChunks()
-            console.log("blob sha256sum ok")
+            if (!await this.checkblobShasum()) {
+                throw new Error('blob shasum failure: ' + this.c.name)
+            }
             this.log.info('blob sha256sum ok')
+            this.cleanCache()
         } finally {
             this.log.info('end')
-            this.cleanCache()
         }
     }
 }

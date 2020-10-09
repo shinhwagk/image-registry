@@ -1,20 +1,22 @@
 import * as path from 'path';
 
-import { moveSync, readJsonSync, removeSync, createWriteStream, statSync, copySync, writeFileSync } from 'fs-extra';
+import { moveSync, readJsonSync, removeSync, createWriteStream, statSync, copySync, writeFileSync, createReadStream, existsSync } from 'fs-extra';
 import * as uuid from 'uuid'
 import Router from 'koa-router'
 import Koa from 'koa'
 
-import { checkblobExist, getblobFilePath, blobsCacheDirectory, getManifestsDirectory, ManifestsCacheDirectory, createManifestsDirectories, createblobDirectory, checkblobSha256sum, getManifestFileForDigest, DistributionFS } from './storage'
+import { checkblobExist, getblobFilePath, blobsCacheDirectory, getManifestsDirectory, ManifestsCacheDirectory, createManifestsDirectories, createBlobsDirectory, checkblobSha256sum, getManifestFileForDigest, DistributionFS } from './storage'
 import { sha256sumOnFile, sleep } from './helper';
 import { BLOB_UNKNOWN, MANIFEST_UNKNOWN, TOOMANYREQUESTS } from './protocols';
 import { envDownProxyPrefix, envDownProxyRepos } from './constants';
 import { RegistryClient } from './client';
 import { ManifestSchema, ManifestSchemaV2, KoaStateContext } from './types';
 import { ThirdRegistry } from './registry';
+import { create } from './logger';
+import { Logger } from 'winston';
 
 export const _patch_blob: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
-    console.log("_patch_blob11111111")
+    const logger: Logger = ctx.state.logger('_patch_blob')
     const name = ctx.params[0]
     const uid = ctx.params[1]
     const blobUid = path.join(blobsCacheDirectory, uid)
@@ -24,15 +26,14 @@ export const _patch_blob: Router.IMiddleware = async (ctx: Router.IRouterContext
     ctx.set('Docker-Upload-UUID', uid)
     ctx.set('range', `0-${statSync(blobUid).size - 1}`) // must
     ctx.body = '{}'
-    console.log("end.........................")
 }
 
 export const _post_blob: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
+    const logger: Logger = ctx.state.logger('_post_blob')
     const name = ctx.params[0]
     const uid = uuid.v4()
-    console.log('postblob', ctx.req.url, ctx.req.headers)
+    logger.info(`${name} ${uid}`)
     ctx.status = 202
-
     ctx.set('Location', `/v2/${name}/blob/uploads/${uid}`)
     ctx.set('Docker-Upload-UUID', uid)
     ctx.type = 'application/json'
@@ -40,12 +41,13 @@ export const _post_blob: Router.IMiddleware = async (ctx: Router.IRouterContext)
 }
 
 export const _req_blob: Router.IMiddleware = async (ctx: KoaStateContext, next: () => Promise<void>) => {
-    console.log("_req_blob")
+    const logger: Logger = ctx.method === 'HEAD' ? ctx.state.logger('_head_blob') : ctx.state.logger('_get_blob')
+    logger.info("check proxy external proxy")
     const digest = ctx.state.digest = ctx.params[1]
-    if (! await ctx.state.storage.validateBlob(digest)) {
+    if (!(await ctx.state.storage.validateBlob(digest)) && ctx.state.proxy) {
         await next()
     }
-    console.log("_req_blob back")
+    logger.info("_req_blob back")
     if (await ctx.state.storage.validateBlob(digest)) {
         ctx.type = "application/octet-stream"
         ctx.set('Docker-Content-Digest', digest)
@@ -63,29 +65,25 @@ export const _req_blob: Router.IMiddleware = async (ctx: KoaStateContext, next: 
 }
 
 export const _put_blob: Router.IMiddleware = async (ctx: KoaStateContext) => {
-    console.log('putblob...1', ctx.req.method, ctx.req.url,)
-    const name = ctx.params[0]
-    const uid = ctx.params[1]
+    const logger: Logger = ctx.state.logger('_put_blob')
+    const uuid = ctx.params[1]
     const digest: string = ctx.query.digest as string
 
-    if (checkblobExist(name, digest) && await checkblobSha256sum(name, digest)) {
-        removeSync(path.join(blobsCacheDirectory, uid))
+    if (await ctx.state.storage.validateBlob(digest)) {
+        logger.info("exist")
     } else {
-        createblobDirectory(name)
-        moveSync(path.join(blobsCacheDirectory, uid), getblobFilePath(name, digest))
+        await ctx.state.storage.writerBlob(digest, uuid)
     }
-    console.log("copy", path.join(blobsCacheDirectory, uid), getblobFilePath(name, digest))
-    console.log('copy success')
     ctx.status = 201
 }
 
 export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
-    console.log('put manifests', ctx.req.method, ctx.req.url, ctx.req.headers)
+    const logger: Logger = ctx.state.logger('_put_manifests')
     const name = ctx.params[0]
     const ref = ctx.params[1]
-    const mfuid = uuid.v4()
+    const _uuid = uuid.v4()
 
-    const tempManifest = path.join(ManifestsCacheDirectory, mfuid)
+    const tempManifest = path.join(ManifestsCacheDirectory, _uuid)
     await new Promise<void>((res, rej) => {
         ctx.req.pipe(createWriteStream(tempManifest))
             .on('finish', res)
@@ -94,7 +92,7 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     const sha256: string = await sha256sumOnFile(tempManifest)
 
     const ms = readJsonSync(tempManifest) as ManifestSchema
-    console.log("put version", ms.schemaVersion)
+    logger.info("put version " + ms.schemaVersion)
     createManifestsDirectories(name, ref)
     const mediaType: string = ms.schemaVersion === 1 ? 'vnd.docker.distribution.manifest.v1+json' : (ms as ManifestSchemaV2).mediaType.substr(12)
     writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType), `sha256:${sha256}`, { encoding: "utf8" })
@@ -105,14 +103,14 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
 }
 
 export const _req_manifest: Router.IMiddleware = async (ctx: KoaStateContext, next: () => Promise<void>) => {
-    console.log("_req_manifests")
+    const logger: Logger = ctx.state.logger('_req_manifests')
     const ref: string = ctx.state.ref = ctx.params[1]
     let manifest = ctx.state.storage.findManifest(ref)
-    console.log(333, ref)
     if (ctx.state.proxy && manifest === undefined) {
+        logger.info(ctx.state.proxy + ' ' + manifest)
         await next()
     }
-    console.log("_req_manifests back.")
+    logger.info("_req_manifests back.")
     manifest = manifest || ctx.state.storage.findManifest(ref)
     if (manifest === undefined) {
         ctx.status = 404
@@ -131,33 +129,35 @@ export const _req_manifest: Router.IMiddleware = async (ctx: KoaStateContext, ne
 }
 
 export const _delete_uploads_blob: Router.IMiddleware = async (ctx: Router.IRouterContext) => {
+    const logger: Logger = ctx.state.logger('_req_manifests')
+    logger.info('_delete_blob')
     const uid = ctx.params[1]
-    console.log('_delete_blob')
     const blobUid = path.join(blobsCacheDirectory, uid)
     removeSync(blobUid)
     ctx.status = 200
 }
 
-export const _down_manifests: Router.IMiddleware = async (ctx: Koa.ParameterizedContext<{ registryClient: RegistryClient, name: string, ref: string, proxyRepo: string }>) => {
-    console.log("_try_down_manifests")
+export const _down_manifest: Router.IMiddleware = async (ctx: KoaStateContext) => {
+    const logger: Logger = ctx.state.logger('_down_manifests')
     try {
+        logger.info(`down manifest ${ctx.state.fullName} ${ctx.state.ref}`)
         await ctx.state.registryClient.gotManifest(ctx.state.ref)
     } catch (e) {
-        console.log("_try_down_manifest false", e.message)
+        logger.error("_try_down_manifest false: " + e.message)
     }
 }
 
 export const _down_blob: Router.IMiddleware = async (ctx: KoaStateContext) => {
-    console.log("_try_down_blob")
+    const logger: Logger = ctx.state.logger('_down_blob')
     try {
         await ctx.state.registryClient.gotBlob(ctx.state.digest)
     } catch (e) {
-        console.log("_down_blob faile", e.message)
+        logger.error(`_down_blob failure : ${e.message}`)
     }
 }
 
 export const _set_state: Router.IMiddleware = async (ctx: KoaStateContext, next: () => Promise<void>) => {
-    console.log("_set_state")
+    const logger: Logger = ctx.state.logger('_set_state')
     const sName = ctx.state.name = ctx.params[0].split('/')
     if (sName[0] === envDownProxyPrefix
         && envDownProxyRepos.includes(sName[1])
@@ -175,8 +175,10 @@ export const _set_state: Router.IMiddleware = async (ctx: KoaStateContext, next:
         ctx.state.registryClient = new RegistryClient(registry, sName.slice(2).join('/'), ctx.state.storage);
     } else {
         ctx.state.proxy = false;
-        ctx.state.name = ctx.params[0]
-        ctx.state.storage = new DistributionFS(ctx.hostname, ctx.state.name);
+        ctx.state.name = sName.join('/')
+        ctx.state.daemon = ctx.hostname
+        ctx.state.fullName = ctx.hostname + '/' + ctx.state.name
+        ctx.state.storage = new DistributionFS(ctx.state.daemon, ctx.state.name);
     }
     await next()
 }
@@ -184,7 +186,7 @@ export const _set_state: Router.IMiddleware = async (ctx: KoaStateContext, next:
 export function _request_control(maxParallel: number): Router.IMiddleware {
     let p = 0;
     return async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
-        console.log("_request_control")
+        const logger: Logger = ctx.state.logger('_request_control')
         for (let i = 0; i <= 5; i++) {
             if (p > maxParallel) {
                 await sleep(1000)
@@ -194,6 +196,7 @@ export function _request_control(maxParallel: number): Router.IMiddleware {
                     return await next()
                 } finally {
                     p -= 1
+                    logger.debug("parallel " + p)
                 }
             }
         }
@@ -208,4 +211,12 @@ export const _set_headers: Router.IMiddleware = async (ctx: Router.IRouterContex
     ctx.set("server", "koa/registry")
     ctx.type = 'json'
     await next()
+}
+
+
+export function _set_logger(module: string): Router.IMiddleware {
+    return async (ctx: Router.IRouterContext, next: () => Promise<void>) => {
+        ctx.state.logger = create(module)
+        await next()
+    }
 }
