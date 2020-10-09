@@ -63,7 +63,7 @@ export const _req_blob: Router.IMiddleware = async (ctx: KoaStateContext, next: 
 
 export const _put_blob: Router.IMiddleware = async (ctx: KoaStateContext) => {
     const logger: Logger = ctx.state.logger('_put_blob')
-    const uuid = ctx.params[1]
+    const uuid: string = ctx.params[1]
     const digest: string = ctx.query.digest as string
 
     if (await ctx.state.storage.validateBlob(digest)) {
@@ -89,9 +89,10 @@ export const _put_manifests: Router.IMiddleware = async (ctx: Router.IRouterCont
     const sha256: string = await sha256sumOnFile(tempManifest)
 
     const ms = readJsonSync(tempManifest) as ManifestSchema
-    logger.info("put version " + ms.schemaVersion)
     createManifestsDirectories(name, ref)
-    const mediaType: string = ms.schemaVersion === 1 ? 'vnd.docker.distribution.manifest.v1+json' : (ms as ManifestSchemaV2).mediaType.substr(12)
+    const mediaType: string = ms.schemaVersion === 1
+        ? 'vnd.docker.distribution.manifest.v1+json'
+        : (ms as ManifestSchemaV2).mediaType.substr(12)
     writeFileSync(path.join(getManifestsDirectory(name, ref), mediaType), `sha256:${sha256}`, { encoding: "utf8" })
     ctx.set('docker-content-digest', 'sha256:' + sha256)
     copySync(tempManifest, getManifestFileForDigest(name, 'sha256:' + sha256), { overwrite: true })
@@ -110,7 +111,6 @@ export const _req_manifest: Router.IMiddleware = async (ctx: KoaStateContext, ne
     }
 
     manifest = manifest || ctx.state.storage.findManifest(ref)
-    logger.info("back..", manifest, ctx.state.storage.findManifest(ref))
     if (manifest === undefined) {
         ctx.status = 404
         ctx.body = MANIFEST_UNKNOWN
@@ -118,7 +118,7 @@ export const _req_manifest: Router.IMiddleware = async (ctx: KoaStateContext, ne
     }
     const statManifest = ctx.state.storage.statManifest(ref, manifest)
     ctx.status = 200
-    ctx.type = statManifest.mediaType
+    ctx.type = 'application/' + statManifest.mediaType
     ctx.set('Docker-Content-Digeste', statManifest.digest)
     if (ctx.method === 'GET') {
         ctx.body = ctx.state.storage.readerRawManfiest(statManifest.digest)

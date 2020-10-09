@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { ReadStream, WriteStream } from "fs-extra";
 import Koa from 'koa'
 
@@ -15,9 +16,35 @@ export interface ManifestSchemaV1 extends ManifestSchema {
     schemaVersion: 1
 }
 
+export interface ManifestSchemaV1Signed extends ManifestSchema {
+    schemaVersion: 1
+    signatures: any[]
+}
+
 export interface ManifestSchemaV2 extends ManifestSchema {
     schemaVersion: 2
-    mediaType: ManifestMedia
+    mediaType: 'application/vnd.docker.distribution.manifest.v2+json'
+}
+
+export interface ManifestSchemaV2List extends ManifestSchema {
+    schemaVersion: 2
+    mediaType: 'application/vnd.docker.distribution.manifest.list.v2+json'
+}
+
+export function isManifestSchemaV1Signed(ms: any): ms is ManifestSchemaV1Signed {
+    return ms.schemaVersion === 1 && typeof ms.signatures === 'object'
+}
+
+export function isManifestSchemaV1(ms: any): ms is ManifestSchemaV1Signed {
+    return ms.schemaVersion === 1 && ms.signatures === undefined
+}
+
+export function isManifestSchemaV2(ms: any): ms is ManifestSchemaV1Signed {
+    return ms.schemaVersion === 2 && ms.mediaType === 'application/vnd.docker.distribution.manifest.v2+json'
+}
+
+export function isManifestSchemaV2List(ms: any): ms is ManifestSchemaV1Signed {
+    return ms.schemaVersion === 2 && ms.mediaType === 'application/vnd.docker.distribution.manifest.list.v2+json'
 }
 
 export interface IDistribution {
@@ -55,16 +82,19 @@ export abstract class AbsDistribution implements IDistribution {
 }
 
 export interface ManifestStat {
-    version: number, mediaType: string, digest: string, size: number
+    schemaVersion: number, mediaType: ManifestMediaType, digest: string, size: number
 }
 
-export type ManifestMedia = 'application/vnd.docker.distribution.manifest.list.v2+json' | 'application/vnd.docker.distribution.manifest.v2+json'
+export type ManifestMediaType = 'vnd.docker.distribution.manifest.list.v2+json'
+    | 'vnd.docker.distribution.manifest.v2+json'
+    | 'vnd.docker.distribution.manifest.v1+prettyjws'
+    | 'vnd.docker.distribution.manifest.v1+json'
 
 export interface GlobalState {
     fullName: string;
     name: string;
     ref: string; // tag or sha256
-    digest: string; // blob dig
+    digest: string; // blob digest
     daemon: string;
     registryClient: RegistryClient;
     storage: IDistribution;

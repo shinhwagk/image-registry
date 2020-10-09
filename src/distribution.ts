@@ -1,12 +1,12 @@
 
 import * as path from 'path'
 
-import { statSync, existsSync, mkdirpSync, writeFileSync, ReadStream, createReadStream, WriteStream, createWriteStream, readFileSync, readJsonSync, removeSync, moveSync } from 'fs-extra'
+import { statSync, existsSync, mkdirpSync, writeFileSync, ReadStream, createReadStream, readFileSync, readJsonSync, removeSync, moveSync } from 'fs-extra'
 
 import { envDistribution } from './constants'
-import { sha256sumOnFile, sha256sumOnString as sha256sumOnString } from './helper'
-import { ManifestSchema, ManifestSchemaV2, AbsDistribution, ManifestStat } from './types'
-import { ManifestMediaTypes } from './protocols'
+import { sha256sumOnFile } from './helper'
+import { ManifestSchema, ManifestSchemaV2, AbsDistribution, ManifestStat, ManifestMediaType as ManifestMediaType } from './types'
+import { IdentifyMediaType, ManifestMediaTypes } from './protocols'
 
 export const CacheDirectory = path.join(envDistribution, 'cache')
 
@@ -64,6 +64,7 @@ export function getblobSize(name: string, sha: string): number {
 }
 
 export async function checkBlobSha256sum(name: string, digest: string, shasum: string): Promise<boolean> {
+    console.log("checkBlobSha256sum", existsSync(getblobFilePath(name, digest)))
     return (await sha256sumOnFile(getblobFilePath(name, digest))) === shasum
 }
 
@@ -89,7 +90,7 @@ function persistentManifest(name: string, ref: string, rawManifest: string, medi
     writeFileSync(manifestFile, rawManifest, { encoding: 'utf8' })
 }
 
-function getManifestFileForTags(name: string, tag: string): string | undefined {
+function getManifestFileForTags(name: string, tag: string, mediaType?: ManifestMediaType): string | undefined {
     const tagDirectory = getManifestsDirectory(name, tag)
     for (const mt of ManifestMediaTypes) {
         const tagFile = path.join(tagDirectory, mt)
@@ -99,6 +100,12 @@ function getManifestFileForTags(name: string, tag: string): string | undefined {
     }
     return undefined
 }
+
+function getManifestFileForTagMediaType(name: string, tag: string, mediaType: ManifestMediaType): string {
+    const tagDirectory = getManifestsDirectory(name, tag)
+    return path.join(tagDirectory, mediaType)
+}
+
 
 export class DistributionFS extends AbsDistribution {
     constructor(daemon: string, name: string) { super(daemon, name) }
@@ -135,18 +142,15 @@ export class DistributionFS extends AbsDistribution {
     }
 
     public statManifest(ref: string, ms: ManifestSchema): ManifestStat {
-        const mediaType = ms.schemaVersion === 1
-            ? 'application/vnd.docker.distribution.manifest.v1+json'
-            : (ms as ManifestSchemaV2).mediaType
+        const mediaType: ManifestMediaType = IdentifyMediaType(ms)
         let digest = ref
         if (this.checkRefType(ref) === 'tag') {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const tagpath = getManifestFileForTags(this.fullName, ref)!
+            const tagpath = getManifestFileForTagMediaType(this.fullName, ref, mediaType)!
             digest = readFileSync(tagpath, { encoding: 'utf8' })
         }
         const size = this.readerRawManfiest(digest).length
-        // digest = ref.substr(7)
-        return { version: ms.schemaVersion, mediaType, digest, size }
+        return { schemaVersion: ms.schemaVersion, mediaType, digest, size }
     }
 
     public saveManifest(ref: string, type: string, digest: string, manifest: ManifestSchema): void {
@@ -172,7 +176,7 @@ export class DistributionFS extends AbsDistribution {
 
     }
 
-    public existManifest(ref: string): boolean {
+    public existManifest(): boolean {
         return false
     }
 
@@ -186,7 +190,7 @@ export class DistributionFS extends AbsDistribution {
         return v
     }
 
-    public saveBlob(buffer: ReadStream): void {
+    public saveBlob(): void {
         return
     }
 
