@@ -1,6 +1,6 @@
 {
   "name": "registry",
-  "version": "0.2.6",
+  "version": "0.0.2",
   "description": "a simple image layer proxy",
   "dependencies": {
     "async": "^3.2.0",

@@ -3,9 +3,9 @@ import * as async from 'async';
 import { ITask } from '../types';
 import { sleep } from '../helper';
 import { envLogLevel } from '../constants';
-import { create } from '../logger';
+import { newLogger } from '../logger';
 
-const log = create('queue')('')
+const log = newLogger('queue')('')
 
 /**
  * @param qc concurrency number

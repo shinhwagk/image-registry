@@ -4,7 +4,7 @@ import * as logger from '../logger'
 export class DownManager {
 
     private readonly tasks: { [id: string]: Promise<void> } = {}
-    private readonly log = logger.create('DownManager')('')
+    private readonly log = logger.newLogger('DownManager')('')
 
     public addTask(dtc: DownTaskConfig): void {
         const tid = this.getTaskId(dtc)

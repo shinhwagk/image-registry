@@ -5,10 +5,11 @@ import got from "got/dist/source";
 
 import { DownTaskConfig } from './down/down';
 import { DownMangerService } from './down/manager';
-import { getblobDirectory, getDownBlobCacheDirectory } from './storage';
+import { getblobDirectory, getDownBlobCacheDirectory } from './distribution';
 import { IDistribution } from './types';
 import { RegistryConfig, ThirdRegistry } from './registry';
 import { DownCache } from './constants';
+import { newLogger, develConsole } from './logger';
 
 function parserHeaderWWWAuthenticate(header: string): [string | undefined, string | undefined] {
     const res = /Bearer realm="(.*)",service="(.*)"/.exec(header)
@@ -22,6 +23,7 @@ export class RegistryClient {
     isAuth = false
     manifestType = ""
     manifestDigest = ""
+    logger = newLogger('RegistryClient')('')
     constructor(
         private readonly registry: RegistryConfig,
         private readonly name: string,
@@ -72,6 +74,7 @@ export class RegistryClient {
     public async gotManifest(ref: string): Promise<void> {
         await this.tryGetAuth()
         const rawManifest: string = await this.reqManifest(ref);
+        this.logger.info(`gotManifest ${this.name} ${ref} ${rawManifest.length}`)
         this.distribution.saveRawManifest(ref, this.manifestType, this.manifestDigest, rawManifest)
     }
 
@@ -90,12 +93,16 @@ export class RegistryClient {
     }
 
     public async gotBlob(digest: string, dest?: string, cacheDest?: string, retry = 5): Promise<void> {
-        for (const _i of Array(retry)) {
+        for (let i = 0; i <= retry; i++) {
             try {
                 await this._gotBlob(digest, dest, cacheDest)
                 return;
             } catch (e) {
-                throw new Error(e.message)
+                if (i == 5) {
+                    throw new Error(e.message)
+                } else {
+                    develConsole(e.message)
+                }
             }
         }
     }

@@ -5,7 +5,7 @@ import { envLogLevel } from './constants'
 const { combine, timestamp, printf } = format;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const create = (module: string) => (task?: string) => {
+export const newLogger = (module: string) => (task?: string) => {
     const _task = task ? `[${task}]` : ''
     const customFormat = printf(({ level, message, timestamp }) => `${timestamp} ${level} [${module}]${_task}: ${message}`);
     return createLogger({
@@ -15,4 +15,9 @@ export const create = (module: string) => (task?: string) => {
         ),
         transports: [new transports.Console({ level: envLogLevel })]
     })
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function develConsole(message?: any, ...optionalParams: any[]): void {
+    console.log(message, ...optionalParams)
 }

@@ -33,7 +33,7 @@ export class DownTask {
 
     constructor(public readonly c: DownTaskConfig) {
         this.id = this.getId()
-        this.log = logger.create('DownTask')(this.c.name)
+        this.log = logger.newLogger('DownTask')(this.c.name)
         this.destFile = path.join(this.c.dest, this.c.fname)
         this.cacheDest = path.join(c.cacheDest, v4())
     }
@@ -102,14 +102,16 @@ export class DownTask {
     }
 
     private async actionChunks() {
+        let cnt = 0;
         return Promise.all(this.chunks.map(chunk => {
             const task = new DownTaskChunk(chunk)
             return new Promise<void>((res, rej) => {
                 chunksQueue.push({ task }, (e) => {
+                    cnt += 1
                     if (e) {
                         rej(e.message)
                     } else {
-                        this.log.info(chunk.seq.toString(), this.chunks.length, this.c.shasum.substr(19), 'success')
+                        this.log.debug(chunk.seq.toString() + ' success' + '; ' + `${cnt}/${this.chunks.length}`)
                         res()
                     }
                 })

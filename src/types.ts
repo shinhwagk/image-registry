@@ -65,7 +65,6 @@ export interface GlobalState {
     name: string;
     ref: string; // tag or sha256
     digest: string; // blob dig
-    proxyDaemon: string;
     daemon: string;
     registryClient: RegistryClient;
     storage: IDistribution;

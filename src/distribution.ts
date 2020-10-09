@@ -63,7 +63,7 @@ export function getblobSize(name: string, sha: string): number {
     return statSync(getblobFilePath(name, sha)).size
 }
 
-export async function checkblobSha256sum(name: string, digest: string, shasum: string): Promise<boolean> {
+export async function checkBlobSha256sum(name: string, digest: string, shasum: string): Promise<boolean> {
     return (await sha256sumOnFile(getblobFilePath(name, digest))) === shasum
 }
 
@@ -112,7 +112,7 @@ export class DistributionFS extends AbsDistribution {
 
     public findManifestByDigest(digest: string): ManifestSchema | undefined {
         if (existsSync(getManifestFileForDigest(this.fullName, digest))) {
-            return readJsonSync(getManifestFileForDigest(this.fullName, digest), { encoding: 'utf8' })
+            return readJsonSync(getManifestFileForDigest(this.fullName, digest), { encoding: 'utf8' }) as ManifestSchema
         }
         return undefined
     }
@@ -181,7 +181,7 @@ export class DistributionFS extends AbsDistribution {
     }
 
     async validateBlob(digest: string): Promise<boolean> {
-        const v = this.existBlob(digest) && await checkblobSha256sum(this.fullName, digest, digest.substr(7))
+        const v = this.existBlob(digest) && (await checkBlobSha256sum(this.fullName, digest, digest.substr(7)))
         if (v === false) { this.removeBlob(digest) }
         return v
     }

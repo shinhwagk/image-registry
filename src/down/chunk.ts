@@ -9,6 +9,7 @@ import { Logger } from 'winston';
 
 import * as logger from '../logger'
 import { ITask } from '../types';
+import { sleep } from '../helper';
 // import { agent } from '../constants';
 
 export interface DownTaskChunkConfig {
@@ -29,7 +30,7 @@ export class DownTaskChunk implements ITask {
         public readonly c: DownTaskChunkConfig
     ) {
         this.destFile = path.join(this.c.dest, this.c.seq.toString())
-        this.log = logger.create(`DownTaskChunk`)(this.c.name)
+        this.log = logger.newLogger(`DownTaskChunk`)(this.c.name)
     }
 
     checkIsDown(): boolean {
@@ -52,12 +53,13 @@ export class DownTaskChunk implements ITask {
         await pipeline(source, target)
         if (this.checkExist()) {
             if (this.checkValid()) {
-                this.log.info(this.c.seq + ' done')
+                // this.log.info(this.c.seq + ' done')
                 return
             } else {
                 this.remove()
             }
         }
+        await sleep(1000)
         throw new Error('valid failure')
     }
 
