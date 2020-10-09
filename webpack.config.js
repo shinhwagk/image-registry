@@ -9,7 +9,7 @@ module.exports = {
     },
     resolve: { extensions: ['.ts', '.js'] },
     output: {
-        filename: `app1.js`,
+        filename: `app.js`,
         path: path.resolve(__dirname, 'dist'),
     }
 };

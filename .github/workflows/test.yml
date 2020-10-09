@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-node@v2-beta
       - run: npm i
       - run: npm run compile-webpack
-      - run: node dist/src/app.js > test.log && sleep 5 &
+      - run: node dist/app.js > test.log && sleep 5 &
       - run: curl -OL https://github.com/openshift/okd/releases/download/4.5.0-0.okd-2020-10-03-012432/openshift-client-linux-4.5.0-0.okd-2020-10-03-012432.tar.gz
       - run: |
           echo "${{ secrets.QUAYIO_PULL_SECRET }}" | base64 -d > pull-secret.txt
