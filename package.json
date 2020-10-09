@@ -36,7 +36,6 @@
   },
   "scripts": {
     "test": "mocha dist/test --timeout 100000",
-    "test-watch": "mocha dist/test --timeout 100000",
     "compile-tsc": "tsc -p ./tsconfig.json",
     "compile-webpack": "webpack",
     "compile-tsc-watch": "npm rum compile-tsc -- -w",
