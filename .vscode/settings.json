@@ -2,5 +2,6 @@
     "editor.insertSpaces": true,
     "editor.formatOnSave": true,
     "files.eol": "\n",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "deno.enable": true,
 }
