@@ -1,6 +1,5 @@
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
   - [pull images from third hub use keyword 'proxy' with hub name](#pull-images-from-third-hub-use-keyword-proxy-with-hub-name)
   - [push image to registry](#push-image-to-registry)
