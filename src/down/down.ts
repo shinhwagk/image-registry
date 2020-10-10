@@ -111,7 +111,7 @@ export class DownTask {
                     if (e) {
                         rej(e.message)
                     } else {
-                        this.log.debug(chunk.seq.toString() + ' success' + '; ' + `${cnt}/${this.chunks.length}`)
+                        this.log.info(chunk.seq.toString() + ' success' + '; ' + `${cnt}/${this.chunks.length}`)
                         res()
                     }
                 })

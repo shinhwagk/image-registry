@@ -6,7 +6,7 @@ export const envMaxParallel = process.env['MAX_PARALLEL'] || '10';
 export const envAllPort = process.env['APP_PORT'] || 8003;
 
 // app-down
-export const envDownProxyRepos: string = process.env['DOWN_PROXY_REPOS'] || "quay.io, docker.io";
+// export const envDownProxyRepos: string = process.env['DOWN_PROXY_REPOS'] || "quay.io, docker.io";
 export const envDownChunkSize: string = process.env['DOWN_CHUNK_SIZE'] || '1048576'; // default 1m.
 export const envDownProxyPrefix: string = process.env['DOWN_PROXY_PREFIX'] || 'proxy'; // default 1m.
 export const envDownTimeout: string = process.env['DOWN_TIMEOUT'] || '20000'

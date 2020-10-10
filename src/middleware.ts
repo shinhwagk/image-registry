@@ -7,7 +7,7 @@ import Router from 'koa-router'
 import { blobsCacheDirectory, getManifestsDirectory, ManifestsCacheDirectory, createManifestsDirectories, getManifestFileForDigest, DistributionFS } from './distribution'
 import { sha256sumOnFile, sleep } from './helper';
 import { BLOB_UNKNOWN, MANIFEST_UNKNOWN, TOOMANYREQUESTS } from './protocols';
-import { envDownProxyPrefix, envDownProxyRepos } from './constants';
+import { envDownProxyPrefix } from './constants';
 import { RegistryClient } from './client';
 import { ManifestSchema, ManifestSchemaV2, KoaStateContext } from './types';
 import { ThirdRegistry } from './registry';
@@ -157,9 +157,7 @@ export const _down_blob: Router.IMiddleware = async (ctx: KoaStateContext) => {
 
 export const _set_state: Router.IMiddleware = async (ctx: KoaStateContext, next: () => Promise<void>) => {
     const sName = ctx.state.name = ctx.params[0].split('/')
-    if (sName[0] === envDownProxyPrefix
-        && envDownProxyRepos.includes(sName[1])
-    ) {
+    if (sName[0] === envDownProxyPrefix) {
         ctx.state.proxyPrefix = sName[0];
         ctx.state.fullName = sName.slice(1).join('/');
         ctx.state.name = sName.slice(2).join('/');

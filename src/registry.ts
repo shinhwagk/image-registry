@@ -1,4 +1,4 @@
-export type RepoDaemon = 'docker.io' | 'quay.io'
+export type RepoDaemon = 'docker.io' | 'quay.io' | 'mcr.microsoft.com'
 
 export interface RegistryConfig {
     daemon: RepoDaemon;
@@ -13,5 +13,9 @@ export const ThirdRegistry: { [repo: string]: RegistryConfig } = {
     'quay.io': {
         daemon: 'quay.io',
         registry: 'quay.io'
+    },
+    'mcr.microsoft.com': {
+        daemon: 'mcr.microsoft.com',
+        registry: 'mcr.microsoft.com'
     }
 }

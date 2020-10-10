@@ -53,7 +53,6 @@ export class DownTaskChunk implements ITask {
         await pipeline(source, target)
         if (this.checkExist()) {
             if (this.checkValid()) {
-                // this.log.info(this.c.seq + ' done')
                 return
             } else {
                 this.remove()
