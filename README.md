@@ -1,33 +1,45 @@
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
+  - [pull images from third hub use keyword 'proxy' with repo name](#pull-images-from-third-hub-use-keyword-proxy-with-repo-name)
+  - [push image to registry](#push-image-to-registry)
+- [directory for filesystem](#directory-for-filesystem)
 
 ## Getting Started
 ```sh
-git clone --depth=1 https://github.com/registry
-cd registry/exmaple
+docker run --name registry -d -p 8003:8003 docker.io/shinhwagk/registry
+```
 
-docker volume create registry-cache
-docker-compose up
+### pull images from third hub use keyword 'proxy' with repo name
+- quay.io 
+```sh
+docker pull 127.0.0.1:8003/proxy/quay.io/coreos/etcd-operator:dev
+```
+- docker.io
+```sh
+docker pull 127.0.0.1:8003/proxy/docker.io/library/node:14
+```
 
-# pull images from third proe use keyword 'proxy' with repo name
-## quay.io 
-docker pull 127.0.0.1:6660/proxy/quay.io/coreos/etcd-operator:dev
-## docker.io
-docker pull 127.0.0.1:6661/proxy/docker.io/library/node:10
+### push image to registry
+```sh
+docker tag 127.0.0.1:8003/proxy/docker.io/library/node:14 127.0.0.1:8003/library/node:14
+docker push 127.0.0.1:8003/library/node:14
 ```
 
 ## directory for filesystem
 ```
-|<name>
-|____|blobs
-|__________|sha256:xxxxxxxx
-|____|manifests
-|_____________|tags
-|_________________|vnd.docker.distribution.manifest.list.v2+json # link to sha256
-|_________________|vnd.docker.distribution.manifest.v2+json
-|_________________|vnd.docker.distribution.manifest.v1+json
-|_____________|sha256
-|____________________| sha256:xxx
-
+|<daemon>
+|________|<image name>
+|_____________________|blobs
+|___________________________|sha256:xxxxxxxx
+|_____________________|manifests
+|_______________________________|tags
+|____________________________________|<tag>
+|__________________________________________|vnd.docker.distribution.manifest.list.v2+json # link to sha256
+|__________________________________________|vnd.docker.distribution.manifest.v2+json
+|__________________________________________|vnd.docker.distribution.manifest.v1+json
+|__________________________________________|...
+|_______________________________|sha256
+|_____________________________________| sha256:xxx
 ```
