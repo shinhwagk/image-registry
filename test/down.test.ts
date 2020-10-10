@@ -7,7 +7,7 @@ import { sha256sumOnFile, sleep } from '../src/helper'
 import { DownTaskChunk, DownTaskChunkConfig } from "../src/down/chunk"
 import { DownMangerService } from '../src/down/manager'
 import { RegistryClient } from '../src/client'
-import { DistributionFS } from '../src/storage'
+import { DistributionFS } from '../src/distribution'
 import { ThirdRegistry } from '../src/registry'
 
 describe('down', () => {

@@ -4,7 +4,7 @@ import { RegistryClient } from "../src/client";
 import { DownManager } from "../src/down/manager";
 import { sha256sumOnFile } from "../src/helper";
 import { ThirdRegistry } from "../src/registry";
-import { DistributionFS } from "../src/storage";
+import { DistributionFS } from "../src/distribution";
 
 // describe('got manfiest', () => {
 //     const fs = new DistributionFS('quay.io/outline/shadowbox');
