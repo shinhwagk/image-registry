@@ -1,23 +1,38 @@
-name: build
+name: test
 
 on:
   push:
-    branches: [nr]
+    branches: [plan-a]
 
 jobs:
-  test:
+  # unit-test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v2-beta
+  #     - run: npm i
+  #     - run: npm run compile-tsc
+  #     - run: npm run test
+  #     - run: npm run compile-webpack
+  #     - run: node dist/src/app.js > test.log && sleep 5 &
+  #     - run: |
+  #         curl http://127.0.0.1:8000/v2/
+  #         cat test/images | while read image; do
+  #           docker pull -q quay.io/${image} > /dev/null && docker tag quay.io/${image} 127.0.0.1:8000/${image} && docker push 127.0.0.1:8000/${image} &
+  #         done
+  #         wait;
+  #     - run: cat test.log
+  #     - run: ls -l notes/test/openshift/okd-content/blobs | wc -l
+  oc-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
       - run: npm i
       - run: npm run compile-webpack
-      - run: node dist/repository.min.js > test.log && sleep 5 &
+      - run: node dist/app.js > test.log && sleep 5 &
+      - run: curl -OL https://github.com/openshift/okd/releases/download/4.5.0-0.okd-2020-10-03-012432/openshift-client-linux-4.5.0-0.okd-2020-10-03-012432.tar.gz
       - run: |
-          curl http://127.0.0.1:8000/v2/
-          cat test/images | while read image; do
-            docker pull -q quay.io/${image} > /dev/null && docker tag quay.io/${image} 127.0.0.1:8000/${image} && docker push 127.0.0.1:8000/${image} &
-          done
-          wait;
-      - run: cat test.log
-      - run: ls -l notes/test/openshift/okd-content/blobs | wc -l
+          echo "${{ secrets.QUAYIO_PULL_SECRET }}" | base64 -d > pull-secret.txt
+          tar zxvf openshift-client-linux-4.5.0-0.okd-2020-10-03-012432.tar.gz
+          ./oc adm -a pull-secret.txt release mirror 4.3.0 --to='127.0.0.1:8003/quay.io/okd' --insecure=true

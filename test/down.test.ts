@@ -1,62 +1,83 @@
-import * as path from 'path'
+import * as assert from 'assert'
 
-import { statSync, removeSync, mkdirpSync } from 'fs-extra';
+import { mkdirpSync, removeSync, rmdirSync, statSync } from "fs-extra"
 
-import { DownTask } from '../src/down/down'
-import { DownTaskChunk } from '../src/down/chunk'
-import { DownManager } from '../src/down/manager'
-import { sha256sum, sleep } from '../src/helper'
+import { DownTask, DownTaskConfig } from '../src/down/down'
+import { sha256sumOnFile, sleep } from '../src/helper'
+import { DownTaskChunk, DownTaskChunkConfig } from "../src/down/chunk"
+import { DownMangerService } from '../src/down/manager'
+import { RegistryClient } from '../src/client'
+import { DistributionFS } from '../src/distribution'
+import { ThirdRegistry } from '../src/registry'
 
-const url = 'https://quay.io/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95'
-const dest = 'storage'
-const name = 'openshift/okd-content'
-const sha256 = '70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95'
-
-beforeAll(() => {
-    mkdirpSync(dest)
-})
-
-afterAll(async () => {
-    await sleep(5000)
-    removeSync(dest)
-});
-
-describe('test down task chunk', () => {
-    const twc = new DownTaskChunk("1", "0", 'https://quay.io/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95', undefined, dest, 0, 19)
-    test('Check TaskWorker down', async () => {
-        await twc.start()
-        expect(statSync('storage/0').size).toBe(20)
+describe('down', () => {
+    const dest = 'storage'
+    beforeEach(() => {
+        mkdirpSync(dest)
     });
+
+    afterEach(() => {
+        rmdirSync(dest, { recursive: true })
+    });
+
+    describe('chunk', async () => {
+        it('test', async () => {
+            const dtcc: DownTaskChunkConfig = { id: "", seq: 0, url: 'https://quay.io/v2/openshift/okd-content/blobs/sha256:70a4a9f9d194035612c9bcad53b10e24875091230d7ff5f172b425a89f659b95', dest, size: 20, headers: { range: 'bytes=0-19' } }
+            const twc = new DownTaskChunk(dtcc)
+            await twc.start()
+            assert.strictEqual(statSync('storage/0').size, dtcc.size)
+        }).timeout(60 * 1000)
+    })
+
+    describe('down', async () => {
+        it('test', async () => {
+            const url = 'https://quay.io/v2/outline/shadowbox/blobs/sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f'
+            const config: DownTaskConfig = {
+                name: "outline/shadowbox",
+                url,
+                fname: 'sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
+                dest,
+                cacheDest: 'storage/cache',
+                shasum: '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
+                headers: {}
+            }
+            const tw = new DownTask(config)
+            await tw.start()
+            const sha = await sha256sumOnFile(`storage/sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f`)
+            assert.strictEqual(sha, '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f');
+        }).timeout(60 * 1000)
+    })
+
+    describe('down', async () => {
+        it('manager', async () => {
+            const url = 'https://quay.io/v2/outline/shadowbox/blobs/sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f'
+            const config = {
+                name: "outline/shadowbox",
+                url,
+                fname: 'sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
+                dest,
+                cacheDest: 'storage/cache',
+                sha256: '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f',
+                headers: {}
+            }
+            for (let i = 0; i <= 10; i++) {
+                DownMangerService.addTask(config)
+            }
+            await Promise.all([DownMangerService.wait(config), DownMangerService.wait(config)]);
+            await sleep(5000)
+            await Promise.all([DownMangerService.wait(config), DownMangerService.wait(config)]);
+            const sha = await sha256sumOnFile(`storage/sha256:6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f`)
+            assert.strictEqual(sha, '6bfb22f59047fee5261cab5114352687b081331dc5653b8c38517afab1a1315f');
+        }).timeout(60 * 1000)
+    })
 })
 
-const tw = new DownTask(url, dest, name, sha256)
 
-test('Check DownTask', async () => {
-    await tw.start()
-    const blobsShasum = await sha256sum(path.join(dest, 'blobs'))
-    console.log(blobsShasum)
-    expect(blobsShasum).toBe(sha256)
-}, 60 * 1000 * 2);
-
-describe('test DownManager', () => {
-    mkdirpSync(`${dest}/${name}/${sha256}`)
-    const task1 = new DownTask(url, `${dest}/${name}/${sha256}`, name, sha256)
-    // const task2 = new DownTask(url, `storage/${name}/${sha256}`, name, sha256)
-    const dmgr = new DownManager()
-    test('Check some task down', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const i of Array(20)) {
-            dmgr.addTask(task1)
-        }
-        await dmgr.wait(task1)
-        const blobsShasum = await sha256sum(`${dest}/${name}/${sha256}/blobs`)
-        expect(blobsShasum).toBe(sha256)
-    }, 60 * 1000 * 2);
-
-    test('Check DownTask down', async () => {
-        dmgr.addTask(task1)
-        await dmgr.wait(task1)
-        const blobsShasum = await sha256sum(`${dest}/${name}/${sha256}/blobs`)
-        expect(blobsShasum).toBe(sha256)
-    }, 60 * 1000 * 2);
+describe('client', () => {
+    it("", async () => {
+        const d = new DistributionFS('quay.io', `/outline/shadowbox`)
+        const rc = new RegistryClient(ThirdRegistry['quay.io'], 'outline/shadowbox', d)
+        await rc.gotManifest('server-2020-09-28')
+        assert.strictEqual(1, 1)
+    }).timeout(60 * 1000)
 })

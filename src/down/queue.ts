@@ -1,13 +1,17 @@
 import * as async from 'async';
 
-import { ITask } from './types';
+import { ITask } from '../types';
 import { sleep } from '../helper';
-import { logLevel } from '../constants';
-import { create } from '../logger';
+import { envLogLevel } from '../constants';
+import { newLogger } from '../logger';
 
+const log = newLogger('queue')('')
 
-const log = create('queue')
-
+/**
+ * @param qc concurrency number
+ * @param rt retry number
+ * @param ri 1s retry interval
+ */
 function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ task: ITask }> {
     return async.queue<{ task: ITask }>(({ task }, qcb) => {
         async.retry({ times: rt, interval: ri }, (rcb) => {
@@ -20,7 +24,7 @@ function makeTasksQueue(qc: number, rt: number, ri: number): async.AsyncQueue<{ 
 
 export const chunksQueue = makeTasksQueue(10, 10, 1000);
 
-if (logLevel === 'debug') {
+if (envLogLevel === 'debug') {
     (async () => {
         // eslint-disable-next-line no-constant-condition
         while (true) {

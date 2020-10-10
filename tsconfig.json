@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "CommonJS",
-    "strict": false,
+    "strict": true,
     "outDir": "dist",
     "esModuleInterop": true
   },
   "include": [
-    "src-repository"
+    "src"
   ]
 }

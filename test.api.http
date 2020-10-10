@@ -1,9 +1,26 @@
-HEAD http://127.0.0.1:8000/v2/shinhwagk/centos/blobs/sha256:8a29a15cefaeccf6545f7ecf11298f9672d2f0cdaf9e357a95133ac3ad3e1f01 HTTP/1.1
+HEAD http://127.0.0.1:8003/v2/outline/shadowbox/blobs/sha256:50edf33318ff25c2ba81ba24966f1db6a16f7f14292b06203053298e15d81fe3 HTTP/1.1
 
 
 ###
-GET http://127.0.0.1:8000/v2 HTTP/1.1
+GET http://127.0.0.1:8003/v2 HTTP/1.1
 
 
 ###
-GET http://127.0.0.1:8000/v2/test/test1/manifests/latest HTTP/1.1
+GET http://127.0.0.1:8003/v2/proxy/docker.io/library/node/manifests/10 HTTP/1.1
+
+### GET manifest for digest
+GET http://127.0.0.1:8003/v2/proxy/docker.io/library/node/manifests/sha256:59c26cf58705ef08a6b52eaa3664db1820c70530f461bc8e983e4b37c8cc6be0 HTTP/1.1
+
+### GET blob 
+GET http://127.0.0.1:8003/v2/proxy/docker.io/library/node/blobs/sha256:d660b1f15b9bfb8142f50b518156f2d364d9642fe05854538b060498e2f7928d HTTP/1.1
+
+###
+HEAD http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/manifests/latest HTTP/1.1
+
+###
+HEAD http://127.0.0.1:8003/v2/quay.io/coreos/etcd/manifests/latest HTTP/1.1
+
+###
+HEAD http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/blobs/sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4 HTTP/1.1
+###
+GET http://127.0.0.1:8003/v2/proxy/quay.io/coreos/etcd/blobs/sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4 HTTP/1.1
