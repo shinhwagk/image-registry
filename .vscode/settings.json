@@ -2,8 +2,5 @@
     "editor.insertSpaces": true,
     "editor.formatOnSave": true,
     "files.eol": "\n",
-    "editor.wordWrap": "on",
-    "files.exclude": {
-        "node_modules": true
-    }
+    "editor.wordWrap": "on"
 }

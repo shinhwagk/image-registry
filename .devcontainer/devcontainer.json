@@ -1,17 +1,10 @@
 {
 	"name": "registry",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspace",
+	"dockerFile": "Dockerfile",
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
 	"extensions": [
-		"dbaeumer.vscode-eslint",
-		"humao.rest-client",
-		"howardzuo.vscode-npm-dependency",
-		"shinhwagk.vscode-googletran-zh"
-	],
-	"postCreateCommand": "npm i",
-	"shutdownAction": "stopCompose"
+		"denoland.vscode-deno"
+	]
 }
