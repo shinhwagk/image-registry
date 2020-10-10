@@ -2,7 +2,7 @@
 
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
-  - [pull images from third hub use keyword 'proxy' with repo name](#pull-images-from-third-hub-use-keyword-proxy-with-repo-name)
+  - [pull images from third hub use keyword 'proxy' with hub name](#pull-images-from-third-hub-use-keyword-proxy-with-hub-name)
   - [push image to registry](#push-image-to-registry)
 - [directory for filesystem](#directory-for-filesystem)
 
@@ -11,7 +11,7 @@
 docker run --name registry -d -p 8003:8003 docker.io/shinhwagk/registry
 ```
 
-### pull images from third hub use keyword 'proxy' with repo name
+### pull images from third hub use keyword 'proxy' with hub name
 - quay.io 
 ```sh
 docker pull 127.0.0.1:8003/proxy/quay.io/coreos/etcd-operator:dev
