@@ -42,3 +42,8 @@ export interface AppContext {
 
 function reqBlobHanlder(ctx: AppContext, req: ServerRequest) {
 }
+
+
+interface AppC{
+  router:()=>{}
+}
